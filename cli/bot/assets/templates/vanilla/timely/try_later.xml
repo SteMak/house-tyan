@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+    <embed color="#ee281f">
+        {{.Member}} Вы уже получили свою ежедневную награду в {{.LastTimely}}. 
+        Вы сможете получить её заново через {{.Interval}}.
+    </embed>
+</template>

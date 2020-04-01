@@ -1,0 +1,5 @@
+.vscode
+bin
+cli/bot/config/
+cli/bot/vanilla
+cli/bot/storage.db

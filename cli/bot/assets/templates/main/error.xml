@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+    <embed color="#ee281f">
+        <title>Ошибка!</title>
+        ```{{.Message}}```
+        <fields>
+            <field name="Время" inline="true">```{{.Timestamp}}```</field>
+            <field name="Версия" inline="true">```{{.Version}}```</field>
+        </fields>
+    </embed>
+</template>
