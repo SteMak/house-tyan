@@ -1,4 +1,6 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+github.com/GrownNed/dgutils v0.0.0-20200401121328-f503dd49733a h1:o5WO4DzSNqSvFsgD39xRg9pH9RJNEL2oI8F34QtuwoU=
+github.com/GrownNed/dgutils v0.0.0-20200401121328-f503dd49733a/go.mod h1:c1Min/GotTwlmbmppaeCFdPfqVgfi/6ebCxiAOOjCVo=
 github.com/bwmarrin/discordgo v0.20.2 h1:nA7jiTtqUA9lT93WL2jPjUp8ZTEInRujBdx1C9gkr20=
 github.com/bwmarrin/discordgo v0.20.2/go.mod h1:O9S4p+ofTFwB02em7jkpkV8M3R0/PUVOwN61zSZ0r4Q=
 github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d h1:U+s90UTSYgptZMwQh2aRr3LuazLJIa+Pg3Kc1ylSYVY=
