@@ -2,10 +2,10 @@
 <template>
     <embed color="#ee281f">
         <title>Ошибка!</title>
-        ```{{.Message}}```
         <fields>
             <field name="Время" inline="true">```{{.Timestamp}}```</field>
             <field name="Версия" inline="true">```{{.Version}}```</field>
+            <field name="Описание" inline="false"> ```{{.Error}}```</field>
         </fields>
     </embed>
 </template>

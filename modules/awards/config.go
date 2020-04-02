@@ -1,13 +1,36 @@
 package awards
 
+type bank struct {
+	Token string
+}
+
+type channels struct {
+	Confirm   string `json:"confirm,omitempty"`
+	Responces string `json:"responces,omitempty"`
+	Logs      string `json:"logs,omitempty"`
+	Bump      string `json:"bump,omitempty"`
+}
+
+type users struct {
+	Confirmator string `json:"confirmator,omitempty"`
+}
+
+type roles struct {
+	Requester string `json:"requester,omitempty"`
+}
+
+type bots struct {
+	Bumper string `json:"bumper,omitempty"`
+	Uper   string `json:"uper,omitempty"`
+}
+
 type config struct {
-	BankirAPIToken   string `json:"bankir_api_token,omitempty"`
-	GdHouseID        string `json:"gd_house_id,omitempty"`
-	ChForRequestID   string `json:"ch_for_request_id,omitempty"`
-	ChForLogsID      string `json:"ch_for_logs_id,omitempty"`
-	ChForBumpSiupID  string `json:"ch_for_bump_siup_id,omitempty"`
-	UsConfirmatorID  string `json:"us_confirmator_id,omitempty"`
-	UsSiupID         string `json:"us_siup_id,omitempty"`
-	UsBumpID         string `json:"us_bump_id,omitempty"`
-	RoRequestMakerID string `json:"ro_request_maker_id,omitempty"`
+	AwardAmount int `json:"award_amount,omitempty"`
+
+	Channels channels `json:"channels,omitempty"`
+	Users    users    `json:"users,omitempty"`
+	Roles    roles    `json:"roles,omitempty"`
+	Bots     bots     `json:"bots,omitempty"`
+
+	Bank bank `json:"bank,omitempty"`
 }

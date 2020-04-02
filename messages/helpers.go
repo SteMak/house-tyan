@@ -20,8 +20,8 @@ func normalizeSpaces(in []byte) []byte {
 	return result
 }
 
-func buildMessage(data *shema) (*discordgo.MessageSend, error) {
-	result := new(discordgo.MessageSend)
+func buildMessage(data *shema) (*Message, error) {
+	result := new(Message)
 
 	if content := strings.TrimSpace(data.Content); content != "" {
 		result.Content = content
@@ -65,6 +65,11 @@ func buildMessage(data *shema) (*discordgo.MessageSend, error) {
 				})
 			}
 		}
+	}
+
+	if reactions := data.Reactions; reactions != nil {
+		result.Reactions = make([]string, len(*reactions))
+		copy(result.Reactions, *reactions)
 	}
 
 	return result, nil

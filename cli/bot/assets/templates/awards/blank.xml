@@ -1,0 +1,23 @@
+<template>
+    <embed color="#03e517">
+        <title>Запрос на выдачу денег</title>
+        <fields>
+            <field key="Запрос" inline="false">
+                ```
+                {{.Reason}}
+                ```
+            </field>
+            <field key="Получатели" inline="false">
+                ```
+                {{range .Users}} 
+                    {{.Amount}}: &lt;@{{.ID}}&gt;
+                {{end}}
+                ```
+            </field>
+        </fields>	    
+    </embed>
+    <reactions>
+        <reaction>✅</reaction>
+        <reaction>🇽</reaction>
+    </reactions>
+</template>

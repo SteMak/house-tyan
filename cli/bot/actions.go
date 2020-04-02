@@ -6,6 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/SteMak/house-tyan/cache"
+
 	"github.com/SteMak/house-tyan/config"
 	"github.com/SteMak/house-tyan/modules"
 	"github.com/SteMak/house-tyan/out"
@@ -18,6 +20,9 @@ func run(c *cli.Context) error {
 
 	config.Load(c.GlobalString("config"))
 	out.SetDebug(c.GlobalBool("debug"))
+
+	cache.Init()
+	defer cache.Close()
 
 	storage.Init()
 

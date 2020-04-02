@@ -1,6 +1,8 @@
 package modules
 
 import (
+	"fmt"
+
 	"github.com/SteMak/house-tyan/config"
 	"github.com/SteMak/house-tyan/out"
 	"github.com/bwmarrin/discordgo"
@@ -41,7 +43,7 @@ func loadModules() {
 		out.Infof("\nLoading %s...\n", id)
 		module, exists := modules[id]
 		if !exists {
-			out.Err(false, "Module", id, "not found")
+			out.Err(false, fmt.Errorf("Module %s not found", id))
 			continue
 		}
 

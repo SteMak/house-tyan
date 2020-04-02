@@ -15,12 +15,14 @@ var (
 	Bot     = &cfg.Bot
 	Storage = &cfg.Storage
 	Modules = &cfg.Modules
+	Cache   = &cfg.Cache
 )
 
 type config struct {
 	Session session           `json:"session,omitempty"`
 	Bot     bot               `json:"bot,omitempty"`
 	Storage storage           `json:"storage,omitempty"`
+	Cache   cache             `json:"cache,omitempty"`
 	Modules map[string]module `json:"modules,omitempty"`
 }
 
