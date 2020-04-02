@@ -15,12 +15,14 @@ var (
 	Bot     = &cfg.Bot
 	Storage = &cfg.Storage
 	Modules = &cfg.Modules
+	Cache   = &cfg.Cache
 )
 
 type config struct {
 	Session session           `yaml:"session,omitempty"`
 	Bot     bot               `yaml:"bot,omitempty"`
 	Storage storage           `yaml:"storage,omitempty"`
+	Cache   cache             `yaml:"cache,omitempty"`
 	Modules map[string]module `yaml:"modules,omitempty"`
 }
 

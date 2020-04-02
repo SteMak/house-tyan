@@ -1,58 +1,86 @@
 package awards
 
 import (
-	"github.com/SteMak/house-tyan/modules/awards/workerTools/config"
-	"github.com/SteMak/house-tyan/modules/awards/workerTools/database"
+	"sort"
+
+	"github.com/SteMak/house-tyan/messages"
+	"github.com/SteMak/house-tyan/modules"
+	"github.com/pkg/errors"
+
+	"github.com/SteMak/house-tyan/cache"
 	"github.com/SteMak/house-tyan/out"
 	"github.com/bwmarrin/discordgo"
+	"github.com/dgraph-io/badger"
 )
 
-func (bot *module) onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if m.GuildID == bot.config.GdHouseID {
-		if m.Content == "R U TYT?" && m.ChannelID == config.ChForLogsID {
-			s.ChannelMessageSend(m.ChannelID, "I TYT KUSHAU!")
-			return
-		}
-
-		if m.ChannelID == config.ChForBumpSiupID {
-			if len(chMonitorWriters) >= 30 {
-				chMonitorWriters = chMonitorWriters[1:]
-			}
-
-			chMonitorWriters = append(chMonitorWriters, simplifiedUser{
-				id:     m.Author.ID,
-				strify: m.Author.String(),
-			})
-		}
-
-		if m.ChannelID == config.ChForBumpSiupID && len(m.Embeds) > 0 {
-			detectBumpSiup(s, m)
-			return
-		}
-
-		isRequest, request := checkRequest(m.Content)
-		if isRequest {
-			member, err := s.GuildMember(config.GdHouseID, m.Author.ID)
-			if err != nil {
-				return
-			}
-			if len(member.Roles) > 0 && hasRole(member, config.RoRequestMakerID) {
-				detectRequest(s, m.ChannelID, "-запрос"+request)
-				return
-			}
-		}
+func (bot *module) handlerUp(s *discordgo.Session, m *discordgo.MessageCreate) {
+	if !bot.matchUp(s, m.Message) {
+		return
 	}
+
+	out.Debugln("FOUND S.up")
+
+	user, err := cache.Usernames.Get(m.Author.String())
+	if errors.Is(err, badger.ErrKeyNotFound) {
+		// TODO: обработать ситуацию с не найденным пользователем
+		return
+	}
+	if err != nil {
+		out.Err(true, errors.WithStack(err))
+		return
+	}
+
+	err = bot.unb.addToBalance(user.ID, 0, bot.config.AwardAmount, "for S.up")
+	if err != nil {
+		out.Err(true, errors.WithStack(err))
+		modules.Send(m.ChannelID, "awards/bump_fail.xml", map[string]interface{}{
+			"Mention": m.Author.Mention(),
+		})
+		return
+	}
+
+	go modules.SendLog("awards/awarded.xml", map[string]interface{}{
+		"Amount":  bot.config.AwardAmount,
+		"Mention": m.Author.Mention(),
+		"Reason":  "S.up",
+	})
+
+	tpl, err := messages.Random(`^awards/answers/*\.xml$`)
+	if err != nil {
+		out.Err(true, errors.WithStack(err))
+		return
+	}
+
+	go modules.Send(m.ChannelID, tpl, map[string]interface{}{
+		"Amount":  bot.config.AwardAmount,
+		"Mention": m.Author.Mention(),
+		"Reason":  "S.up",
+	})
 }
 
-func onReactionAdd(s *discordgo.Session, r *discordgo.MessageReactionAdd) {
-	if r.ChannelID == config.ChForRequestID && r.UserID == config.UsConfirmatorID {
-		item, err := database.Records.Record(r.MessageID)
-		if err != nil {
-			return
-		}
-
-		out.Infoln("FOUND "+item.EmbedID+" reation added", r.Emoji.Name)
-		emojiOnRequest(s, r, item)
-		out.Infoln("GUILD " + item.EmbedID + " request processed successfuly")
+func (bot *module) handlerRequest(s *discordgo.Session, m *discordgo.MessageCreate) {
+	ok, content := bot.matchRequest(s, m.Message)
+	if !ok {
+		return
 	}
+
+	if content == "-запрос" {
+		modules.Send(m.ChannelID, "awards/usage.xml", nil)
+		return
+	}
+
+	item, err := parseRequest(s, content)
+	if err != nil {
+		out.Err(true, err)
+		return
+	}
+
+	sort.SliceStable(item.Users, func(i, j int) bool {
+		return item.Users[i].Amount > item.Users[j].Amount
+	})
+
+	modules.Send(bot.config.Channels.Responces, "awards/blank.xml", map[string]interface{}{
+		"Reason": item.Reason,
+		"Users":  item.Users,
+	})
 }

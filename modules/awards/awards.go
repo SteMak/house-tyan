@@ -3,6 +3,7 @@ package awards
 import (
 	"encoding/json"
 	"io/ioutil"
+	"net/http"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -12,10 +13,16 @@ type module struct {
 	config  config
 
 	running bool
+
+	unb *unbelievaBoat
 }
 
 func (module) ID() string {
 	return "awards"
+}
+
+func (bot module) IsRunning() bool {
+	return bot.running
 }
 
 func (bot *module) Init(prefix, configPath string) error {
@@ -29,12 +36,10 @@ func (bot *module) Init(prefix, configPath string) error {
 		return err
 	}
 
-	bot.app = &router.App{
-		Prefix:      prefix,
-		Description: bot.config.Description,
+	bot.unb = &unbelievaBoat{
+		token:  bot.config.Bank.Token,
+		client: &http.Client{},
 	}
-
-	bot.initCommands()
 
 	return nil
 }
@@ -43,8 +48,7 @@ func (bot *module) Start(session *discordgo.Session) {
 	bot.session = session
 	bot.running = true
 
-	bot.session.AddHandler(bot.onMessageCreate)
-	bot.session.AddHandler(bot.onReactionAdd)
+	bot.session.AddHandler(bot.handlerUp)
 }
 
 func (bot *module) Stop() {

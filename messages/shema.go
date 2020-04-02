@@ -5,9 +5,10 @@ import (
 )
 
 type shema struct {
-	XMLName xml.Name `xml:"template"`
-	Content string   `xml:",chardata"`
-	Embed   *embed   `xml:"embed,omitempty"`
+	XMLName   xml.Name  `xml:"template"`
+	Content   string    `xml:",chardata"`
+	Embed     *embed    `xml:"embed,omitempty"`
+	Reactions *[]string `xml:"reactions>reaction,omitempty"`
 }
 
 type embed struct {

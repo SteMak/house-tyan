@@ -1,8 +1,10 @@
 package modules
 
 import (
-	"runtime/debug"
+	"fmt"
 	"time"
+
+	"github.com/pkg/errors"
 
 	tyan "github.com/SteMak/house-tyan"
 
@@ -14,24 +16,32 @@ import (
 func Send(channelID string, tplName string, data interface{}) (err error) {
 	m, err := messages.Get(tplName, data)
 	if err != nil {
-		out.Err(true, err)
+		out.Err(true, errors.WithStack(err))
 		return
 	}
 
-	_, err = session.ChannelMessageSendComplex(channelID, m)
+	message, err := session.ChannelMessageSendComplex(channelID, &m.MessageSend)
 	if err != nil {
-		out.Err(true, err)
+		out.Err(true, errors.WithStack(err))
 		return
 	}
+
+	for _, reaction := range m.Reactions {
+		err = session.MessageReactionAdd(message.ChannelID, message.ID, reaction)
+		if err != nil {
+			out.Err(true, errors.WithStack(err))
+			return
+		}
+	}
+
 	return
 }
 
-func SendError(msg string) {
+func SendError(err error) {
 	data := map[string]interface{}{
 		"Timestamp": time.Now().UTC().Format(time.StampNano),
 		"Version":   tyan.Vesion,
-		"Message":   msg,
-		"Stack":     string(debug.Stack()),
+		"Error":     fmt.Sprintf("%+v", err),
 	}
 
 	m, err := messages.Get("main/error.xml", data)
@@ -40,8 +50,12 @@ func SendError(msg string) {
 		return
 	}
 
-	_, err = session.ChannelMessageSendComplex(*config.Bot.ErrorsChannel, m)
+	_, err = session.ChannelMessageSendComplex(*config.Bot.ErrorsChannel, &m.MessageSend)
 	if err != nil {
 		out.Err(false, err)
 	}
+}
+
+func SendLog(tplName string, data interface{}) (err error) {
+	return Send(*config.Bot.LogChannel, tplName, data)
 }
