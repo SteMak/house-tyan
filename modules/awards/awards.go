@@ -38,6 +38,8 @@ func (bot *module) Init(prefix, configPath string) error {
 		return err
 	}
 
+	bot.loadEnv()
+
 	bot.unb = &unbelievaBoat{
 		token:  bot.config.Bank.Token,
 		client: &http.Client{},
