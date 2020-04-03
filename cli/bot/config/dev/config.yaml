@@ -1,0 +1,15 @@
+bot:
+  console_channel: "691362207300321381"
+  errors_channel: "691362207300321381"
+  guild_id: "615264378014531724"
+  log_channel: "691362207300321381"
+  templates: ./assets/templates/
+cache:
+  path: ./cache/
+  ttl:
+    username: 30s
+modules: {}
+session: {}
+storage:
+  connection: password=vanilla
+  driver: postgres

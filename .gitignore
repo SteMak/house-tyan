@@ -1,5 +1,6 @@
 .vscode
 bin
-cli/bot/config/
-cli/bot/vanilla
+cli/bot/cache/
+
+cli/bot/bot
 cli/bot/storage.db
