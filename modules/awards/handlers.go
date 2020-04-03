@@ -35,7 +35,7 @@ func (bot *module) handlerUp(s *discordgo.Session, m *discordgo.MessageCreate) {
 		out.Err(true, errors.WithStack(err))
 		modules.Send(m.ChannelID, "awards/bump_fail.xml", map[string]interface{}{
 			"Mention": m.Author.Mention(),
-		})
+		}, nil)
 		return
 	}
 
@@ -55,7 +55,7 @@ func (bot *module) handlerUp(s *discordgo.Session, m *discordgo.MessageCreate) {
 		"Amount":  bot.config.AwardAmount,
 		"Mention": m.Author.Mention(),
 		"Reason":  "S.up",
-	})
+	}, nil)
 }
 
 func (bot *module) handlerRequest(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -64,8 +64,8 @@ func (bot *module) handlerRequest(s *discordgo.Session, m *discordgo.MessageCrea
 		return
 	}
 
-	if content == "-запрос" {
-		modules.Send(m.ChannelID, "awards/usage.xml", nil)
+	if m.Content == "-запрос" {
+		modules.Send(m.ChannelID, "awards/usage.xml", nil, nil)
 		return
 	}
 
@@ -79,8 +79,30 @@ func (bot *module) handlerRequest(s *discordgo.Session, m *discordgo.MessageCrea
 		return item.Users[i].Amount > item.Users[j].Amount
 	})
 
-	modules.Send(bot.config.Channels.Responces, "awards/blank.xml", map[string]interface{}{
+	blank := modules.Send(bot.config.Channels.Confirm, "awards/blank.xml", map[string]interface{}{
 		"Reason": item.Reason,
 		"Users":  item.Users,
+	}, func(msg *messages.Message) error {
+		if m.Author == nil {
+			return errors.New("Message author is nil")
+		}
+		msg.Embed.Author = &discordgo.MessageEmbedAuthor{
+			Name:    m.Author.String(),
+			IconURL: m.Author.AvatarURL("16"),
+		}
+		return nil
 	})
+
+	if blank == nil {
+		return
+	}
+
+	item.ID = blank.ID
+	item.Author = *m.Author
+
+	err = cache.Awards.Set(item)
+	if err != nil {
+		out.Err(true, errors.WithStack(err))
+		return
+	}
 }

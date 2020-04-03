@@ -5,7 +5,10 @@
         <fields>
             <field name="Время" inline="true">```{{.Timestamp}}```</field>
             <field name="Версия" inline="true">```{{.Version}}```</field>
-            <field name="Описание" inline="false"> ```{{.Error}}```</field>
+            <field name="Описание" inline="false"> 
+                ```{{.Message}}```
+                {{if .Stack }} {{ .Stack }} {{ end }}
+            </field>
         </fields>
     </embed>
 </template>
