@@ -8,7 +8,11 @@ cache:
   path: ./cache/
   ttl:
     username: 30s
-modules: {}
+modules:
+  xp:
+    config: ./config/dev/modules/xp.yaml
+    enabled: true
+    prefix: "-"
 session: {}
 storage:
   connection: password=vanilla
