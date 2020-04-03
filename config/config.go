@@ -1,11 +1,11 @@
 package config
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"os"
 
 	"github.com/SteMak/house-tyan/out"
+	"gopkg.in/yaml.v2"
 )
 
 var cfg config
@@ -19,11 +19,11 @@ var (
 )
 
 type config struct {
-	Session session           `json:"session,omitempty"`
-	Bot     bot               `json:"bot,omitempty"`
-	Storage storage           `json:"storage,omitempty"`
-	Cache   cache             `json:"cache,omitempty"`
-	Modules map[string]module `json:"modules,omitempty"`
+	Session session           `yaml:"session,omitempty"`
+	Bot     bot               `yaml:"bot,omitempty"`
+	Storage storage           `yaml:"storage,omitempty"`
+	Cache   cache             `yaml:"cache,omitempty"`
+	Modules map[string]module `yaml:"modules,omitempty"`
 }
 
 func Load(path string) {
@@ -32,7 +32,7 @@ func Load(path string) {
 		out.Fatal(err)
 	}
 
-	err = json.Unmarshal(data, &cfg)
+	err = yaml.Unmarshal(data, &cfg)
 	if err != nil {
 		out.Fatal(err)
 	}

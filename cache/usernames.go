@@ -25,7 +25,7 @@ func (table *usernames) Set(user *discordgo.User) error {
 		}
 
 		entry := badger.NewEntry(table.key(user.String()), values.Bytes()).
-			WithTTL(config.Cache.TTL.Username.Duration)
+			WithTTL(config.Cache.TTL.Username)
 
 		return tx.SetEntry(entry)
 	})

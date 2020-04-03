@@ -5,32 +5,32 @@ type bank struct {
 }
 
 type channels struct {
-	Confirm   string `json:"confirm,omitempty"`
-	Responces string `json:"responces,omitempty"`
-	Logs      string `json:"logs,omitempty"`
-	Bump      string `json:"bump,omitempty"`
+	Confirm   string `yaml:"confirm,omitempty"`
+	Responces string `yaml:"responces,omitempty"`
+	Logs      string `yaml:"logs,omitempty"`
+	Bump      string `yaml:"bump,omitempty"`
 }
 
 type users struct {
-	Confirmator string `json:"confirmator,omitempty"`
+	Confirmator string `yaml:"confirmator,omitempty"`
 }
 
 type roles struct {
-	Requester string `json:"requester,omitempty"`
+	Requester string `yaml:"requester,omitempty"`
 }
 
 type bots struct {
-	Bumper string `json:"bumper,omitempty"`
-	Uper   string `json:"uper,omitempty"`
+	Bumper string `yaml:"bumper,omitempty"`
+	Uper   string `yaml:"uper,omitempty"`
 }
 
 type config struct {
-	AwardAmount int `json:"award_amount,omitempty"`
+	AwardAmount int `yaml:"award_amount,omitempty"`
 
-	Channels channels `json:"channels,omitempty"`
-	Users    users    `json:"users,omitempty"`
-	Roles    roles    `json:"roles,omitempty"`
-	Bots     bots     `json:"bots,omitempty"`
+	Channels channels `yaml:"channels,omitempty"`
+	Users    users    `yaml:"users,omitempty"`
+	Roles    roles    `yaml:"roles,omitempty"`
+	Bots     bots     `yaml:"bots,omitempty"`
 
-	Bank bank `json:"bank,omitempty"`
+	Bank bank `yaml:"bank,omitempty"`
 }

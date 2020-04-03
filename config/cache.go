@@ -1,12 +1,12 @@
 package config
 
-import "github.com/SteMak/house-tyan/config/parsers/json"
+import "time"
 
 type ttl struct {
-	Username json.Duration `json:"username,omitempty"`
+	Username time.Duration `yaml:"username,omitempty"`
 }
 
 type cache struct {
-	Path string `json:"path,omitempty"`
-	TTL  ttl    `json:"ttl,omitempty"`
+	Path string `yaml:"path,omitempty"`
+	TTL  ttl    `yaml:"ttl,omitempty"`
 }
