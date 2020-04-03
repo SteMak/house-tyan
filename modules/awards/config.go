@@ -5,10 +5,9 @@ type bank struct {
 }
 
 type channels struct {
-	Confirm   string `json:"confirm,omitempty"`
-	Responces string `json:"responces,omitempty"`
-	Logs      string `json:"logs,omitempty"`
-	Bump      string `json:"bump,omitempty"`
+	Confirm  string `yaml:"confirm,omitempty"`
+	Requests string `yaml:"requests,omitempty"`
+	Bump     string `yaml:"bump,omitempty"`
 }
 
 type users struct {

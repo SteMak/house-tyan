@@ -1,7 +1,7 @@
 bot:
+  guild_id: "615264378014531724"
   console_channel: "691362207300321381"
   errors_channel: "691362207300321381"
-  guild_id: "615264378014531724"
   log_channel: "691362207300321381"
   templates: ./assets/templates/
 cache:
@@ -12,7 +12,7 @@ modules:
   awards:
     config: ./config/dev/modules/awards.yaml
     enabled: true
-    prefix: ""
+    prefix: "-"
 session: {}
 storage:
   connection: password=vanilla

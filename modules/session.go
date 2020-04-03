@@ -4,10 +4,13 @@ import (
 	"github.com/SteMak/house-tyan/config"
 	"github.com/SteMak/house-tyan/out"
 	"github.com/bwmarrin/discordgo"
+	"github.com/urfave/cli"
 )
 
 var (
 	session *discordgo.Session
+
+	App *cli.App
 )
 
 func authentificate() {
@@ -19,8 +22,10 @@ func authentificate() {
 	session = s
 
 	session.StateEnabled = true
-
 	session.SyncEvents = false
+
+	App.Co
+	session.Debug(App)
 
 	session.AddHandler(onReady)
 

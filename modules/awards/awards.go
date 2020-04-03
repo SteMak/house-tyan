@@ -1,9 +1,11 @@
 package awards
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -30,12 +32,12 @@ func (bot module) IsRunning() bool {
 func (bot *module) Init(prefix, configPath string) error {
 	data, err := ioutil.ReadFile(configPath)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
-	err = json.Unmarshal(data, &bot.config)
+	err = yaml.Unmarshal(data, &bot.config)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
 	bot.loadEnv()
