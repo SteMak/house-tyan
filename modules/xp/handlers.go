@@ -8,12 +8,20 @@ import (
 )
 
 func (bot *module) handlerXpMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if !util.EqualAny(m.ChannelID, bot.config.Channels.XpFarming) {
+	if !util.EqualAny(m.ChannelID, bot.config.MessageFarm.Channels) {
 		return
 	}
-	if len(m.Content) < bot.config.XpConfig.XpMesLen {
+	if len(m.Content) < bot.config.MessageFarm.MessageLength {
 		return
 	}
 
-	fmt.Println(m.Author.ID, bot.config.XpConfig.XpMessage)
+	member, err := s.GuildMember(m.GuildID, m.Author.ID)
+	if err != nil {
+		return
+	}
+	if util.EqualAny(bot.config.RoleHermit, member.Roles) {
+		return 
+	}
+
+	fmt.Println(m.Author.ID, bot.config.MessageFarm.XpForMessage)
 }

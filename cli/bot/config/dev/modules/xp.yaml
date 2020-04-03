@@ -1,6 +1,7 @@
-channels:
-  xp_farming:
-    - "692101636113432705"
-    - "615264380874915842"
-xp_config:
-  xp_boost: 5
+role_hermit: "636168605867704320"
+message_farm:
+  channels:
+    - "695739766557245461"
+    - "695739819598282763"
+  xp_for_message: 141
+  message_length: 5
