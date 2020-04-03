@@ -1,1 +1,6 @@
-{}
+channels:
+  xp_farming:
+    - "692101636113432705"
+    - "615264380874915842"
+xp_config:
+  xp_boost: 5

@@ -5,11 +5,11 @@ type channels struct {
 }
 
 type xpConfig struct {
-	XpBoost   string `yaml:"xp_boost,omitempty"`
-	XpMessage string `yaml:"xp_message,omitempty"`
-	XpVoice   string `yaml:"xp_voice,omitempty"`
-	XpMesLen  int    `yaml:"xp_mes_len,omitempty"`
-	XpVoiSec  int    `yaml:"xp_mes_len,omitempty"`
+	XpBoost   int `yaml:"xp_boost,omitempty"`
+	XpMessage int `yaml:"xp_message,omitempty"`
+	XpVoice   int `yaml:"xp_voice,omitempty"`
+	XpMesLen  int `yaml:"xp_mes_len,omitempty"`
+	XpVoiSec  int `yaml:"xp_voi_sec,omitempty"`
 }
 
 type roles struct {
