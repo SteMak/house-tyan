@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 
+	_ "github.com/SteMak/house-tyan/modules/xp"
+
 	"github.com/SteMak/house-tyan/out"
 )
 

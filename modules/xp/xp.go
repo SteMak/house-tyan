@@ -1,10 +1,10 @@
 package xp
 
 import (
-	"encoding/json"
 	"io/ioutil"
 
 	"github.com/bwmarrin/discordgo"
+	"gopkg.in/yaml.v2"
 )
 
 type module struct {
@@ -30,7 +30,7 @@ func (bot *module) Init(prefix, configPath string) error {
 		return err
 	}
 
-	err = json.Unmarshal(data, &bot.config)
+	err = yaml.Unmarshal(data, &bot.config)
 	if err != nil {
 		return err
 	}
