@@ -1,5 +1,5 @@
 .vscode
-bin
+bin/
 cli/bot/cache/
 
 cli/bot/bot
