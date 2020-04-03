@@ -1,7 +1,7 @@
 package awards
 
 type bank struct {
-	Token string
+	Token string `yaml:"-"`
 }
 
 type channels struct {
