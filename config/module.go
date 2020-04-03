@@ -1,7 +1,7 @@
 package config
 
 type module struct {
-	Enabled bool   `json:"enabled,omitempty"`
-	Prefix  string `json:"prefix,omitempty"`
-	Config  string `json:"config,omitempty"`
+	Enabled bool   `yaml:"enabled,omitempty"`
+	Prefix  string `yaml:"prefix,omitempty"`
+	Config  string `yaml:"config,omitempty"`
 }

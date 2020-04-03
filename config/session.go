@@ -1,5 +1,5 @@
 package config
 
 type session struct {
-	Token string `json:"-"`
+	Token string `yaml:"-"`
 }
