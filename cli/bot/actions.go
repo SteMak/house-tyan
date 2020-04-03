@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	tyan "github.com/SteMak/house-tyan"
 	"github.com/SteMak/house-tyan/cache"
 
 	"github.com/SteMak/house-tyan/config"
@@ -16,6 +17,8 @@ import (
 )
 
 func run(c *cli.Context) error {
+	tyan.GlobalCtx = c
+
 	fmt.Println("Bot is running. Press Ctrl + C to exit.")
 
 	config.Load(c.GlobalString("config"))

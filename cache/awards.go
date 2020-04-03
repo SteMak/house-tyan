@@ -8,16 +8,16 @@ import (
 	"github.com/dgraph-io/badger"
 )
 
-type User struct {
-	ID     string
+type Reward struct {
 	Amount uint64
+	Users  []discordgo.User
 }
 
 type Award struct {
-	ID     string
-	Author discordgo.User
-	Reason string
-	Users  []User
+	ID      string
+	Author  discordgo.User
+	Reason  string
+	Rewards []Reward
 }
 
 type awards struct{}

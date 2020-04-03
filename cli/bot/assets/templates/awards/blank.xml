@@ -1,19 +1,13 @@
 <template>
-    <embed color="#03e517">
+    <embed color="#faa61a">
         <title>Запрос на выдачу денег</title>
         <fields>
-            <field key="Запрос" inline="false">
-                ```
-                {{.Reason}}
-                ```
+            <field name="Запрос" inline="false">{{.Reason}}</field>
+            {{ range .Rewards }}
+            <field name="Получат {{ .Amount }}" inline="false">
+                {{range .Users}} {{ .Mention }} {{end}}
             </field>
-            <field key="Получатели" inline="false">
-                ```
-                {{range .Users}} 
-                    {{.Amount}}: &lt;@{{.ID}}&gt;
-                {{end}}
-                ```
-            </field>
+            {{ end }}
         </fields>	    
     </embed>
     <reactions>

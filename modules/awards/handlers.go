@@ -75,13 +75,13 @@ func (bot *module) handlerRequest(s *discordgo.Session, m *discordgo.MessageCrea
 		return
 	}
 
-	sort.SliceStable(item.Users, func(i, j int) bool {
-		return item.Users[i].Amount > item.Users[j].Amount
+	sort.SliceStable(item.Rewards, func(i, j int) bool {
+		return item.Rewards[i].Amount > item.Rewards[j].Amount
 	})
 
 	blank := modules.Send(bot.config.Channels.Confirm, "awards/blank.xml", map[string]interface{}{
-		"Reason": item.Reason,
-		"Users":  item.Users,
+		"Reason":  item.Reason,
+		"Rewards": item.Rewards,
 	}, func(msg *messages.Message) error {
 		if m.Author == nil {
 			return errors.New("Message author is nil")

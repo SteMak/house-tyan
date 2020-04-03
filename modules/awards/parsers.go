@@ -53,6 +53,10 @@ func parseRequest(s *discordgo.Session, content string) (*cache.Award, error) {
 
 		users := strings.Split(usersSum[0], " ")
 
+		reward := cache.Reward{
+			Amount: sum,
+		}
+
 		for i := 0; i < len(users); i++ {
 			if !strings.HasPrefix(users[i], "<@") || !strings.HasSuffix(users[i], ">") {
 				return nil, errors.New("В юзверях затесался шпион")
@@ -62,18 +66,14 @@ func parseRequest(s *discordgo.Session, content string) (*cache.Award, error) {
 			users[i] = strings.TrimPrefix(users[i], "!")
 			users[i] = strings.TrimSuffix(users[i], ">")
 
-			_, err = s.GuildMember(conf.Bot.GuildID, users[i])
+			member, err := s.GuildMember(conf.Bot.GuildID, users[i])
 			if err != nil {
 				return nil, errors.New("В юзверях затесался шпион")
 			}
-		}
 
-		for _, id := range users {
-			item.Users = append(item.Users, cache.User{
-				ID:     id,
-				Amount: sum,
-			})
+			reward.Users = append(reward.Users, *member.User)
 		}
+		item.Rewards = append(item.Rewards, reward)
 	}
 	return item, nil
 }
