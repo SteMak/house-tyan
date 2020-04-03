@@ -13,6 +13,8 @@ modules:
   awards:
     config: ./config/dev/modules/awards.yaml
   triggers:
+  xp:
+    config: ./config/dev/modules/xp.yaml
     enabled: true
     prefix: "-"
 session: {}
