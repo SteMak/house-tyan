@@ -15,6 +15,8 @@ type module struct {
 	running bool
 
 	unb *unbelievaBoat
+
+	stopHandlers []func()
 }
 
 func (module) ID() string {
@@ -48,9 +50,15 @@ func (bot *module) Start(session *discordgo.Session) {
 	bot.session = session
 	bot.running = true
 
-	bot.session.AddHandler(bot.handlerUp)
+	bot.stopHandlers = []func(){
+		bot.session.AddHandler(bot.handlerUp),
+		bot.session.AddHandler(bot.handlerRequest),
+	}
 }
 
 func (bot *module) Stop() {
+	for _, stopHandler := range bot.stopHandlers {
+		stopHandler()
+	}
 	bot.running = false
 }
