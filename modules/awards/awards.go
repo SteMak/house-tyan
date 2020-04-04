@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/GrownNed/dgutils"
+	"github.com/SteMak/house-tyan/libs/dgutils"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 
