@@ -1,18 +1,20 @@
 <template>
-    <embed color="#faa61a">
-        <title>Заявка</title>
-            {{.Author.Mention}}, **Перечислите получателей**
-            Отправте сообщение с упоминаниями получателей           
-        <fields>            
-            <field name="Причина">{{.Reason}}</field>
-            {{ range .Rewards }}
-            <field name="Получат {{ .Amount }}">
-                {{range .Users}} {{ .Mention }} {{end}}
-            </field>
-            {{ end }}
-        </fields>	    
-        <footer>
-            Заявка истечёт в {{.ExpiresAt.Format "01.02.2006 15:04:05 MST"}}
-        </footer>
-    </embed>
+  <embed color="#faa61a">
+    <title>Запрос редактируется</title>
+      {{ .Author.Mention }}, **перечислите получателей для одинаковой суммы**.
+      Отправте команду `-выдать` с упоминаниями получателей.
+    <fields>
+      <field name="Причина">{{.Reason}}</field>
+      <field name="Команды">
+        ```md
+        -выдать  &lt;линки&gt;    указать получателей
+        -причина &lt;причина&gt;  изменить причину
+        -отменить           отменяет запрос
+        ```
+      </field>
+    </fields>
+    <footer>
+      Время на ответ истечёт в {{ .ExpiresAt.Format "01.02.2006 15:04:05 MST" }}
+    </footer>
+  </embed>
 </template>

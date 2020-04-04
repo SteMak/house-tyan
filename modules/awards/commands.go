@@ -30,10 +30,31 @@ func (bot *module) onCreateBlank(ctx *dgutils.MessageContext) {
 		return
 	}
 
+	modules.Send(ctx.Message.ChannelID, "awards/blank.reason.xml",
+		map[string]interface{}{
+			"Author":    ctx.Message.Author,
+			"ExpiresAt": blank.ExpiresAt,
+		}, nil)
 	modules.Send(ctx.Message.ChannelID, "awards/blank.created.xml",
 		map[string]interface{}{
 			"Author":    ctx.Message.Author,
 			"ExpiresAt": blank.ExpiresAt,
 			"Reason":    reason,
 		}, nil)
+	modules.Send(ctx.Message.ChannelID, "awards/blank.howmuch.xml",
+		map[string]interface{}{
+			"Author":    ctx.Message.Author,
+			"ExpiresAt": blank.ExpiresAt,
+			"Reason":    reason,
+		}, nil)
+	modules.Send(ctx.Message.ChannelID, "awards/blank.anythingelse.xml",
+		map[string]interface{}{
+			"Author":    ctx.Message.Author,
+			"ExpiresAt": blank.ExpiresAt,
+			"Reason":    reason,
+		}, nil)
+	modules.Send(ctx.Message.ChannelID, "awards/black.sended.xml",
+		map[string]interface{}{}, nil)
+	modules.Send(ctx.Message.ChannelID, "awards/blank.discarded.xml",
+		map[string]interface{}{}, nil)
 }
