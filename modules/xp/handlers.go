@@ -11,12 +11,16 @@ func (bot *module) handlerXpMessage(s *discordgo.Session, m *discordgo.MessageCr
 	if !util.EqualAny(m.ChannelID, bot.config.MessageFarm.Channels) {
 		return
 	}
+
 	if len(m.Content) < bot.config.MessageFarm.MessageLength {
 		return
 	}
 
 	member, err := s.State.Member(m.GuildID, m.Author.ID)
 	if err != nil {
+		return
+	}
+	if member.User.Bot {
 		return
 	}
 	if util.EqualAny(bot.config.RoleHermit, member.Roles) {
