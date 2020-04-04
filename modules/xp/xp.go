@@ -14,6 +14,8 @@ type module struct {
 	running bool
 
 	stopHandlers []func()
+
+	voiceXpWorker *voiceXpWorker
 }
 
 func (module) ID() string {
@@ -35,6 +37,8 @@ func (bot *module) Init(prefix, configPath string) error {
 		return err
 	}
 
+	bot.voiceXpWorker = newVoiceXpWorker(&bot.config, bot.session)
+
 	return nil
 }
 
@@ -47,11 +51,14 @@ func (bot *module) Start(session *discordgo.Session) {
 	bot.stopHandlers = []func(){
 		bot.session.AddHandler(bot.handlerXpMessage),
 	}
+	bot.voiceXpWorker.start()
 }
 
 func (bot *module) Stop() {
 	for _, stopHandler := range bot.stopHandlers {
 		stopHandler()
 	}
+	bot.voiceXpWorker.stop()
+
 	bot.running = false
 }
