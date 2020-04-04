@@ -15,4 +15,6 @@ func onReady(s *discordgo.Session, e *discordgo.Ready) {
 	}
 
 	Send(*config.Bot.LogChannel, "main/started.xml", data)
+
+	loadModules()
 }

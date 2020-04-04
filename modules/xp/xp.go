@@ -37,7 +37,7 @@ func (bot *module) Init(prefix, configPath string) error {
 		return err
 	}
 
-	bot.voiceXpWorker = newVoiceXpWorker(&bot.config, bot.session)
+	bot.voiceXpWorker = newVoiceXpWorker(&bot.config)
 
 	return nil
 }
@@ -51,7 +51,7 @@ func (bot *module) Start(session *discordgo.Session) {
 	bot.stopHandlers = []func(){
 		bot.session.AddHandler(bot.handlerXpMessage),
 	}
-	bot.voiceXpWorker.start()
+	bot.voiceXpWorker.start(session)
 }
 
 func (bot *module) Stop() {

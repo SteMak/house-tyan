@@ -67,7 +67,6 @@ func Run() {
 
 	loadTemplates()
 	authentificate()
-	loadModules()
 }
 
 func Stop() {
