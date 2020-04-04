@@ -46,8 +46,6 @@ func (bot *module) Start(session *discordgo.Session) {
 	bot.session = session
 	bot.running = true
 
-	// TODO runMagicGorooting()
-
 	bot.stopHandlers = []func(){
 		bot.session.AddHandler(bot.handlerXpMessage),
 	}

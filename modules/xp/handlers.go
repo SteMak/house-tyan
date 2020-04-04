@@ -15,7 +15,7 @@ func (bot *module) handlerXpMessage(s *discordgo.Session, m *discordgo.MessageCr
 		return
 	}
 
-	member, err := s.GuildMember(m.GuildID, m.Author.ID)
+	member, err := s.State.Member(m.GuildID, m.Author.ID)
 	if err != nil {
 		return
 	}
