@@ -68,7 +68,6 @@ func Run() {
 	out.ErrorHandler = SendError
 
 	authentificate()
-	loadModules()
 }
 
 func Stop() {

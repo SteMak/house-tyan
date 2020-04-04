@@ -20,7 +20,7 @@ func (bot *module) handlerXpMessage(s *discordgo.Session, m *discordgo.MessageCr
 		return
 	}
 	if util.EqualAny(bot.config.RoleHermit, member.Roles) {
-		return 
+		return
 	}
 
 	fmt.Println(m.Author.ID, bot.config.MessageFarm.XpForMessage)
