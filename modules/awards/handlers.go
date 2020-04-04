@@ -106,3 +106,7 @@ func (bot *module) handlerRequest(s *discordgo.Session, m *discordgo.MessageCrea
 		return
 	}
 }
+
+func (bot *module) handleCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+}

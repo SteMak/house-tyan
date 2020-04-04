@@ -3,7 +3,8 @@ package config
 import "github.com/SteMak/house-tyan/config/parsers/json"
 
 type ttl struct {
-	Username json.Duration `json:"username,omitempty"`
+	Blank    time.Duration `yaml:"blank,omitempty"`
+	Username time.Duration `yaml:"username,omitempty"`
 }
 
 type cache struct {

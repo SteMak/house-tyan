@@ -1,5 +1,7 @@
 .vscode
 bin
+libs
+vendor
 cli/bot/cache
 
 cli/bot/bot

@@ -2,7 +2,8 @@ package awards
 
 import "github.com/SteMak/house-tyan/modules"
 
+var _module module
+
 func init() {
-	m := new(module)
-	modules.Register(m.ID(), m)
+	modules.Register(_module.ID(), &_module)
 }
