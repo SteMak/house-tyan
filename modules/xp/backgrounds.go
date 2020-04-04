@@ -32,7 +32,7 @@ func newVoiceXpWorker(c *config) *voiceXpWorker {
 }
 
 func (w *voiceXpWorker) onTick() {
-	if len(*w.voiceStates) == 0 {
+	if len(*w.voiceStates) < 2 {
 		return
 	}
 
@@ -63,7 +63,7 @@ func (w *voiceXpWorker) onTick() {
 		}
 
 		if len(states) < 2 {
-			break
+			continue
 		}
 
 		roomBoost := 0
@@ -79,14 +79,11 @@ func (w *voiceXpWorker) onTick() {
 				out.Err(false, err)
 				continue
 			}
-			if st.SelfDeaf || st.Deaf {
-				continue
-			}
 			if util.EqualAny(w.config.RoleHermit, member.Roles) {
 				continue
 			}
 
-			fmt.Println(st.UserID, w.config.VoiceFarm.XpForVoice * roomBoost)
+			fmt.Println(st.UserID, w.config.VoiceFarm.XpForVoice*roomBoost)
 		}
 	}
 }
