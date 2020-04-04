@@ -1,6 +1,6 @@
 <template>
     <embed color="#faa61a">
-        <title>Запрос на выдачу денег</title>
+        <title>Заявка на выдачу денег</title>
         <fields>
             <field name="Запрос" inline="false">{{.Reason}}</field>
             {{ range .Rewards }}

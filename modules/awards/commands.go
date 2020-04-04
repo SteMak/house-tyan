@@ -1,8 +1,8 @@
 package awards
 
 import (
-	"github.com/GrownNed/dgutils"
 	"github.com/SteMak/house-tyan/cache"
+	"github.com/SteMak/house-tyan/libs/dgutils"
 	"github.com/SteMak/house-tyan/modules"
 	"github.com/SteMak/house-tyan/out"
 	"github.com/pkg/errors"
