@@ -1,5 +1,9 @@
 package xp
 
+import (
+	"time"
+)
+
 type messageFarm struct {
 	Channels      []string `yaml:"channels,omitempty"`
 	XpForMessage  int      `yaml:"xp_for_message,omitempty"`
@@ -7,8 +11,8 @@ type messageFarm struct {
 }
 
 type voiceFarm struct {
-	WaitFor    int `yaml:"wait_for,omitempty"`
-	XpForVoice int `yaml:"xp_for_voice,omitempty"`
+	WaitFor    time.Duration `yaml:"wait_for,omitempty"`
+	XpForVoice int           `yaml:"xp_for_voice,omitempty"`
 }
 
 type config struct {
