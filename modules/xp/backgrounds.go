@@ -1,9 +1,11 @@
 package xp
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/SteMak/house-tyan/out"
+	"github.com/SteMak/house-tyan/util"
 
 	conf "github.com/SteMak/house-tyan/config"
 	"github.com/pkg/errors"
@@ -39,10 +41,52 @@ func (w *voiceXpWorker) onTick() {
 		channels[state.ChannelID] = append(channels[state.ChannelID], state)
 	}
 
-	for channelID, states := range channels {
-		out.Debugln("\nChannelID:", channelID)
+	// for channelID, states := range channels {
+	// 	out.Debugln("\nChannelID:", channelID)
+	// 	for _, st := range states {
+	// 		out.Debugf("%+v\n", *st)
+	// 	}
+	// }
+
+	out.Debugf("\n")
+
+	for _, allStates := range channels {
+		var states []*discordgo.VoiceState
+		for _, st := range allStates {
+			member, err := w.session.State.Member(st.GuildID, st.UserID)
+			if err != nil || member.User.Bot {
+				continue
+			}
+			if !st.SelfDeaf && !st.Deaf {
+				states = append(states, st)
+			}
+		}
+
+		if len(states) < 2 {
+			break
+		}
+
+		roomBoost := 0
 		for _, st := range states {
-			out.Debugf("%+v\n", *st)
+			if !st.SelfMute && !st.Mute {
+				roomBoost++
+			}
+		}
+
+		for _, st := range states {
+			member, err := w.session.State.Member(st.GuildID, st.UserID)
+			if err != nil {
+				out.Err(false, err)
+				continue
+			}
+			if st.SelfDeaf || st.Deaf {
+				continue
+			}
+			if util.EqualAny(w.config.RoleHermit, member.Roles) {
+				continue
+			}
+
+			fmt.Println(st.UserID, w.config.VoiceFarm.XpForVoice * roomBoost)
 		}
 	}
 }
