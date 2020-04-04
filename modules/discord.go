@@ -47,6 +47,49 @@ func Send(channelID string, tplName string, data interface{}, beforeSend func(*m
 	return message
 }
 
+func Edit(messageID, channelID string, tplName string, data interface{}, beforeSend func(*messages.Message) error) *discordgo.Message {
+	m, err := messages.Get(tplName, data)
+	if err != nil {
+		out.Err(true, errors.WithStack(err))
+		return nil
+	}
+
+	if beforeSend != nil {
+		err = beforeSend(m)
+		if err != nil {
+			out.Err(true, err)
+			return nil
+		}
+	}
+
+	edit := new(discordgo.MessageEdit)
+	edit.ID = messageID
+	edit.SetContent(m.Content).
+		SetEmbed(m.Embed)
+
+	message, err := session.ChannelMessageEditComplex(edit)
+	if err != nil {
+		out.Err(true, errors.WithStack(err))
+		return nil
+	}
+
+	err = session.MessageReactionsRemoveAll(channelID, messageID)
+	if err != nil {
+		out.Err(true, errors.WithStack(err))
+		return nil
+	}
+
+	for _, reaction := range m.Reactions {
+		err = session.MessageReactionAdd(message.ChannelID, message.ID, reaction)
+		if err != nil {
+			out.Err(true, errors.WithStack(err))
+			return nil
+		}
+	}
+
+	return message
+}
+
 func SendError(err error) {
 	data := map[string]interface{}{
 		"Timestamp": time.Now().UTC().Format(time.StampNano),

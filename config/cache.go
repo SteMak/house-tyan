@@ -3,6 +3,7 @@ package config
 import "time"
 
 type ttl struct {
+	Blank    time.Duration `yaml:"blank,omitempty"`
 	Username time.Duration `yaml:"username,omitempty"`
 }
 

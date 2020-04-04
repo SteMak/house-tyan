@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/GrownNed/dgutils"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 
@@ -16,7 +17,8 @@ type module struct {
 
 	running bool
 
-	unb *unbelievaBoat
+	cmds *dgutils.Discord
+	unb  *unbelievaBoat
 
 	stopHandlers []func()
 }
@@ -42,6 +44,11 @@ func (bot *module) Init(prefix, configPath string) error {
 
 	bot.loadEnv()
 
+	bot.cmds = &dgutils.Discord{
+		Prefix:   prefix,
+		Commands: commands,
+	}
+
 	bot.unb = &unbelievaBoat{
 		token:  bot.config.Bank.Token,
 		client: &http.Client{},
@@ -56,11 +63,14 @@ func (bot *module) Start(session *discordgo.Session) {
 
 	bot.stopHandlers = []func(){
 		bot.session.AddHandler(bot.handlerUp),
-		bot.session.AddHandler(bot.handlerRequest),
 	}
+
+	bot.cmds.Start(session)
 }
 
 func (bot *module) Stop() {
+	bot.cmds.Stop()
+
 	for _, stopHandler := range bot.stopHandlers {
 		stopHandler()
 	}

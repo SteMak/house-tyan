@@ -9,5 +9,5 @@ var (
 )
 
 func init() {
-	//funcs["formatDate"] =
+	// funcs["formatDate"] = time.
 }

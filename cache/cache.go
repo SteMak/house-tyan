@@ -13,6 +13,7 @@ var cache *badger.DB
 
 var (
 	Awards    awards
+	Blanks    blanks
 	Usernames usernames
 )
 
