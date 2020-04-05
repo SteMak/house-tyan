@@ -1,7 +1,6 @@
 package xp
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/SteMak/house-tyan/out"
@@ -41,49 +40,48 @@ func (w *voiceXpWorker) onTick() {
 		channels[state.ChannelID] = append(channels[state.ChannelID], state)
 	}
 
-	// for channelID, states := range channels {
-	// 	out.Debugln("\nChannelID:", channelID)
-	// 	for _, st := range states {
-	// 		out.Debugf("%+v\n", *st)
-	// 	}
-	// }
+	out.Debugln()
 
-	out.Debugf("\n")
-
-	for _, allStates := range channels {
-		var states []*discordgo.VoiceState
-		for _, st := range allStates {
-			member, err := w.session.State.Member(st.GuildID, st.UserID)
-			if err != nil || member.User.Bot {
-				continue
-			}
-			if !st.SelfDeaf && !st.Deaf {
-				states = append(states, st)
-			}
-		}
-
-		if len(states) < 2 {
+	for channelID, allStates := range channels {
+		guild, err := w.session.State.Guild(conf.Bot.GuildID)
+		if err != nil || channelID == guild.AfkChannelID {
 			continue
 		}
 
-		roomBoost := 0
-		for _, st := range states {
-			if !st.SelfMute && !st.Mute {
-				roomBoost++
-			}
-		}
-
-		for _, st := range states {
+		var voiceMembers []*discordgo.Member
+		for _, st := range allStates {
 			member, err := w.session.State.Member(st.GuildID, st.UserID)
-			if err != nil {
+			if err != nil || member.User.Bot {
 				out.Err(false, err)
 				continue
 			}
+			if st.SelfDeaf || st.Deaf {
+				continue
+			}
+			if st.SelfMute || st.Mute {
+				continue
+			}
+
+			voiceMembers = append(voiceMembers, member)
+		}
+
+		if len(voiceMembers) < 2 {
+			continue
+		}
+
+		roomBoost := 1
+		if len(voiceMembers) > w.config.VoiceFarm.MaxRoomBoost {
+			roomBoost = roomBoost * w.config.VoiceFarm.MaxRoomBoost
+		} else {
+			roomBoost = roomBoost * len(voiceMembers)
+		}
+
+		for _, member := range voiceMembers {
 			if util.EqualAny(w.config.RoleHermit, member.Roles) {
 				continue
 			}
 
-			fmt.Println(st.UserID, w.config.VoiceFarm.XpForVoice*roomBoost)
+			out.Debugln(member.User.ID, w.config.VoiceFarm.XpForVoice*roomBoost)
 		}
 	}
 }
