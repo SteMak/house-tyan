@@ -7,7 +7,8 @@ import (
 type messageFarm struct {
 	Channels      []string `yaml:"channels,omitempty"`
 	XpForChar     float32  `yaml:"xp_for_char,omitempty"`
-	XpForMessage  int      `yaml:"xp_for_message,omitempty"`
+	XpForRune     float32  `yaml:"xp_for_rune,omitempty"`
+	XpForEmpty    float32  `yaml:"xp_for_empty,omitempty"`
 	MessageLength int      `yaml:"message_length,omitempty"`
 }
 
