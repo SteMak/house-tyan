@@ -12,6 +12,7 @@ cache:
 modules:
   awards:
     config: ./config/dev/modules/awards.yaml
+  triggers:
     enabled: true
     prefix: "-"
 session: {}
