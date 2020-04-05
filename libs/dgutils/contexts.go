@@ -11,6 +11,26 @@ type MessageContext struct {
 
 	handlers []func(*MessageContext)
 	index    int
+
+	params map[string]interface{}
+}
+
+func newContext(s *discordgo.Session, m *discordgo.Message, args []string, handlers []func(*MessageContext)) *MessageContext {
+	return &MessageContext{
+		Session:  s,
+		Message:  m,
+		Args:     args,
+		handlers: handlers,
+		params:   make(map[string]interface{}),
+	}
+}
+
+func (mc *MessageContext) SetParam(key string, value interface{}) {
+	mc.params[key] = value
+}
+
+func (mc *MessageContext) Param(key string) interface{} {
+	return mc.params[key]
 }
 
 func (mc *MessageContext) Next() {
