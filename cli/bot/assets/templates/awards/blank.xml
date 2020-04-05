@@ -5,7 +5,7 @@
       <field name="Запрос" inline="false">{{.Reason}}</field>
       {{ range .Rewards }}
       <field name="Получат {{ .Amount }}" inline="false">
-        {{ range .Users }} {{ .Mention }} {{end}}
+        {{ range .Users }} {{ mention . }} {{end}}
       </field>
       {{ end }}
     </fields>

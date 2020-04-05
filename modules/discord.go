@@ -64,6 +64,7 @@ func Edit(messageID, channelID string, tplName string, data interface{}, beforeS
 
 	edit := new(discordgo.MessageEdit)
 	edit.ID = messageID
+	edit.Channel = channelID
 	edit.SetContent(m.Content).
 		SetEmbed(m.Embed)
 
@@ -102,10 +103,14 @@ func SendError(err error) {
 	}
 
 	if st, ok := err.(stackTracer); ok {
-		data["Stack"] = fmt.Sprintf("%+v", st.StackTrace())
+		stack := st.StackTrace()
+		if len(stack) > 5 {
+			stack = stack[:5]
+		}
+		data["Stack"] = fmt.Sprintf("%+v", stack)
 	}
 
-	m, err := messages.Get("main/error.xml", data)
+	m, err := messages.Get("error.xml", data)
 	if err != nil {
 		out.Err(false, err)
 		return

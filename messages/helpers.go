@@ -14,6 +14,9 @@ func normalizeSpaces(in []byte) []byte {
 
 	for _, line := range bytes.Split(in, []byte("\n")) {
 		line = append(bytes.TrimSpace(line), byte('\n'))
+		if string(line) == "\n" {
+			continue
+		}
 		result = append(result, line...)
 	}
 

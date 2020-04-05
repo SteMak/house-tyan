@@ -13,7 +13,6 @@ import (
 )
 
 type BlankActions struct {
-	SetReason bool
 	SetUsers  bool
 	SetAmount bool
 	Send      bool
@@ -36,37 +35,19 @@ func (blanks) key(id string) []byte {
 	return []byte("blank." + id)
 }
 
-func (table *blanks) Create(id, reason string, author *discordgo.User, message *discordgo.Message) (*Blank, error) {
-	blank := &Blank{
-		ID:      id,
-		Message: *message,
-		Reason:  reason,
-		Author:  *author,
-		Actions: BlankActions{
-			SetReason: true,
-			SetUsers:  true,
-			Discard:   true,
-		},
-	}
-
-	err := cache.Update(func(tx *badger.Txn) error {
+func (table *blanks) Create(blank *Blank) error {
+	return cache.Update(func(tx *badger.Txn) error {
 		values := bytes.NewBufferString("")
 		if err := gob.NewEncoder(values).Encode(blank); err != nil {
 			return err
 		}
 
-		entry := badger.NewEntry(table.key(id), values.Bytes()).
+		entry := badger.NewEntry(table.key(blank.ID), values.Bytes()).
 			WithTTL(config.Cache.TTL.Blank)
 
 		blank.ExpiresAt = time.Unix(int64(entry.ExpiresAt), 0).UTC()
-
 		return tx.SetEntry(entry)
 	})
-
-	if err != nil {
-		return nil, err
-	}
-	return blank, nil
 }
 
 func (table *blanks) Set(blank *Blank) error {

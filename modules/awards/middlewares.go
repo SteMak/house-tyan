@@ -21,16 +21,17 @@ func (bot *module) middlewareChannel(ctx *dgutils.MessageContext) {
 }
 
 func (bot *module) middlewareRole(ctx *dgutils.MessageContext) {
+	if ctx.Message.Author.ID == ctx.Session.State.User.ID {
+		ctx.Next()
+		return
+	}
+
 	member, err := bot.session.GuildMember(conf.Bot.GuildID, ctx.Message.Author.ID)
 	if err != nil {
 		out.Err(true, errors.WithStack(err))
 		return
 	}
 	if !util.HasRole(member, bot.config.Roles.Requester) {
-		return
-	}
-	if len(ctx.Args) == 0 {
-		modules.Send(ctx.Message.ChannelID, "awards/usage.xml", nil, nil)
 		return
 	}
 	ctx.Next()
@@ -54,5 +55,12 @@ func (bot *module) middlewareBlank(ctx *dgutils.MessageContext) {
 		return
 	}
 	ctx.SetParam("blank", blank)
+	ctx.Next()
+}
+
+func (bot *module) middlewareDeleteMessage(ctx *dgutils.MessageContext) {
+	if ctx.Message.Author.ID != ctx.Session.State.User.ID {
+		ctx.Session.ChannelMessageDelete(ctx.Message.ChannelID, ctx.Message.ID)
+	}
 	ctx.Next()
 }

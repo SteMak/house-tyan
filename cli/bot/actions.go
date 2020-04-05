@@ -8,6 +8,7 @@ import (
 
 	tyan "github.com/SteMak/house-tyan"
 	"github.com/SteMak/house-tyan/cache"
+	"github.com/SteMak/house-tyan/messages"
 
 	"github.com/SteMak/house-tyan/config"
 	"github.com/SteMak/house-tyan/modules"
@@ -15,8 +16,6 @@ import (
 	"github.com/SteMak/house-tyan/storage"
 	"github.com/urfave/cli"
 )
-
-
 
 func run(c *cli.Context) error {
 	tyan.GlobalCtx = c
@@ -30,6 +29,8 @@ func run(c *cli.Context) error {
 	defer cache.Close()
 
 	storage.Init()
+
+	messages.Init()
 
 	modules.Run()
 	defer modules.Stop()

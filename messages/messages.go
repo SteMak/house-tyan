@@ -3,15 +3,12 @@ package messages
 import (
 	"bytes"
 	"encoding/xml"
-	"errors"
-	"fmt"
 	"html/template"
 	"io/ioutil"
-	"math/rand"
 	"os"
 	"path/filepath"
-	"regexp"
-	"sync"
+
+	"github.com/SteMak/house-tyan/out"
 
 	"github.com/SteMak/house-tyan/config"
 
@@ -19,7 +16,7 @@ import (
 )
 
 var (
-	tpls = make(map[string]*template.Template)
+	tpls *template.Template
 )
 
 type Message struct {
@@ -27,91 +24,55 @@ type Message struct {
 	Reactions []string
 }
 
-func AddTpl(f string) error {
-	file, err := os.Open(f)
-	if err != err {
-		return err
-	}
-	defer file.Close()
+func Init() {
+	tpls = template.New("").Funcs(funcs)
 
-	var data shema
-	err = xml.NewDecoder(file).Decode(&data)
+	out.Infoln("Loading templates...")
+	err := filepath.Walk(config.Bot.Templates, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		data, err := ioutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		name, err := filepath.Rel(config.Bot.Templates, path)
+		if err != nil {
+			return err
+		}
+
+		_, err = tpls.New(name).Parse(string(data))
+		return err
+	})
+
 	if err != nil {
-		return err
+		out.Fatal(err)
 	}
 
-	d, err := ioutil.ReadFile(f)
-	if err != nil {
-		return err
+	for _, tpl := range tpls.Templates() {
+		out.Infoln(tpl.Name())
 	}
-	d = normalizeSpaces(d)
-
-	name, err := filepath.Rel(config.Bot.Templates, f)
-	if err != nil {
-		return err
-	}
-
-	tpl, err := template.New(name).Funcs(funcs).Parse(string(d))
-	if err != nil {
-		return err
-	}
-
-	tpls[name] = tpl
-	return nil
 }
 
 func Get(name string, data interface{}) (*Message, error) {
-	tpl, ok := tpls[name]
-	if !ok {
-		return nil, fmt.Errorf("message '%s' no found", name)
-	}
-
 	buf := bytes.NewBufferString("")
-	err := tpl.ExecuteTemplate(buf, name, data)
-	if err != nil {
-		return nil, err
-	}
-
-	s := bytes.NewBufferString("")
-	err = xml.EscapeText(s, buf.Bytes())
+	err := tpls.ExecuteTemplate(buf, name, data)
 	if err != nil {
 		return nil, err
 	}
 
 	var m shema
-
-	err = xml.NewDecoder(buf).Decode(&m)
-	if err != nil {
+	s := bytes.NewBuffer(normalizeSpaces(buf.Bytes()))
+	out.Debugln(s.String())
+	if err := xml.NewDecoder(s).Decode(&m); err != nil {
 		return nil, err
 	}
 
 	return buildMessage(&m)
-}
-
-func Random(pattern string) (string, error) {
-	matcher, err := regexp.Compile(pattern)
-	if err != nil {
-		return "", err
-	}
-
-	var finded []string
-	var wg sync.WaitGroup
-
-	for s := range tpls {
-		wg.Add(1)
-		go func(s string) {
-			defer wg.Done()
-			if matcher.MatchString(s) {
-				finded = append(finded, s)
-			}
-		}(s)
-	}
-
-	wg.Wait()
-
-	if len(finded) == 0 {
-		return "", errors.New("not found")
-	}
-
-	return finded[rand.Intn(len(finded))], nil
 }
