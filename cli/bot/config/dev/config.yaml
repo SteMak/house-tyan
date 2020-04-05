@@ -8,7 +8,10 @@ cache:
   path: ./cache/
   ttl:
     username: 30s
-modules: {}
+modules:
+  triggers:
+    enabled: true
+    prefix: "-"
 session: {}
 storage:
   connection: password=vanilla
