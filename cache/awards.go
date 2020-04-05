@@ -10,7 +10,7 @@ import (
 
 type Reward struct {
 	Amount uint64
-	Users  []discordgo.User
+	Users  map[string]discordgo.User
 }
 
 type Award struct {

@@ -78,12 +78,10 @@ func (discord *Discord) messageCreate(s *discordgo.Session, m *discordgo.Message
 		return
 	}
 
-	ctx := &MessageContext{
-		Session: discord.Session,
-		Message: m.Message,
-		Args:    args,
-
-		handlers: append(command.Handlers, command.Function),
-	}
+	ctx := newContext(discord.Session,
+		m.Message,
+		args,
+		append(command.Handlers, command.Function),
+	)
 	ctx.Next()
 }
