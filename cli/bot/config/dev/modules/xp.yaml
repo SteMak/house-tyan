@@ -4,7 +4,8 @@ message_farm:
     - "695739766557245461"
     - "695739819598282763"
   xp_for_char: 0.334
-  xp_for_message: 141
+  xp_for_rune: 5
+  xp_for_empty: 141
   message_length: 5
 voice_farm:
   wait_for: "1s"
