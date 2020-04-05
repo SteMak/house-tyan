@@ -1,7 +1,6 @@
 package awards
 
 import (
-	"github.com/SteMak/house-tyan/messages"
 	"github.com/SteMak/house-tyan/modules"
 	"github.com/pkg/errors"
 
@@ -43,15 +42,15 @@ func (bot *module) handlerUp(s *discordgo.Session, m *discordgo.MessageCreate) {
 		"Reason":  "S.up",
 	})
 
-	tpl, err := messages.Random(`^awards/answers/*\.xml$`)
-	if err != nil {
-		out.Err(true, errors.WithStack(err))
-		return
-	}
+	// tpl, err := messages.Random(`^awards/answers/*\.xml$`)
+	// if err != nil {
+	// 	out.Err(true, errors.WithStack(err))
+	// 	return
+	// }
 
-	go modules.Send(m.ChannelID, tpl, map[string]interface{}{
-		"Amount":  bot.config.AwardAmount,
-		"Mention": m.Author.Mention(),
-		"Reason":  "S.up",
-	}, nil)
+	// go modules.Send(m.ChannelID, tpl, map[string]interface{}{
+	// 	"Amount":  bot.config.AwardAmount,
+	// 	"Mention": m.Author.Mention(),
+	// 	"Reason":  "S.up",
+	// }, nil)
 }

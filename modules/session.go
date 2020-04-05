@@ -28,8 +28,4 @@ func authentificate() {
 	if err := session.Open(); err != nil {
 		out.Fatal(err)
 	}
-	out.Infoln("websocket started")
-
-	out.Infoln("authorized as:", session.State.User.String())
-	out.Debugln("token:", s.Token)
 }

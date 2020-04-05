@@ -67,7 +67,6 @@ func loadModules() {
 func Run() {
 	out.ErrorHandler = SendError
 
-	loadTemplates()
 	authentificate()
 	loadModules()
 }

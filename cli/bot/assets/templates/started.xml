@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <template>
     <embed color="#ffa550">
         <title>Бот {{.Name}} запущен</title>
