@@ -1,0 +1,12 @@
+<template>
+    <embed color="#43b581">
+        <fields>
+            <field name="Общий синтаксис:" inline="false">
+                `-запрос &lt;причина&gt; -&gt; &lt;заслужившие награду пользователи&gt; &lt;сумма для выдачи&gt;, &lt;заслужившие другую награду пользователи&gt; &lt;сумма для выдачи&gt;`
+            </field>
+            <field name="Пример:" inline="false">
+                `-запрос Победители ивента &quot;Шляпа&quot; -&gt; @someone @elseone 100, @anotherone 200`
+            </field>
+        </fields>	    
+    </embed>
+</template>

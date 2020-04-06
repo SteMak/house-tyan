@@ -1,11 +1,13 @@
 package triggers
 
 import (
+	"github.com/SteMak/house-tyan/libs/dgutils"
 	"github.com/bwmarrin/discordgo"
 )
 
 type module struct {
 	session *discordgo.Session
+	cmds    *dgutils.Discord
 
 	running bool
 
@@ -31,6 +33,11 @@ func (bot *module) Init(prefix, configPath string) error {
 	// 	return err
 	// }
 
+	bot.cmds = &dgutils.Discord{
+		Prefix:   prefix,
+		Commands: commands,
+	}
+
 	return nil
 }
 
@@ -41,9 +48,13 @@ func (bot *module) Start(session *discordgo.Session) {
 	bot.stopHandlers = []func(){
 		bot.session.AddHandler(bot.triggerHandler),
 	}
+
+	bot.cmds.Start(session)
 }
 
 func (bot *module) Stop() {
+	bot.cmds.Stop()
+
 	for _, stopHandler := range bot.stopHandlers {
 		stopHandler()
 	}

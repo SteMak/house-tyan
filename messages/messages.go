@@ -3,11 +3,15 @@ package messages
 import (
 	"bytes"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"html/template"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"path/filepath"
+	"regexp"
+	"sync"
 
 	"github.com/SteMak/house-tyan/config"
 
@@ -17,6 +21,11 @@ import (
 var (
 	tpls = make(map[string]*template.Template)
 )
+
+type Message struct {
+	discordgo.MessageSend
+	Reactions []string
+}
 
 func AddTpl(f string) error {
 	file, err := os.Open(f)
@@ -51,7 +60,7 @@ func AddTpl(f string) error {
 	return nil
 }
 
-func Get(name string, data interface{}) (*discordgo.MessageSend, error) {
+func Get(name string, data interface{}) (*Message, error) {
 	tpl, ok := tpls[name]
 	if !ok {
 		return nil, fmt.Errorf("message '%s' no found", name)
@@ -77,4 +86,32 @@ func Get(name string, data interface{}) (*discordgo.MessageSend, error) {
 	}
 
 	return buildMessage(&m)
+}
+
+func Random(pattern string) (string, error) {
+	matcher, err := regexp.Compile(pattern)
+	if err != nil {
+		return "", err
+	}
+
+	var finded []string
+	var wg sync.WaitGroup
+
+	for s := range tpls {
+		wg.Add(1)
+		go func(s string) {
+			defer wg.Done()
+			if matcher.MatchString(s) {
+				finded = append(finded, s)
+			}
+		}(s)
+	}
+
+	wg.Wait()
+
+	if len(finded) == 0 {
+		return "", errors.New("not found")
+	}
+
+	return finded[rand.Intn(len(finded))], nil
 }

@@ -1,8 +1,12 @@
 package modules
 
 import (
-	"runtime/debug"
+	"fmt"
 	"time"
+
+	"github.com/bwmarrin/discordgo"
+
+	"github.com/pkg/errors"
 
 	tyan "github.com/SteMak/house-tyan"
 
@@ -11,27 +15,94 @@ import (
 	"github.com/SteMak/house-tyan/out"
 )
 
-func Send(channelID string, tplName string, data interface{}) (err error) {
+func Send(channelID string, tplName string, data interface{}, beforeSend func(*messages.Message) error) *discordgo.Message {
 	m, err := messages.Get(tplName, data)
 	if err != nil {
-		out.Err(true, err)
-		return
+		out.Err(true, errors.WithStack(err))
+		return nil
 	}
 
-	_, err = session.ChannelMessageSendComplex(channelID, m)
-	if err != nil {
-		out.Err(true, err)
-		return
+	if beforeSend != nil {
+		err = beforeSend(m)
+		if err != nil {
+			out.Err(true, err)
+			return nil
+		}
 	}
-	return
+
+	message, err := session.ChannelMessageSendComplex(channelID, &m.MessageSend)
+	if err != nil {
+		out.Err(true, errors.WithStack(err))
+		return nil
+	}
+
+	for _, reaction := range m.Reactions {
+		err = session.MessageReactionAdd(message.ChannelID, message.ID, reaction)
+		if err != nil {
+			out.Err(true, errors.WithStack(err))
+			return nil
+		}
+	}
+
+	return message
 }
 
-func SendError(msg string) {
+func Edit(messageID, channelID string, tplName string, data interface{}, beforeSend func(*messages.Message) error) *discordgo.Message {
+	m, err := messages.Get(tplName, data)
+	if err != nil {
+		out.Err(true, errors.WithStack(err))
+		return nil
+	}
+
+	if beforeSend != nil {
+		err = beforeSend(m)
+		if err != nil {
+			out.Err(true, err)
+			return nil
+		}
+	}
+
+	edit := new(discordgo.MessageEdit)
+	edit.ID = messageID
+	edit.SetContent(m.Content).
+		SetEmbed(m.Embed)
+
+	message, err := session.ChannelMessageEditComplex(edit)
+	if err != nil {
+		out.Err(true, errors.WithStack(err))
+		return nil
+	}
+
+	err = session.MessageReactionsRemoveAll(channelID, messageID)
+	if err != nil {
+		out.Err(true, errors.WithStack(err))
+		return nil
+	}
+
+	for _, reaction := range m.Reactions {
+		err = session.MessageReactionAdd(message.ChannelID, message.ID, reaction)
+		if err != nil {
+			out.Err(true, errors.WithStack(err))
+			return nil
+		}
+	}
+
+	return message
+}
+
+func SendError(err error) {
 	data := map[string]interface{}{
 		"Timestamp": time.Now().UTC().Format(time.StampNano),
 		"Version":   tyan.Vesion,
-		"Message":   msg,
-		"Stack":     string(debug.Stack()),
+		"Message":   err.Error(),
+	}
+
+	type stackTracer interface {
+		StackTrace() errors.StackTrace
+	}
+
+	if st, ok := err.(stackTracer); ok {
+		data["Stack"] = fmt.Sprintf("%+v", st.StackTrace())
 	}
 
 	m, err := messages.Get("main/error.xml", data)
@@ -40,8 +111,12 @@ func SendError(msg string) {
 		return
 	}
 
-	_, err = session.ChannelMessageSendComplex(*config.Bot.ErrorsChannel, m)
+	_, err = session.ChannelMessageSendComplex(*config.Bot.ErrorsChannel, &m.MessageSend)
 	if err != nil {
 		out.Err(false, err)
 	}
+}
+
+func SendLog(tplName string, data interface{}) {
+	Send(*config.Bot.LogChannel, tplName, data, nil)
 }

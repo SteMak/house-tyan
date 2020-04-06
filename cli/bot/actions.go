@@ -6,6 +6,9 @@ import (
 	"os/signal"
 	"syscall"
 
+	tyan "github.com/SteMak/house-tyan"
+	"github.com/SteMak/house-tyan/cache"
+
 	"github.com/SteMak/house-tyan/config"
 	"github.com/SteMak/house-tyan/modules"
 	"github.com/SteMak/house-tyan/out"
@@ -13,11 +16,18 @@ import (
 	"github.com/urfave/cli"
 )
 
+
+
 func run(c *cli.Context) error {
+	tyan.GlobalCtx = c
+
 	fmt.Println("Bot is running. Press Ctrl + C to exit.")
 
 	config.Load(c.GlobalString("config"))
 	out.SetDebug(c.GlobalBool("debug"))
+
+	cache.Init()
+	defer cache.Close()
 
 	storage.Init()
 

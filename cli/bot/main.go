@@ -3,6 +3,9 @@ package main
 import (
 	"os"
 
+	_ "github.com/SteMak/house-tyan/modules/awards"
+	_ "github.com/SteMak/house-tyan/modules/triggers"
+
 	"github.com/SteMak/house-tyan/out"
 )
 
