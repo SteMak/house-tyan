@@ -15,6 +15,7 @@ var (
 	Awards    awards
 	Blanks    blanks
 	Usernames usernames
+	Triggers  triggers
 )
 
 func Init() {

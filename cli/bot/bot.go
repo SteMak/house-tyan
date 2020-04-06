@@ -12,7 +12,7 @@ func commands() *cli.App {
 				Usage: "Enable debug mode",
 			},
 			&cli.BoolFlag{
-				Name:  "m,migrate",
+				Name:  "m, migrate",
 				Usage: "Migrate database",
 			},
 			&cli.StringFlag{

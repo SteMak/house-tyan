@@ -28,6 +28,7 @@ func Fatal(msg ...interface{}) {
 	ct.Foreground(ct.Red, true)
 	fmt.Print("[F]: " + time.Now().Format(timeFormat) + " -> ")
 	fmt.Println(msg...)
+	ct.ResetColor()
 	os.Exit(1)
 }
 

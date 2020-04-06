@@ -8,9 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/SteMak/house-tyan/out"
-
 	"github.com/SteMak/house-tyan/config"
+	"github.com/SteMak/house-tyan/out"
 
 	"github.com/bwmarrin/discordgo"
 )

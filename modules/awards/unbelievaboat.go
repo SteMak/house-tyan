@@ -25,11 +25,11 @@ var (
 
 // Balance balance of user
 type responce struct {
-	Rank   string `yaml:"rank"`
-	UserID string `yaml:"user_id"`
-	Cash   int    `yaml:"cash"`
-	Bank   int    `yaml:"bank"`
-	Total  int    `yaml:"total"`
+	Rank   string `json:"rank"`
+	UserID string `json:"user_id"`
+	Cash   int    `json:"cash"`
+	Bank   int    `json:"bank"`
+	Total  int    `json:"total"`
 }
 
 // unbelievaBoat is a magic structure
@@ -41,15 +41,15 @@ type unbelievaBoat struct {
 func (api *unbelievaBoat) request(protocol, userID string, reqBodyBytes io.Reader) (*responce, error) {
 	// RateLimit is a structure for 429 error
 	type RateLimit struct {
-		Message    string `yaml:"message"`
-		RetryAfter int    `yaml:"retry_after"`
+		Message    string `json:"message"`
+		RetryAfter int    `json:"retry_after"`
 	}
 
 	// JSONBalanse is a structure for changing user balance
 	type JSONBalanse struct {
-		Cash   int    `yaml:"cash"`
-		Bank   int    `yaml:"bank"`
-		Reason string `yaml:"reason"`
+		Cash   int    `json:"cash"`
+		Bank   int    `json:"bank"`
+		Reason string `json:"reason"`
 	}
 
 	var (
@@ -117,9 +117,9 @@ func (api *unbelievaBoat) getBalance(userID string) (*responce, error) {
 // SetBalance sets balance of user
 func (api *unbelievaBoat) setBalance(userID string, cash, bank int, reason string) error {
 	type JSONBalanse struct {
-		Cash   int    `yaml:"cash"`
-		Bank   int    `yaml:"bank"`
-		Reason string `yaml:"reason"`
+		Cash   int    `json:"cash"`
+		Bank   int    `json:"bank"`
+		Reason string `json:"reason"`
 	}
 
 	jsonBalanse := JSONBalanse{
@@ -139,9 +139,9 @@ func (api *unbelievaBoat) setBalance(userID string, cash, bank int, reason strin
 
 func (api *unbelievaBoat) addToBalance(userID string, cash, bank int, reason string) error {
 	type JSONBalanse struct {
-		Cash   int    `yaml:"cash"`
-		Bank   int    `yaml:"bank"`
-		Reason string `yaml:"reason"`
+		Cash   int    `json:"cash"`
+		Bank   int    `json:"bank"`
+		Reason string `json:"reason"`
 	}
 
 	jsonBal := JSONBalanse{
