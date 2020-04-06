@@ -61,6 +61,8 @@ func (table *triggers) Get(id string) (*Trigger, error) {
 	return result, nil
 }
 
+// GetList
+
 func (table *triggers) Delete(id string) error {
 	err := cache.Update(func(tx *badger.Txn) error {
 		return tx.Delete(table.key(id))

@@ -2,6 +2,7 @@ package triggers
 
 import (
 	"github.com/SteMak/house-tyan/libs/dgutils"
+	"github.com/SteMak/house-tyan/out"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -34,8 +35,9 @@ func (bot *module) Init(prefix, configPath string) error {
 	// }
 
 	bot.cmds = &dgutils.Discord{
-		Prefix:   prefix,
-		Commands: commands,
+		Prefix:       prefix,
+		Commands:     commands,
+		ErrorHandler: func(err error) { out.Err(true, err) },
 	}
 
 	return nil

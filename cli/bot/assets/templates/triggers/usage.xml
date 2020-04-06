@@ -1,0 +1,20 @@
+<template>
+  <embed color="#43b581">
+    <fields>
+      <field name="Общий синтаксис:" inline="false">
+        ```md
+        -триггер &lt;команда&gt;
+        ```
+      </field>
+      <field name="Пример:" inline="false">
+        ```md
+        -триггер добавить Привет Привет!
+        -триггер добавить Привет Пока.
+        [EOL]
+        -триггер удалить trigger 2
+        -триггер удалить trigger
+        ```
+      </field>
+    </fields>
+  </embed>
+</template>

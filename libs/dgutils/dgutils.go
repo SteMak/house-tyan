@@ -33,7 +33,7 @@ func New(token string) (*Discord, error) {
 		Session: session,
 
 		Prefix: "!",
-		Usage:  usage,
+		Usage:  Usage,
 
 		menus:        make(map[string]*Menu),
 		ErrorHandler: func(err error) { fmt.Println("error", err) },

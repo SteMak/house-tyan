@@ -26,7 +26,7 @@ func (bot *module) triggerHandler(s *discordgo.Session, m *discordgo.MessageCrea
 	// 	}
 	// }
 
-	trigger, err := cache.Triggers.Get(m.Content)
+	trigger, err := cache.Triggers.Get(strings.ToLower(m.Content))
 	if err != nil {
 		return
 	}

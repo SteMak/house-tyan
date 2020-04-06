@@ -1,0 +1,6 @@
+<template>
+    <embed color="#f11d56">
+        <title>Триггеров не найден</title>
+        Триггеров на слово `{{ . }}` не найден.
+    </embed>
+</template>

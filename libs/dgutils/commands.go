@@ -47,10 +47,11 @@ func commandsToString(commands map[string]interface{}) string {
 	return usage
 }
 
-func usage(commands map[string]interface{}) *discordgo.MessageSend {
+func Usage(commands map[string]interface{}) *discordgo.MessageSend {
 	usageEmbed := discordgo.MessageEmbed{
-		Title:       "Usage",
+		Title:       "Использование",
 		Description: commandsToString(commands),
+		Color:       4437377,
 	}
 
 	return &discordgo.MessageSend{

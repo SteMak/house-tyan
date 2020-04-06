@@ -1,0 +1,7 @@
+<template>
+    <embed color="#43b581">
+        <title>Триггер удалён</title>
+        {{ if .Answer }}Триггер `{{ .Answer }}` на слово `{{ .Name }} удалён.`
+        {{ else }}Все триггеры на слово `{{ .Name }}` удалены.{{ end }}
+    </embed>
+</template>
