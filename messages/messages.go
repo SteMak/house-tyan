@@ -3,76 +3,73 @@ package messages
 import (
 	"bytes"
 	"encoding/xml"
-	"fmt"
 	"html/template"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 
 	"github.com/SteMak/house-tyan/config"
+	"github.com/SteMak/house-tyan/out"
 
 	"github.com/bwmarrin/discordgo"
 )
 
 var (
-	tpls = make(map[string]*template.Template)
+	tpls *template.Template
 )
 
-func AddTpl(f string) error {
-	file, err := os.Open(f)
-	if err != err {
-		return err
-	}
-	defer file.Close()
-
-	var data shema
-	err = xml.NewDecoder(file).Decode(&data)
-	if err != nil {
-		return err
-	}
-
-	d, err := ioutil.ReadFile(f)
-	if err != nil {
-		return err
-	}
-	d = normalizeSpaces(d)
-
-	name, err := filepath.Rel(config.Bot.Templates, f)
-	if err != nil {
-		return err
-	}
-
-	tpl, err := template.New(name).Funcs(funcs).Parse(string(d))
-	if err != nil {
-		return err
-	}
-
-	tpls[name] = tpl
-	return nil
+type Message struct {
+	discordgo.MessageSend
+	Reactions []string
 }
 
-func Get(name string, data interface{}) (*discordgo.MessageSend, error) {
-	tpl, ok := tpls[name]
-	if !ok {
-		return nil, fmt.Errorf("message '%s' no found", name)
-	}
+func Init() {
+	tpls = template.New("").Funcs(funcs)
 
-	buf := bytes.NewBufferString("")
-	err := tpl.ExecuteTemplate(buf, name, data)
+	out.Infoln("Loading templates...")
+	err := filepath.Walk(config.Bot.Templates, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		data, err := ioutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		name, err := filepath.Rel(config.Bot.Templates, path)
+		if err != nil {
+			return err
+		}
+
+		_, err = tpls.New(name).Parse(string(data))
+		return err
+	})
+
 	if err != nil {
-		return nil, err
+		out.Fatal(err)
 	}
 
-	s := bytes.NewBufferString("")
-	err = xml.EscapeText(s, buf.Bytes())
+	for _, tpl := range tpls.Templates() {
+		out.Infoln(tpl.Name())
+	}
+}
+
+func Get(name string, data interface{}) (*Message, error) {
+	buf := bytes.NewBufferString("")
+	err := tpls.ExecuteTemplate(buf, name, data)
 	if err != nil {
 		return nil, err
 	}
 
 	var m shema
-
-	err = xml.NewDecoder(buf).Decode(&m)
-	if err != nil {
+	s := bytes.NewBuffer(normalizeSpaces(buf.Bytes()))
+	out.Debugln(s.String())
+	if err := xml.NewDecoder(s).Decode(&m); err != nil {
 		return nil, err
 	}
 

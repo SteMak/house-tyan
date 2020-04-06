@@ -2,6 +2,8 @@ package messages
 
 import (
 	"html/template"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 var (
@@ -9,5 +11,7 @@ var (
 )
 
 func init() {
-	//funcs["formatDate"] =
+	funcs["mention"] = func(user discordgo.User) string {
+		return user.Mention()
+	}
 }

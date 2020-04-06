@@ -1,0 +1,12 @@
+<template>
+  <embed color="{{ if .Err -}} #f11d56 {{- else -}} #faa61a {{- end }}">
+    <title>Запрос редактируется</title>
+      {{ .Author.Mention }}, **перечислите получателей для одинаковой суммы**.
+      Отправте команду `-выдать` с упоминаниями получателей.
+      <fields>
+        {{ template "awards/blank-fields.xml" . }}
+        {{ template "awards/blank-actions.xml" . }}
+      </fields>
+      {{ template "awards/blank-footer.xml" . }}
+  </embed>
+</template>
