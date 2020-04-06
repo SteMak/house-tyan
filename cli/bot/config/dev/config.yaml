@@ -12,9 +12,13 @@ cache:
 modules:
   awards:
     config: ./config/dev/modules/awards.yaml
-  triggers:
+    enabled: true
+    prefix: "-"
   xp:
     config: ./config/dev/modules/xp.yaml
+    enabled: false
+    prefix: "-"
+  triggers:
     enabled: true
     prefix: "-"
 session: {}

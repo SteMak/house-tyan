@@ -28,7 +28,6 @@ func (awards) key(id string) []byte {
 }
 
 func (table *awards) CreateFromBlank(id string, blank *Blank) error {
-
 	sort.SliceStable(blank.Rewards, func(i, j int) bool {
 		return blank.Rewards[i].Amount > blank.Rewards[j].Amount
 	})

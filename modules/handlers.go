@@ -12,6 +12,8 @@ func onReady(s *discordgo.Session, e *discordgo.Ready) {
 	out.Infoln("authorized as:", session.State.User.String())
 	out.Debugln("token:", s.Token)
 
+	loadModules()
+
 	if config.Bot.LogChannel == nil {
 		return
 	}

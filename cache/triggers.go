@@ -4,30 +4,29 @@ import (
 	"bytes"
 	"encoding/gob"
 
-	"github.com/bwmarrin/discordgo"
-
-	"github.com/SteMak/house-tyan/config"
 	"github.com/dgraph-io/badger"
 )
 
-type usernames struct{}
-
-func (usernames) key(id string) []byte {
-	return []byte("username." + id)
+type Trigger struct {
+	Name    string
+	Answers []string
 }
 
-func (table *usernames) Set(user *discordgo.User) error {
+type triggers struct{}
+
+func (triggers) key(id string) []byte {
+	return []byte("trigger." + id)
+}
+
+func (table *triggers) Set(trigger *Trigger) error {
 	err := cache.Update(func(tx *badger.Txn) error {
 
 		values := bytes.NewBufferString("")
-		if err := gob.NewEncoder(values).Encode(user); err != nil {
+		if err := gob.NewEncoder(values).Encode(trigger); err != nil {
 			return err
 		}
 
-		entry := badger.NewEntry(table.key(user.String()), values.Bytes()).
-			WithTTL(config.Cache.TTL.Username)
-
-		return tx.SetEntry(entry)
+		return tx.Set(table.key(trigger.Name), values.Bytes())
 	})
 
 	if err != nil {
@@ -36,11 +35,11 @@ func (table *usernames) Set(user *discordgo.User) error {
 	return nil
 }
 
-func (table *usernames) Get(username string) (*discordgo.User, error) {
-	result := new(discordgo.User)
+func (table *triggers) Get(id string) (*Trigger, error) {
+	result := new(Trigger)
 
 	err := cache.View(func(tx *badger.Txn) error {
-		item, err := tx.Get(table.key(username))
+		item, err := tx.Get(table.key(id))
 		if err != nil {
 			return err
 		}
@@ -62,9 +61,9 @@ func (table *usernames) Get(username string) (*discordgo.User, error) {
 	return result, nil
 }
 
-func (table *usernames) Delete(username string) error {
+func (table *triggers) Delete(id string) error {
 	err := cache.Update(func(tx *badger.Txn) error {
-		return tx.Delete(table.key(username))
+		return tx.Delete(table.key(id))
 	})
 
 	if err != nil {
