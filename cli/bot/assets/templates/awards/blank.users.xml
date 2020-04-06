@@ -3,7 +3,10 @@
     <title>Запрос редактируется</title>
       {{ .Author.Mention }}, **перечислите получателей для одинаковой суммы**.
       Отправте команду `-выдать` с упоминаниями получателей.
-      {{ template "awards/blank-fields.xml" . }}
+      <fields>
+        {{ template "awards/blank-fields.xml" . }}
+        {{ template "awards/blank-actions.xml" . }}
+      </fields>
       {{ template "awards/blank-footer.xml" . }}
   </embed>
 </template>

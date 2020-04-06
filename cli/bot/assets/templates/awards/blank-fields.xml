@@ -1,25 +1,13 @@
-<fields>
-    {{ if .Err }}
-        <field name="Ошибка">**{{- .Err -}}**</field>
+{{ if .Err }}
+    <field name="Ошибка">**{{- .Err -}}**</field>
+{{ end }}
+{{ with .Blank }}
+    {{ if ne .Reason "" }} 
+        <field name="Причина">{{ .Reason }}</field>
     {{ end }}
-    {{ with .Blank }}
-        {{ if ne .Reason "" }} 
-            <field name="Причина">{{ .Reason }}</field>
-        {{ end }}
-        {{ range .Rewards }}
-            <field name="Получат {{ if eq .Amount 0 }} `не указано` {{ else }} {{ .Amount }} {{ end }}">
-                {{ range $id, $user := .Users }} {{ mention $user }} {{ end }}
-            </field>
-        {{ end }}
-        {{ with .Actions }}
-            <field name="Команды">
-                ```md
-                {{ if .SetUsers -}} -выдать  &lt;линки&gt;    указать получателей {{- end }}
-                {{ if .SetAmount -}}-сумма   &lt;сумма&gt;    указать сумму  {{- end }}
-                {{ if .Send -}}     -отправить          отправляет запрос на рассмотрение {{- end }}
-                {{ if .Discard -}}  -отменить           отменяет запрос  {{- end }}
-                ```
-            </field>
-        {{ end}}
+    {{ range .Rewards }}
+        <field name="Получат {{ if eq .Amount 0 }} `не указано` {{ else }} {{ .Amount }} {{ end }}">
+            {{ range $id, $user := .Users }} {{ mention $user }} {{ end }}
+        </field>
     {{ end }}
-</fields>
+{{ end }}
