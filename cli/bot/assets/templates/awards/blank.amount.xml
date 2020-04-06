@@ -3,7 +3,10 @@
     <title>Запрос редактируется</title>
       {{ .Author.Mention }}, **введите сумму**.
       Отправте команду `-сумма` с её указанием.
-    {{ template "awards/blank-fields.xml" . }}
+      <fields>
+        {{ template "awards/blank-fields.xml" . }}
+        {{ template "awards/blank-actions.xml" . }}
+      </fields>
     {{ template "awards/blank-footer.xml" . }}
   </embed>
 </template>

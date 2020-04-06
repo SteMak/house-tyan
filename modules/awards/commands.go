@@ -90,7 +90,9 @@ func (bot *module) onSend(ctx *dgutils.MessageContext) {
 	cache.Blanks.Delete(blank.ID)
 	cache.Awards.CreateFromBlank(m.ID, blank)
 
-	modules.Send(ctx.Message.ChannelID, "awards/black.sended.xml", nil, nil)
+	modules.Edit(blank.Message.ID, ctx.Message.ChannelID, "awards/black.sended.xml", map[string]interface{}{
+		"Blank": blank,
+	}, nil)
 }
 
 func (bot *module) onDiscard(ctx *dgutils.MessageContext) {
@@ -100,7 +102,7 @@ func (bot *module) onDiscard(ctx *dgutils.MessageContext) {
 	}
 
 	cache.Blanks.Delete(blank.ID)
-	go modules.Send(ctx.Message.ChannelID, "awards/blank.discarded.xml", nil, nil)
+	go modules.Edit(blank.Message.ID, ctx.Message.ChannelID, "awards/blank.discarded.xml", nil, nil)
 }
 
 func (bot *module) onAmount(ctx *dgutils.MessageContext) {
