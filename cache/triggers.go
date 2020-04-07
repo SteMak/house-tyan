@@ -29,10 +29,7 @@ func (table *triggers) Set(trigger *Trigger) error {
 		return tx.Set(table.key(trigger.Name), values.Bytes())
 	})
 
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (table *triggers) Get(id string) (*Trigger, error) {
@@ -46,12 +43,10 @@ func (table *triggers) Get(id string) (*Trigger, error) {
 
 		err = item.Value(func(value []byte) error {
 			reader := bytes.NewBuffer(value)
-			if err := gob.NewDecoder(reader).Decode(result); err != nil {
-				return err
-			}
-			return nil
+			return gob.NewDecoder(reader).Decode(result)
 		})
-		return nil
+
+		return err
 	})
 
 	if err != nil {
@@ -61,15 +56,54 @@ func (table *triggers) Get(id string) (*Trigger, error) {
 	return result, nil
 }
 
-// GetList
+func (table *triggers) GetList(page, perPage int) (*[]Trigger, error) {
+	result := make([]Trigger, perPage)
+	index := 0
+	i := 0
+
+	err := cache.View(func(txn *badger.Txn) error {
+		it := txn.NewIterator(badger.DefaultIteratorOptions)
+		defer it.Close()
+
+		prefix := table.key("")
+		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
+			if index < page*perPage {
+				index++
+				continue
+			}
+
+			item := it.Item()
+			err := item.Value(func(value []byte) error {
+				reader := bytes.NewBuffer(value)
+				err := gob.NewDecoder(reader).Decode(&result[index])
+				if err != nil {
+					return err
+				}
+
+				index++
+				return nil
+			})
+
+			if err != nil {
+				return err
+			}
+
+			i++
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
 
 func (table *triggers) Delete(id string) error {
 	err := cache.Update(func(tx *badger.Txn) error {
 		return tx.Delete(table.key(id))
 	})
 
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }

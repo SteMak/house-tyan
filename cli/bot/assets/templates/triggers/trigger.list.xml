@@ -1,0 +1,8 @@
+<template>
+    <embed color="#43b581">
+        <title>Список триггеров</title>
+        {{ range . }}
+            {{ if .Name -}} `{{ .Name }}` {{- end }}
+        {{ end }}
+    </embed>
+</template>

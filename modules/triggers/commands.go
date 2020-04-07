@@ -24,6 +24,12 @@ var (
 				"удалить": &dgutils.Command{
 					Function: _module.onTriggerDelete,
 				},
+				"лист": &dgutils.Command{
+					Function: _module.onTriggerList,
+				},
+				"инфо": &dgutils.Command{
+					Function: _module.onTriggerInfo,
+				},
 			},
 		},
 	}
@@ -81,66 +87,112 @@ func (bot *module) onTriggerDelete(ctx *dgutils.MessageContext) {
 
 	name := strings.ToLower(ctx.Args[0])
 
-	if len(ctx.Args) == 2 {
-		i, err := strconv.Atoi(ctx.Args[1])
+	if len(ctx.Args) == 1 {
+		err := cache.Triggers.Delete(name)
 		if err != nil {
-			modules.Send(ctx.Message.ChannelID, "common_error.xml", map[string]interface{}{
-				"Title":   "Ошибка",
-				"Message": "Индекс должен быть числом",
-			}, nil)
-			return
-		}
-
-		trigger, err := cache.Triggers.Get(name)
-		if err != nil {
-			modules.Send(ctx.Message.ChannelID, "triggers/trigger.not.found.xml", name, nil)
-			return
-		}
-
-		if i > len(trigger.Answers) || i < 0 {
-			modules.Send(ctx.Message.ChannelID, "common_error.xml", map[string]interface{}{
-				"Title":   "Ошибка",
-				"Message": "Триггер под индексом " + strconv.Itoa(i) + " отсутствует.",
-			}, nil)
-			return
-		}
-
-		answer := trigger.Answers[i-1]
-		trigger.Answers = append(trigger.Answers[:i-1], trigger.Answers[i:]...)
-
-		err = cache.Triggers.Set(trigger)
-		if err != nil {
+			if errors.Is(err, badger.ErrKeyNotFound) {
+				modules.Send(ctx.Message.ChannelID, "triggers/trigger.not.found.xml", name, nil)
+				return
+			}
 			out.Err(true, err)
 			modules.Send(ctx.Message.ChannelID, "common_error.xml", map[string]interface{}{
 				"Title":   "Ошибка",
-				"Message": "Не удалось удалить триггер",
+				"Message": "Что то пошло не так :0",
 			}, nil)
 			return
 		}
 
 		modules.Send(ctx.Message.ChannelID, "triggers/trigger.deleted.xml", map[string]string{
 			"Name":   name,
-			"Answer": answer,
+			"Answer": "",
 		}, nil)
 
 		return
 	}
 
-	err := cache.Triggers.Delete(name)
+	i, err := strconv.Atoi(ctx.Args[1])
 	if err != nil {
-		if errors.Is(err, badger.ErrKeyNotFound) {
-			modules.Send(ctx.Message.ChannelID, "triggers/trigger.not.found.xml", name, nil)
-			return
-		}
+		modules.Send(ctx.Message.ChannelID, "common_error.xml", map[string]interface{}{
+			"Title":   "Ошибка",
+			"Message": "Индекс должен быть числом",
+		}, nil)
+		return
+	}
+
+	trigger, err := cache.Triggers.Get(name)
+	if err != nil {
+		modules.Send(ctx.Message.ChannelID, "triggers/trigger.not.found.xml", name, nil)
+		return
+	}
+
+	if i > len(trigger.Answers) || i < 0 {
+		modules.Send(ctx.Message.ChannelID, "common_error.xml", map[string]interface{}{
+			"Title":   "Ошибка",
+			"Message": "Триггер под индексом " + strconv.Itoa(i) + " отсутствует.",
+		}, nil)
+		return
+	}
+
+	answer := trigger.Answers[i-1]
+	trigger.Answers = append(trigger.Answers[:i-1], trigger.Answers[i:]...)
+
+	err = cache.Triggers.Set(trigger)
+	if err != nil {
+		out.Err(true, err)
+		modules.Send(ctx.Message.ChannelID, "common_error.xml", map[string]interface{}{
+			"Title":   "Ошибка",
+			"Message": "Не удалось удалить триггер",
+		}, nil)
+		return
+	}
+
+	modules.Send(ctx.Message.ChannelID, "triggers/trigger.deleted.xml", map[string]string{
+		"Name":   name,
+		"Answer": answer,
+	}, nil)
+}
+
+func (bot *module) onTriggerList(ctx *dgutils.MessageContext) {
+	if len(ctx.Args) != 1 {
+		modules.Send(ctx.Message.ChannelID, "triggers/usage.xml", nil, nil)
+		return
+	}
+
+	i, err := strconv.Atoi(ctx.Args[0])
+	if err != nil || i < 0 {
+		modules.Send(ctx.Message.ChannelID, "common_error.xml", map[string]interface{}{
+			"Title":   "Ошибка",
+			"Message": "Номер страницы должен быть числом",
+		}, nil)
+		return
+	}
+
+	triggers, err := cache.Triggers.GetList(i, 16)
+	if err != nil {
 		out.Err(true, err)
 		modules.Send(ctx.Message.ChannelID, "common_error.xml", map[string]interface{}{
 			"Title":   "Ошибка",
 			"Message": "Что то пошло не так :0",
 		}, nil)
+		return
 	}
 
-	modules.Send(ctx.Message.ChannelID, "triggers/trigger.deleted.xml", map[string]string{
-		"Name":   name,
-		"Answer": "",
-	}, nil)
+	modules.Send(ctx.Message.ChannelID, "triggers/trigger.list.xml", triggers, nil)
+}
+
+func (bot *module) onTriggerInfo(ctx *dgutils.MessageContext) {
+	if len(ctx.Args) != 1 {
+		modules.Send(ctx.Message.ChannelID, "triggers/usage.xml", nil, nil)
+		return
+	}
+
+	name := strings.ToLower(ctx.Args[0])
+
+	trigger, err := cache.Triggers.Get(name)
+	if err != nil {
+		modules.Send(ctx.Message.ChannelID, "triggers/trigger.not.found.xml", name, nil)
+		return
+	}
+
+	modules.Send(ctx.Message.ChannelID, "triggers/trigger.info.xml", trigger, nil)
 }
