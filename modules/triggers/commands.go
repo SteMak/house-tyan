@@ -20,9 +20,17 @@ var (
 				"добавить": &dgutils.Command{
 					Raw:      true,
 					Function: _module.onTriggerAdd,
+					Handlers: []func(*dgutils.MessageContext){
+						_module.middlewareAdmin,
+						_module.middlewareUsage,
+					},
 				},
 				"удалить": &dgutils.Command{
 					Function: _module.onTriggerDelete,
+					Handlers: []func(*dgutils.MessageContext){
+						_module.middlewareAdmin,
+						_module.middlewareUsage,
+					},
 				},
 				"лист": &dgutils.Command{
 					Function: _module.onTriggerList,
@@ -36,7 +44,7 @@ var (
 )
 
 func (bot *module) onTriggerAdd(ctx *dgutils.MessageContext) {
-	if ctx.Args == nil || !strings.Contains(ctx.Args[0], " ") {
+	if !strings.Contains(ctx.Args[0], " ") {
 		modules.Send(ctx.Message.ChannelID, "triggers/usage.xml", nil, nil)
 		return
 	}
@@ -80,7 +88,7 @@ func (bot *module) onTriggerAdd(ctx *dgutils.MessageContext) {
 }
 
 func (bot *module) onTriggerDelete(ctx *dgutils.MessageContext) {
-	if ctx.Args == nil || len(ctx.Args) > 2 {
+	if len(ctx.Args) > 2 {
 		modules.Send(ctx.Message.ChannelID, "triggers/usage.xml", nil, nil)
 		return
 	}
