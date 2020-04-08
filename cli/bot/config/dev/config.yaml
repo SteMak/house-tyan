@@ -19,7 +19,7 @@ modules:
     enabled: false
     prefix: "-"
   triggers:
-    enabled: true
+    enabled: false
     prefix: "-"
 session: {}
 storage:
