@@ -5,6 +5,8 @@ import (
 	"encoding/gob"
 	"sort"
 
+	"github.com/pkg/errors"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/dgraph-io/badger"
 )
@@ -71,14 +73,18 @@ func (table *awards) Set(award *Award) error {
 	return nil
 }
 
-func (table *awards) Get(id string) (*Award, error) {
+func (table *awards) Get(id string) (*Award, bool, error) {
 	result := new(Award)
-
+	exists := false
 	err := cache.View(func(tx *badger.Txn) error {
 		item, err := tx.Get(table.key(id))
 		if err != nil {
+			if errors.Is(err, badger.ErrKeyNotFound) {
+				return nil
+			}
 			return err
 		}
+		exists = true
 
 		err = item.Value(func(value []byte) error {
 			reader := bytes.NewBuffer(value)
@@ -89,12 +95,7 @@ func (table *awards) Get(id string) (*Award, error) {
 		})
 		return nil
 	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
+	return result, exists, err
 }
 
 func (table *awards) Delete(id string) error {

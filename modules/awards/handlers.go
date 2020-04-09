@@ -1,6 +1,8 @@
 package awards
 
 import (
+	"strings"
+
 	"github.com/SteMak/house-tyan/modules"
 	"github.com/pkg/errors"
 
@@ -27,7 +29,7 @@ func (bot *module) handlerUp(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	err = bot.unb.addToBalance(user.ID, 0, bot.config.AwardAmount, "for S.up")
+	err = bot.unb.AddToBalance(user.ID, int64(bot.config.AwardAmount), "for S.up")
 	if err != nil {
 		out.Err(true, errors.WithStack(err))
 		modules.Send(m.ChannelID, "awards/bump_fail.xml", map[string]interface{}{
@@ -53,4 +55,43 @@ func (bot *module) handlerUp(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// 	"Mention": m.Author.Mention(),
 	// 	"Reason":  "S.up",
 	// }, nil)
+}
+
+func (bot *module) handlerBlankAccept(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
+	if m.ChannelID != bot.config.Channels.Confirm {
+		return
+	}
+
+	emoji := m.Emoji.Name
+	if !strings.ContainsAny(emoji, "✅🇽") {
+		return
+	}
+
+	award, exists, err := cache.Awards.Get(m.MessageID)
+	if !exists {
+		return
+	}
+	if err != nil {
+		out.Err(true, errors.WithStack(err))
+		return
+	}
+
+	switch emoji {
+	case "✅":
+		for _, reward := range award.Rewards {
+			for _, user := range reward.Users {
+				if err := bot.unb.AddToBalance(user.ID, int64(reward.Amount), award.Reason); err != nil {
+					out.Err(true, errors.WithStack(err))
+					return
+				}
+			}
+		}
+
+		cache.Blanks.Delete(award.Author.ID)
+		cache.Awards.Delete(award.ID)
+
+	case "🇽":
+		cache.Blanks.Delete(award.Author.ID)
+		cache.Awards.Delete(award.ID)
+	}
 }

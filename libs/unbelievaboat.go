@@ -1,4 +1,4 @@
-package awards
+package libs
 
 import (
 	"bytes"
@@ -27,18 +27,25 @@ var (
 type responce struct {
 	Rank   string `json:"rank"`
 	UserID string `json:"user_id"`
-	Cash   int    `json:"cash"`
-	Bank   int    `json:"bank"`
-	Total  int    `json:"total"`
+	Cash   int64  `json:"cash"`
+	Bank   int64  `json:"bank"`
+	Total  int64  `json:"total"`
 }
 
-// unbelievaBoat is a magic structure
-type unbelievaBoat struct {
+// UnbelievaBoatAPI is a magic structure
+type UnbelievaBoatAPI struct {
 	token  string
 	client *http.Client
 }
 
-func (api *unbelievaBoat) request(protocol, userID string, reqBodyBytes io.Reader) (*responce, error) {
+func NewUnbelievaBoatAPI(token string) *UnbelievaBoatAPI {
+	return &UnbelievaBoatAPI{
+		token:  token,
+		client: &http.Client{},
+	}
+}
+
+func (api *UnbelievaBoatAPI) request(protocol, userID string, reqBodyBytes io.Reader) (*responce, error) {
 	// RateLimit is a structure for 429 error
 	type RateLimit struct {
 		Message    string `json:"message"`
@@ -47,8 +54,8 @@ func (api *unbelievaBoat) request(protocol, userID string, reqBodyBytes io.Reade
 
 	// JSONBalanse is a structure for changing user balance
 	type JSONBalanse struct {
-		Cash   int    `json:"cash"`
-		Bank   int    `json:"bank"`
+		Cash   int64  `json:"cash"`
+		Bank   int64  `json:"bank"`
 		Reason string `json:"reason"`
 	}
 
@@ -110,12 +117,16 @@ func (api *unbelievaBoat) request(protocol, userID string, reqBodyBytes io.Reade
 }
 
 // GetBalance return balance of user
-func (api *unbelievaBoat) getBalance(userID string) (*responce, error) {
-	return api.request("GET", userID, nil)
+func (api *UnbelievaBoatAPI) GetBalance(userID string) (int64, error) {
+	r, err := api.request("GET", userID, nil)
+	if err != nil {
+		return 0, err
+	}
+	return r.Total, nil
 }
 
 // SetBalance sets balance of user
-func (api *unbelievaBoat) setBalance(userID string, cash, bank int, reason string) error {
+func (api *UnbelievaBoatAPI) SetBalance(userID string, cash, bank int, reason string) error {
 	type JSONBalanse struct {
 		Cash   int    `json:"cash"`
 		Bank   int    `json:"bank"`
@@ -137,15 +148,14 @@ func (api *unbelievaBoat) setBalance(userID string, cash, bank int, reason strin
 	return err
 }
 
-func (api *unbelievaBoat) addToBalance(userID string, cash, bank int, reason string) error {
+func (api *UnbelievaBoatAPI) AddToBalance(userID string, bank int64, reason string) error {
 	type JSONBalanse struct {
-		Cash   int    `json:"cash"`
-		Bank   int    `json:"bank"`
+		Cash   int64  `json:"cash"`
+		Bank   int64  `json:"bank"`
 		Reason string `json:"reason"`
 	}
 
 	jsonBal := JSONBalanse{
-		Cash:   cash,
 		Bank:   bank,
 		Reason: reason,
 	}
