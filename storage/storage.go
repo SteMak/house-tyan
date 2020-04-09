@@ -6,9 +6,6 @@ import (
 	"github.com/SteMak/house-tyan/config"
 	"github.com/SteMak/house-tyan/out"
 
-	// sqlite3 driver
-	_ "github.com/mattn/go-sqlite3"
-
 	// postgres driver
 	_ "github.com/lib/pq"
 )
@@ -16,7 +13,7 @@ import (
 var db *sql.DB
 
 func Init() {
-	out.Info("\nstorage connection         ")
+	out.Infoln("\nInit storage...")
 
 	var err error
 	db, err = sql.Open(config.Storage.Driver, config.Storage.Connection)
@@ -24,9 +21,10 @@ func Init() {
 		out.Infoln("[FAIL]")
 		out.Fatal(err)
 	}
+	out.Infoln("Done.")
+}
 
-	if config.Storage.Driver == "sqlite3" {
-		db.SetMaxOpenConns(1)
-	}
-	out.Infoln("[OK]")
+func Tx() (*sql.Tx, error) {
+	tx, err := db.Begin()
+	return tx, err
 }
