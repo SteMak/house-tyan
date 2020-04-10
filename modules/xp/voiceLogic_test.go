@@ -316,8 +316,8 @@ func TestAddXpUsers(t *testing.T) {
 			data.config,
 			data.states,
 			data.getMember,
-			func(userID string, xp int) {
-				actual[userID] = xp
+			func(user *discordgo.User, xp int) {
+				actual[user.ID] = xp
 			},
 		)
 

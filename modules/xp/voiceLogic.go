@@ -13,7 +13,7 @@ func addXpUsers(
 	config *config,
 	voiceStates []*discordgo.VoiceState,
 	getMember func(guildID, userID string) (*discordgo.Member, error),
-	addXpToUser func(userID string, xp int),
+	addXpToUser func(user *discordgo.User, xp int),
 ) {
 
 	channals := generateChannals(voiceStates, getMember)
@@ -30,7 +30,7 @@ func addXpUsers(
 				continue
 			}
 
-			addXpToUser(member.User.ID, config.VoiceFarm.XpForVoice*roomBoost)
+			addXpToUser(member.User, config.VoiceFarm.XpForVoice*roomBoost)
 		}
 	}
 }

@@ -41,7 +41,7 @@ func (w *voiceXpWorker) onTick() {
 		w.config,
 		w.guild.VoiceStates,
 		w.state.Member,
-		func(userID string, xp int) {
+		func(userID *discordgo.User, xp int) {
 			out.Debugln(userID, xp)
 		},
 	)

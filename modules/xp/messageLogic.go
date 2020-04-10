@@ -68,11 +68,19 @@ func thinkAboutMathing(content, pattern string, acc int) (string, int) {
 func countOtherSymbols(content string, common, runes int) (int, int) {
 	contentRunes := []rune(content)
 	for _, r := range contentRunes {
+		if r == rune(65039) {
+			continue
+		}
+		if r == rune(8205) {
+			runes--
+			continue
+		}
 		if len(string(r)) != 1 {
 			runes++
 		} else {
 			common++
 		}
+
 	}
 
 	return common, runes

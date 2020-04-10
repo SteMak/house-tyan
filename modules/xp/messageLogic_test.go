@@ -51,6 +51,24 @@ var howMuchXpData = []howMuchXpDataType{
 		},
 		NewXp: 34,
 	},
+	howMuchXpDataType{
+		Content: "💏👨‍❤️‍💋‍👨👩‍❤️‍💋‍👩💑👨‍👨‍👦👨‍👨‍👧👨‍👨‍👧‍👦👨‍👨‍👦‍👦",
+		MesConf: messageFarm{
+			XpForChar:  0,
+			XpForRune:  1,
+			XpForEmpty: 0,
+		},
+		NewXp: 8,
+	},
+	howMuchXpDataType{
+		Content: "🖇",
+		MesConf: messageFarm{
+			XpForChar:  0,
+			XpForRune:  1,
+			XpForEmpty: 0,
+		},
+		NewXp: 1,
+	},
 }
 
 var xpMessageChecksData = []xpMessageChecksDataType{

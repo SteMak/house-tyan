@@ -11,5 +11,5 @@ func (bot *module) handlerXpMessage(s *discordgo.Session, m *discordgo.MessageCr
 		return
 	}
 
-	out.Debugln(m.Author.ID, howMuchXp(m.Content, bot.config.MessageFarm))
+	out.Debugln(m.Author, howMuchXp(m.Content, bot.config.MessageFarm))
 }
