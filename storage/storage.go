@@ -12,6 +12,10 @@ import (
 
 var db *sql.DB
 
+var (
+	Awards awards
+)
+
 func Init() {
 	out.Infoln("\nInit storage...")
 

@@ -4,6 +4,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/SteMak/house-tyan/storage"
+
 	conf "github.com/SteMak/house-tyan/config"
 
 	"github.com/SteMak/house-tyan/cache"
@@ -88,7 +90,30 @@ func (bot *module) onSend(ctx *dgutils.MessageContext) {
 	}
 
 	cache.Blanks.Delete(blank.ID)
-	cache.Awards.CreateFromBlank(m.ID, blank)
+
+	tx, err := storage.Tx()
+	if err != nil {
+		out.Err(true, errors.WithStack(err))
+		modules.Send(ctx.Message.ChannelID, "common_error.xml", map[string]interface{}{
+			"Title":   "Ошибка",
+			"Message": "Не удалось отправить заявку",
+		}, nil)
+		tx.Rollback()
+		return
+	}
+
+	err = storage.Awards.Create(tx, m.ID, blank)
+	if err != nil {
+		out.Err(true, errors.WithStack(err))
+		modules.Send(ctx.Message.ChannelID, "common_error.xml", map[string]interface{}{
+			"Title":   "Ошибка",
+			"Message": "Не удалось отправить заявку",
+		}, nil)
+		tx.Rollback()
+		return
+	}
+
+	tx.Commit()
 
 	modules.Edit(blank.Message.ID, ctx.Message.ChannelID, "awards/black.sended.xml", map[string]interface{}{
 		"Blank": blank,

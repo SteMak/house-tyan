@@ -7,7 +7,7 @@ import (
 )
 
 type User struct {
-	base
+	Base
 
 	Name          string `db:"name"`
 	Discriminator string `db:"discriminator"`
@@ -35,8 +35,8 @@ func (users) Delete(tx *sql.Tx, id string) error {
 
 func (users) AddXP(tx *sql.Tx, user *discordgo.User, xp int64) error {
 	_, err := tx.Exec(`
-		INSERT INTO users u (id, username, discriminator)
-		VALUES ($1, $2, $3)
+		INSERT INTO users AS u (id, username, discriminator, xp)
+		VALUES ($1, $2, $3, $4)
 		ON CONFLICT (id) DO UPDATE SET
 			xp = u.xp + $4
 	`, user.ID, user.Username, user.Discriminator, xp)
