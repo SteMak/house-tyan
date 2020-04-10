@@ -3,6 +3,8 @@ package xp
 import (
 	"errors"
 	"regexp"
+	"strings"
+	"unicode"
 
 	"github.com/SteMak/house-tyan/util"
 
@@ -51,6 +53,7 @@ func countSymbols(content string) (int, int) {
 	)
 
 	content, countOfRunes = thinkAboutMathing(content, `<@!?\d+>`, countOfRunes)
+	content, countOfRunes = thinkAboutMathing(content, `<@&\d+>`, countOfRunes)
 	content, countOfRunes = thinkAboutMathing(content, `<a?:\w+:\d+>`, countOfRunes)
 
 	countOfCommon, countOfRunes = countOtherSymbols(content, countOfCommon, countOfRunes)
@@ -75,13 +78,23 @@ func countOtherSymbols(content string, common, runes int) (int, int) {
 			runes--
 			continue
 		}
-		if len(string(r)) != 1 {
-			runes++
-		} else {
+		if isCommon(r) {
 			common++
+		} else {
+			runes++
 		}
-
 	}
 
 	return common, runes
+}
+
+func isCommon(r rune) bool {
+	return !unicode.IsGraphic(r) ||
+		unicode.IsPunct(r) ||
+		unicode.IsMark(r) ||
+		unicode.IsLower(r) ||
+		unicode.IsLetter(r) ||
+		unicode.IsNumber(r) ||
+		unicode.IsSpace(r) ||
+		util.EqualAny(string(r), strings.Split(" !\"#$%&'()*+,-./:;<=>?@[]^_`{|}", ""))
 }

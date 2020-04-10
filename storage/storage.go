@@ -11,6 +11,9 @@ import (
 )
 
 var db *sql.DB
+var (
+	Users users
+)
 
 func Init() {
 	out.Infoln("\nInit storage...")

@@ -3,6 +3,8 @@ package xp
 import (
 	"time"
 
+	"github.com/SteMak/house-tyan/storage"
+
 	"github.com/SteMak/house-tyan/out"
 
 	conf "github.com/SteMak/house-tyan/config"
@@ -41,8 +43,21 @@ func (w *voiceXpWorker) onTick() {
 		w.config,
 		w.guild.VoiceStates,
 		w.state.Member,
-		func(userID *discordgo.User, xp int) {
-			out.Debugln(userID, xp)
+		func(user *discordgo.User, xp int) {
+			tx, err := storage.Tx()
+			if err != nil {
+				out.Err(true, errors.WithStack(err))
+				return
+			}
+
+			err = storage.Users.AddXP(tx, user, int64(xp))
+			if err != nil {
+				out.Err(true, errors.WithStack(err))
+				tx.Rollback()
+				return
+			}
+
+			tx.Commit()
 		},
 	)
 }

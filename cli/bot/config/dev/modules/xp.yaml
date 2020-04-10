@@ -6,7 +6,6 @@ message_farm:
   xp_for_char: 0.334
   xp_for_rune: 5
   xp_for_empty: 141
-  message_length: 5
 voice_farm:
   wait_for: "1s"
   xp_for_voice: 50

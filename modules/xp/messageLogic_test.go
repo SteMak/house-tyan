@@ -37,10 +37,10 @@ var howMuchXpData = []howMuchXpDataType{
 		Content: "dghd<:AH_Whaat:579709315024158720>hdfh<a:AH_A_SayumiPeek:641710287002796032>fh<@306370108161392653>  <@!306370108161392653>f😪 f",
 		MesConf: messageFarm{
 			XpForChar:  0.334,
-			XpForRune:  3,
+			XpForRune:  6,
 			XpForEmpty: 5,
 		},
-		NewXp: 20,
+		NewXp: 35,
 	},
 	howMuchXpDataType{
 		Content: "dghd<:AH_Whaat:5797094158720>hdfh<aa:AH_A_SayumiPeek:641710287002796032>fh<@3063701061392653>  <@!?306370108161392653>f😪 f",
@@ -50,6 +50,15 @@ var howMuchXpData = []howMuchXpDataType{
 			XpForEmpty: 5,
 		},
 		NewXp: 34,
+	},
+	howMuchXpDataType{
+		Content: "*рандомный русский текст*",
+		MesConf: messageFarm{
+			XpForChar:  0.2,
+			XpForRune:  3,
+			XpForEmpty: 5,
+		},
+		NewXp: 5,
 	},
 	howMuchXpDataType{
 		Content: "💏👨‍❤️‍💋‍👨👩‍❤️‍💋‍👩💑👨‍👨‍👦👨‍👨‍👧👨‍👨‍👧‍👦👨‍👨‍👦‍👦",
@@ -68,6 +77,33 @@ var howMuchXpData = []howMuchXpDataType{
 			XpForEmpty: 0,
 		},
 		NewXp: 1,
+	},
+	howMuchXpDataType{
+		Content: " !\"#$%&'()*+,-./0123456789:;<=>?@[]^_`{|}",
+		MesConf: messageFarm{
+			XpForChar:  1,
+			XpForRune:  10000000000,
+			XpForEmpty: 5000000000000,
+		},
+		NewXp: 41,
+	},
+	howMuchXpDataType{
+		Content: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+		MesConf: messageFarm{
+			XpForChar:  1,
+			XpForRune:  10000000000,
+			XpForEmpty: 5000000000000,
+		},
+		NewXp: 52,
+	},
+	howMuchXpDataType{
+		Content: "ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮІЇЄҐйцукенгшщзхъфывапролджэячсмитьбюіїєґ",
+		MesConf: messageFarm{
+			XpForChar:  1,
+			XpForRune:  10000000000,
+			XpForEmpty: 5000000000000,
+		},
+		NewXp: 72,
 	},
 }
 
