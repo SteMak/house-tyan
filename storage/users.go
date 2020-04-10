@@ -1,0 +1,44 @@
+package storage
+
+import (
+	"database/sql"
+
+	"github.com/bwmarrin/discordgo"
+)
+
+type User struct {
+	base
+
+	Name          string `db:"name"`
+	Discriminator string `db:"discriminator"`
+	XP            uint64 `db:"xp"`
+	Balance       uint64 `db:"balance"`
+}
+
+type users struct{}
+
+func (users) Set(tx *sql.Tx, user *discordgo.User) error {
+	_, err := tx.Exec(`
+		INSERT INTO users (id, username, discriminator)
+		VALUES ($1, $2, $3)
+		ON CONFLICT (id) DO UPDATE SET 
+			username = $2,
+			discriminator = $3,
+	`, user.ID, user.Username, user.Discriminator)
+	return err
+}
+
+func (users) Delete(tx *sql.Tx, id string) error {
+	_, err := tx.Exec(`DELETE FROM users WHERE id = $1`, id)
+	return err
+}
+
+func (users) AddXP(tx *sql.Tx, user *discordgo.User, xp int64) error {
+	_, err := tx.Exec(`
+		INSERT INTO users u (id, username, discriminator)
+		VALUES ($1, $2, $3)
+		ON CONFLICT (id) DO UPDATE SET
+			xp = u.xp + $4
+	`, user.ID, user.Username, user.Discriminator, xp)
+	return err
+}

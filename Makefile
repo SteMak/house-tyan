@@ -11,7 +11,7 @@ build: clean
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64
 	go build -v -o $(BUILD_DIR)/bot $(VANILLA_DIR)
 
-mod: 
+deps: 
 	rm -rf go.mod
 	rm -rf go.mod
 	go mod init 

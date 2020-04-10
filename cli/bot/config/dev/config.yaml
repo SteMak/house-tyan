@@ -23,5 +23,5 @@ modules:
     prefix: "-"
 session: {}
 storage:
-  connection: password=vanilla
+  connection: postgresql://bot:password@localhost:54320/anihouse?sslmode=disable
   driver: postgres
