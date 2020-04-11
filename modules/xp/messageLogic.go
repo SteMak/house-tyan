@@ -56,7 +56,7 @@ func countSymbols(content string) (int, int) {
 	content, _ = thinkAboutMathing(content, `\*\*\*(\*)+`, "*", 0)
 	content, countOfRunes = thinkAboutMathing(content, `<@!?\d+>`, "", countOfRunes)
 	content, countOfRunes = thinkAboutMathing(content, `<@&\d+>`, "", countOfRunes)
-	content, countOfRunes = thinkAboutMathing(content, `(https?://)?(\w+\.)+(\w+)(/\w+)*/?\S*`, "", countOfRunes)
+	content, countOfRunes = thinkAboutMathing(content, `(https?://)?(\w+\.)+\S*`, "", countOfRunes)
 	content, countOfRunes = thinkAboutMathing(content, `<a?:\w+:\d+>`, "", countOfRunes)
 
 	content, _ = thinkAboutMathing(content, `\S{15,}`, "123456789012345", 0)
