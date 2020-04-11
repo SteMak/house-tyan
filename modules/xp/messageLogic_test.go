@@ -33,23 +33,23 @@ var howMuchXpData = []howMuchXpDataType{
 		},
 		NewXp: 5,
 	},
-	howMuchXpDataType{
-		Content: "dghd<:AH_Whaat:579709315024158720>hdfh<a:AH_A_SayumiPeek:641710287002796032>fh<@306370108161392653>  <@!306370108161392653>f😪 f",
+	howMuchXpDataType{ 
+		Content: "dghd<:AH_Whaat:579709315024158720>hdfh<a:AH_A_SayumiPeek:641710287002796032>f h<@306370108161392653>  <@!306370108161392653>f😪 f",
 		MesConf: messageFarm{
-			XpForChar:  0.334,
-			XpForRune:  6,
-			XpForEmpty: 5,
+			XpForChar:  1,
+			XpForRune:  100,
+			XpForEmpty: 10000,
 		},
-		NewXp: 35,
+		NewXp: 515,
 	},
 	howMuchXpDataType{
 		Content: "dghd<:AH_Whaat:5797094158720>hdfh<aa:AH_A_SayumiPeek:641710287002796032>fh<@3063701061392653>  <@!?306370108161392653>f😪 f",
 		MesConf: messageFarm{
-			XpForChar:  0.334,
-			XpForRune:  3,
-			XpForEmpty: 5,
+			XpForChar:  1,
+			XpForRune:  100,
+			XpForEmpty: 10000,
 		},
-		NewXp: 34,
+		NewXp: 233,
 	},
 	howMuchXpDataType{
 		Content: "*рандомный русский текст*",
@@ -61,13 +61,13 @@ var howMuchXpData = []howMuchXpDataType{
 		NewXp: 5,
 	},
 	howMuchXpDataType{
-		Content: "💏👨‍❤️‍💋‍👨👩‍❤️‍💋‍👩💑👨‍👨‍👦👨‍👨‍👧👨‍👨‍👧‍👦👨‍👨‍👦‍👦",
+		Content: "💏 👨‍❤️‍💋‍👨 👩‍❤️‍💋‍👩 💑 👨‍👨‍👦 👨‍👨‍👧 👨‍👨‍👧‍👦 👨‍👨‍👦‍👦",
 		MesConf: messageFarm{
-			XpForChar:  0,
-			XpForRune:  1,
-			XpForEmpty: 0,
+			XpForChar:  1,
+			XpForRune:  100,
+			XpForEmpty: 10000,
 		},
-		NewXp: 8,
+		NewXp: 807,
 	},
 	howMuchXpDataType{
 		Content: "🖇",
@@ -79,31 +79,49 @@ var howMuchXpData = []howMuchXpDataType{
 		NewXp: 1,
 	},
 	howMuchXpDataType{
-		Content: " !\"#$%&'()*+,-./0123456789:;<=>?@[]^_`{|}",
+		Content: " !\"#$%&'()*+,-. /0123456789:;<= >?@[]^_`{|}",
 		MesConf: messageFarm{
 			XpForChar:  1,
 			XpForRune:  10000000000,
 			XpForEmpty: 5000000000000,
 		},
-		NewXp: 41,
+		NewXp: 43,
 	},
 	howMuchXpDataType{
-		Content: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+		Content: "ABCDEFGHIJKLMNO PQRSTUVWXYZabcd efghijklmnopqrs tuvwxyz",
 		MesConf: messageFarm{
 			XpForChar:  1,
 			XpForRune:  10000000000,
 			XpForEmpty: 5000000000000,
 		},
-		NewXp: 52,
+		NewXp: 55,
 	},
 	howMuchXpDataType{
-		Content: "ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮІЇЄҐйцукенгшщзхъфывапролджэячсмитьбюіїєґ",
+		Content: "ЙЦУКЕНГШЩЗХЪФЫВ АПРОЛДЖЭЯЧСМИТЬ БЮІЇЄҐйцукенгшщ зхъфывапролджэя чсмитьбюіїєґ",
 		MesConf: messageFarm{
 			XpForChar:  1,
 			XpForRune:  10000000000,
 			XpForEmpty: 5000000000000,
 		},
-		NewXp: 72,
+		NewXp: 76,
+	},
+	howMuchXpDataType{
+		Content: "google.com http://google.com https://google.com http://www.google.com",
+		MesConf: messageFarm{
+			XpForChar:  1,
+			XpForRune:  100,
+			XpForEmpty: 5000000000000,
+		},
+		NewXp: 403,
+	},
+	howMuchXpDataType{
+		Content: "******************         *************************",
+		MesConf: messageFarm{
+			XpForChar:  1,
+			XpForRune:  100,
+			XpForEmpty: 5000000000000,
+		},
+		NewXp: 3,
 	},
 }
 

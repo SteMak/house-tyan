@@ -52,20 +52,25 @@ func countSymbols(content string) (int, int) {
 		countOfCommon int
 	)
 
-	content, countOfRunes = thinkAboutMathing(content, `<@!?\d+>`, countOfRunes)
-	content, countOfRunes = thinkAboutMathing(content, `<@&\d+>`, countOfRunes)
-	content, countOfRunes = thinkAboutMathing(content, `<a?:\w+:\d+>`, countOfRunes)
+	content, _ = thinkAboutMathing(content, `\s\s+`, " ", 0)
+	content, _ = thinkAboutMathing(content, `\*\*\*(\*)+`, "*", 0)
+	content, countOfRunes = thinkAboutMathing(content, `<@!?\d+>`, "", countOfRunes)
+	content, countOfRunes = thinkAboutMathing(content, `<@&\d+>`, "", countOfRunes)
+	content, countOfRunes = thinkAboutMathing(content, `(https?://)?(\w+\.)+(\w+)(/\w+)*/?\S*`, "", countOfRunes)
+	content, countOfRunes = thinkAboutMathing(content, `<a?:\w+:\d+>`, "", countOfRunes)
+
+	content, _ = thinkAboutMathing(content, `\S{15,}`, "123456789012345", 0)
 
 	countOfCommon, countOfRunes = countOtherSymbols(content, countOfCommon, countOfRunes)
 
 	return countOfCommon, countOfRunes
 }
 
-func thinkAboutMathing(content, pattern string, acc int) (string, int) {
+func thinkAboutMathing(content, pattern string, replace string, acc int) (string, int) {
 	rx := regexp.MustCompile(pattern)
 	foundings := rx.FindAllString(content, -1)
 
-	return rx.ReplaceAllLiteralString(content, ""), acc + len(foundings)
+	return rx.ReplaceAllLiteralString(content, replace), acc + len(foundings)
 }
 
 func countOtherSymbols(content string, common, runes int) (int, int) {
