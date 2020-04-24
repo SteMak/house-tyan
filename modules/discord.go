@@ -125,3 +125,15 @@ func SendError(err error) {
 func SendLog(tplName string, data interface{}) {
 	Send(*config.Bot.LogChannel, tplName, data, nil)
 }
+
+func SendFail(channelID string, title, msg string) {
+	data := map[string]interface{}{
+		"Message": msg,
+	}
+
+	if title != "" {
+		data["Title"] = title
+	}
+
+	Send(channelID, "fail.xml", data, nil)
+}

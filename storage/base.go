@@ -1,11 +1,9 @@
 package storage
 
-import (
-	"time"
-)
+import "database/sql"
 
-type base struct {
-	ID         string     `db:"id"`
-	InsertedAt *time.Time `db:"inserted_at"`
-	UpdatedAt  *time.Time `db:"updated_at"`
+type Base struct {
+	ID         string       `db:"id"`
+	InsertedAt sql.NullTime `db:"inserted_at"`
+	UpdatedAt  sql.NullTime `db:"updated_at"`
 }

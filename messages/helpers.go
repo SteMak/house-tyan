@@ -17,6 +17,9 @@ func normalizeSpaces(in []byte) []byte {
 		if string(line) == "\n" {
 			continue
 		}
+		if string(line) == "[EOL]\n" {
+			line = []byte("\n")
+		}
 		result = append(result, line...)
 	}
 

@@ -4,6 +4,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/SteMak/house-tyan/storage"
+
 	conf "github.com/SteMak/house-tyan/config"
 
 	"github.com/SteMak/house-tyan/cache"
@@ -75,20 +77,43 @@ func (bot *module) onSend(ctx *dgutils.MessageContext) {
 		return
 	}
 
+	go cache.Blanks.Delete(blank.ID)
+
+	tx, err := storage.Tx()
+	if err != nil {
+		go out.Err(true, errors.WithStack(err))
+		go modules.Send(ctx.Message.ChannelID, "awards/fail_storage.xml", nil, nil)
+		tx.Rollback()
+		return
+	}
+
+	id, err := storage.Awards.Create(tx, blank)
+	if err != nil {
+		go out.Err(true, errors.WithStack(err))
+		go modules.Send(ctx.Message.ChannelID, "awards/fail_storage.xml", nil, nil)
+		tx.Rollback()
+		return
+	}
+
 	m := modules.Send(bot.config.Channels.Confirm, "awards/blank.xml", map[string]interface{}{
 		"Reason":  blank.Reason,
 		"Rewards": blank.Rewards,
 	}, nil)
 	if m == nil {
-		modules.Send(ctx.Message.ChannelID, "common_error.xml", map[string]interface{}{
-			"Title":   "Ошибка",
-			"Message": "Не удалось отправить заявку",
-		}, nil)
+		go out.Err(true, errors.New("Ошибка создания заявки: не удалось отправить сообщение"))
+		go modules.SendFail(ctx.Message.ChannelID, "", "Не удалось отправить заявку")
+		tx.Rollback()
 		return
 	}
 
-	cache.Blanks.Delete(blank.ID)
-	cache.Awards.CreateFromBlank(m.ID, blank)
+	if err := storage.Awards.SetBlankID(tx, id, m.ID); err != nil {
+		go out.Err(true, errors.WithStack(err))
+		go modules.SendFail(ctx.Message.ChannelID, "", "Не удалось отправить заявку")
+		tx.Rollback()
+		return
+	}
+
+	tx.Commit()
 
 	modules.Edit(blank.Message.ID, ctx.Message.ChannelID, "awards/black.sended.xml", map[string]interface{}{
 		"Blank": blank,
@@ -100,8 +125,9 @@ func (bot *module) onDiscard(ctx *dgutils.MessageContext) {
 	if !blank.Actions.Discard {
 		return
 	}
-
-	cache.Blanks.Delete(blank.ID)
+	if err := cache.Blanks.Delete(blank.ID); err != nil {
+		go out.Err(true, errors.WithStack(err))
+	}
 	go modules.Edit(blank.Message.ID, ctx.Message.ChannelID, "awards/blank.discarded.xml", nil, nil)
 }
 
@@ -110,6 +136,8 @@ func (bot *module) onAmount(ctx *dgutils.MessageContext) {
 	if !blank.Actions.SetAmount {
 		return
 	}
+
+	go cache.Blanks.Delete(blank.ID)
 
 	amount, err := strconv.ParseUint(ctx.Args[0], 10, 64)
 	if err != nil {
@@ -138,11 +166,8 @@ func (bot *module) onAmount(ctx *dgutils.MessageContext) {
 	}
 
 	if err := cache.Blanks.Set(blank); err != nil {
-		out.Err(true, errors.WithStack(err))
-		modules.Send(ctx.Message.ChannelID, "common_error.xml", map[string]interface{}{
-			"Title":   "Ошибка",
-			"Message": "Не удалось отредактировать заявку",
-		}, nil)
+		go out.Err(true, errors.WithStack(err))
+		go modules.SendFail(ctx.Message.ChannelID, "Ошибка", "повторите ещё раз")
 		return
 	}
 
@@ -180,11 +205,8 @@ func (bot *module) onUsers(ctx *dgutils.MessageContext) {
 	}
 
 	if err := cache.Blanks.Set(blank); err != nil {
-		out.Err(true, errors.WithStack(err))
-		modules.Send(ctx.Message.ChannelID, "common_error.xml", map[string]interface{}{
-			"Title":   "Ошибка",
-			"Message": "Не удалось отредактировать заявку",
-		}, nil)
+		go out.Err(true, errors.WithStack(err))
+		go modules.SendFail(ctx.Message.ChannelID, "Ошибка", "Повторите ещё раз")
 		return
 	}
 
@@ -197,11 +219,9 @@ func (bot *module) onUsers(ctx *dgutils.MessageContext) {
 func (bot *module) onCreateBlank(ctx *dgutils.MessageContext) {
 	exists, err := cache.Blanks.Exists(ctx.Message.Author.ID)
 	if err != nil {
-		out.Err(true, errors.WithStack(err))
-		modules.Send(ctx.Message.ChannelID, "common_error.xml", map[string]interface{}{
-			"Title":   "Ошибка",
-			"Message": "Не удалось отредактировать заявку",
-		}, nil)
+		go out.Err(true, errors.WithStack(err))
+		go modules.SendFail(ctx.Message.ChannelID, "Ошибка", "Не удалось создать заявку")
+		return
 	}
 
 	if exists {
@@ -225,20 +245,15 @@ func (bot *module) onCreateBlank(ctx *dgutils.MessageContext) {
 	}, nil)
 
 	if m == nil {
-		modules.Send(ctx.Message.ChannelID, "common_error.xml", map[string]interface{}{
-			"Title":   "Ошибка",
-			"Message": "Не удалось отредактировать заявку",
-		}, nil)
+		go modules.SendFail(ctx.Message.ChannelID, "Ошибка", "Не удалось создать заявку")
+		return
 	}
 
 	blank.Message = *m
 
 	if err := cache.Blanks.Create(blank); err != nil {
-		out.Err(true, errors.WithStack(err))
-		modules.Send(ctx.Message.ChannelID, "common_error.xml", map[string]interface{}{
-			"Title":   "Ошибка",
-			"Message": "Не удалось отредактировать заявку",
-		}, nil)
+		go out.Err(true, errors.WithStack(err))
+		go modules.SendFail(ctx.Message.ChannelID, "Ошибка", "Не удалось создать заявку")
 		return
 	}
 }
