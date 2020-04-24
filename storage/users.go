@@ -7,7 +7,7 @@ import (
 )
 
 type User struct {
-	base
+	Base
 
 	Name          string `db:"name"`
 	Discriminator string `db:"discriminator"`
@@ -18,6 +18,7 @@ type User struct {
 type users struct{}
 
 func (users) Set(tx *sql.Tx, user *discordgo.User) error {
+
 	_, err := tx.Exec(`
 		INSERT INTO users (id, username, discriminator)
 		VALUES ($1, $2, $3)

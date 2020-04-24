@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	if err := commands().Run(os.Args); err != nil {
+	if err := application().Run(os.Args); err != nil {
 		out.Fatal(err)
 	}
 }

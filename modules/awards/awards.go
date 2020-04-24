@@ -2,8 +2,8 @@ package awards
 
 import (
 	"io/ioutil"
-	"net/http"
 
+	"github.com/SteMak/house-tyan/libs"
 	"github.com/SteMak/house-tyan/libs/dgutils"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
@@ -18,7 +18,7 @@ type module struct {
 	running bool
 
 	cmds *dgutils.Discord
-	unb  *unbelievaBoat
+	unb  *libs.UnbelievaBoatAPI
 
 	stopHandlers []func()
 }
@@ -49,10 +49,7 @@ func (bot *module) Init(prefix, configPath string) error {
 		Commands: commands,
 	}
 
-	bot.unb = &unbelievaBoat{
-		token:  bot.config.Bank.Token,
-		client: &http.Client{},
-	}
+	bot.unb = libs.NewUnbelievaBoatAPI(bot.config.Bank.Token)
 
 	return nil
 }
@@ -62,7 +59,7 @@ func (bot *module) Start(session *discordgo.Session) {
 	bot.running = true
 
 	bot.stopHandlers = []func(){
-		bot.session.AddHandler(bot.handlerUp),
+		bot.session.AddHandler(bot.handlerBlankProcess),
 	}
 
 	bot.cmds.Start(session)

@@ -22,5 +22,5 @@ func onReady(s *discordgo.Session, e *discordgo.Ready) {
 		"Name": e.User,
 	}
 
-	Send(*config.Bot.LogChannel, "started.xml", data, nil)
+	SendLog("started.xml", data)
 }

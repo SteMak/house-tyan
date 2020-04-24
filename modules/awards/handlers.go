@@ -1,56 +1,92 @@
 package awards
 
 import (
+	"strings"
+
+	"github.com/SteMak/house-tyan/storage"
+
 	"github.com/SteMak/house-tyan/modules"
 	"github.com/pkg/errors"
 
-	"github.com/SteMak/house-tyan/cache"
 	"github.com/SteMak/house-tyan/out"
 	"github.com/bwmarrin/discordgo"
-	"github.com/dgraph-io/badger"
 )
 
-func (bot *module) handlerUp(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if !bot.matchUp(s, m.Message) {
+func (bot *module) handlerBlankProcess(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
+	if m.UserID == s.State.User.ID {
 		return
 	}
 
-	out.Debugln("FOUND S.up")
-
-	user, err := cache.Usernames.Get(m.Author.String())
-	if errors.Is(err, badger.ErrKeyNotFound) {
-		// TODO: обработать ситуацию с не найденным пользователем
+	if m.ChannelID != bot.config.Channels.Confirm {
 		return
 	}
+
+	emoji := m.Emoji.Name
+	if !strings.ContainsAny(emoji, "✅🇽") {
+		return
+	}
+
+	blankID := m.MessageID
+
+	award, err := storage.Awards.GetByBlankID(blankID)
 	if err != nil {
-		out.Err(true, errors.WithStack(err))
+		go out.Err(true, errors.WithStack(err))
+		go modules.Send(m.ChannelID, "awards/fail_storage.xml", nil, nil)
 		return
 	}
 
-	err = bot.unb.addToBalance(user.ID, 0, bot.config.AwardAmount, "for S.up")
-	if err != nil {
-		out.Err(true, errors.WithStack(err))
-		modules.Send(m.ChannelID, "awards/bump_fail.xml", map[string]interface{}{
-			"Mention": m.Author.Mention(),
-		}, nil)
+	if award == nil {
 		return
 	}
 
-	go modules.SendLog("awards/awarded.xml", map[string]interface{}{
-		"Amount":  bot.config.AwardAmount,
-		"Mention": m.Author.Mention(),
-		"Reason":  "S.up",
-	})
+	if award.Status != storage.AwardStatusUnknow {
+		return
+	}
 
-	// tpl, err := messages.Random(`^awards/answers/*\.xml$`)
-	// if err != nil {
-	// 	out.Err(true, errors.WithStack(err))
-	// 	return
-	// }
+	switch emoji {
+	case "✅":
+		err := storage.Awards.Accept(nil, blankID)
+		if err != nil {
+			go out.Err(true, errors.WithStack(err))
+			go modules.Send(m.ChannelID, "awards/fail_storage.xml", nil, nil)
+			return
+		}
 
-	// go modules.Send(m.ChannelID, tpl, map[string]interface{}{
-	// 	"Amount":  bot.config.AwardAmount,
-	// 	"Mention": m.Author.Mention(),
-	// 	"Reason":  "S.up",
-	// }, nil)
+		rewards, err := award.Reawrds()
+		if err != nil {
+			go out.Err(true, errors.WithStack(err))
+			go modules.Send(m.ChannelID, "awards/fail_storage.xml", nil, nil)
+			return
+		}
+
+		var failed []string
+		for _, reward := range rewards {
+			if err := bot.unb.AddToBalance(reward.UserID, int64(reward.Amount), award.Reason); err != nil {
+				go out.Err(true, errors.WithStack(err))
+				failed = append(failed, "<@"+reward.UserID+">")
+				continue
+			}
+
+			if err := storage.Awards.SetPaid(nil, award.ID, reward.UserID); err != nil {
+				go out.Err(true, errors.WithStack(err))
+				failed = append(failed, "<@"+reward.UserID+">")
+				continue
+			}
+		}
+
+		data := make(map[string]interface{})
+		if len(failed) > 0 {
+			data["Failed"] = strings.Join(failed, ", ")
+		}
+
+		modules.Send(m.ChannelID, "awards/accepted.xml", data, nil)
+	case "🇽":
+		err := storage.Awards.Reject(nil, blankID)
+		if err != nil {
+			go out.Err(true, errors.WithStack(err))
+			go modules.Send(m.ChannelID, "awards/fail_storage.xml", nil, nil)
+			return
+		}
+		modules.Send(m.ChannelID, "awards/rejected.xml", nil, nil)
+	}
 }
