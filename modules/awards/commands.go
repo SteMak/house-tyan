@@ -79,7 +79,14 @@ func (bot *module) onSend(ctx *dgutils.MessageContext) {
 
 	go cache.Blanks.Delete(blank.ID)
 
-	tx := storage.Tx()
+	tx, err := storage.Tx()
+	if err != nil {
+		go out.Err(true, errors.WithStack(err))
+		go modules.Send(ctx.Message.ChannelID, "awards/fail_storage.xml", nil, nil)
+		tx.Rollback()
+		return
+	}
+
 	id, err := storage.Awards.Create(tx, blank)
 	if err != nil {
 		go out.Err(true, errors.WithStack(err))
