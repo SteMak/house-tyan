@@ -19,6 +19,7 @@ var (
 var (
 	Awards  awards
 	Rewards rewards
+	Users   users
 )
 
 func Init() {
@@ -37,8 +38,8 @@ func Init() {
 	out.Infoln("Done.")
 }
 
-func Tx() *sqlx.Tx {
-	return db.MustBegin()
+func Tx() (*sqlx.Tx, error) {
+	return db.Beginx()
 }
 
 func exec(tx *sqlx.Tx, stmt squirrel.Sqlizer) error {

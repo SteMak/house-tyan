@@ -16,3 +16,9 @@ deps:
 	rm -rf go.mod
 	go mod init 
 	go mod tidy
+
+test:
+	go test $(shell go list ./...) -covermode atomic -race -coverprofile=coverage.out
+
+test-report: test
+	go tool cover  -html=coverage.out -o coverage.html
