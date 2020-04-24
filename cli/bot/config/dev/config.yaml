@@ -24,4 +24,6 @@ modules:
 session: {}
 storage:
   connection: postgresql://bot:password@localhost:54320/anihouse?sslmode=disable
-  driver: postgres
+  driver: pgx
+  max_idle_connection: 3
+  max_open_connection: 2

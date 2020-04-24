@@ -2,7 +2,7 @@ package main
 
 import "github.com/urfave/cli"
 
-func commands() *cli.App {
+func application() *cli.App {
 	a := &cli.App{
 		Name:        "Discord AniHouse server Bot",
 		Description: "Discord AniHouse server Bot",

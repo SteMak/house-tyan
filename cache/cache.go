@@ -12,7 +12,7 @@ import (
 var cache *badger.DB
 
 var (
-	Awards    awards
+	//Awards    awards
 	Blanks    blanks
 	Usernames usernames
 	Triggers  triggers

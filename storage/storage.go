@@ -1,34 +1,56 @@
 package storage
 
 import (
-	"database/sql"
-
+	"github.com/Masterminds/squirrel"
 	"github.com/SteMak/house-tyan/config"
 	"github.com/SteMak/house-tyan/out"
+	"github.com/jmoiron/sqlx"
 
 	// postgres driver
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
-var db *sql.DB
+var (
+	db *sqlx.DB
+
+	psql = squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
+)
 
 var (
-	Awards awards
+	Awards  awards
+	Rewards rewards
 )
 
 func Init() {
 	out.Infoln("\nInit storage...")
 
 	var err error
-	db, err = sql.Open(config.Storage.Driver, config.Storage.Connection)
+	db, err = sqlx.Connect(config.Storage.Driver, config.Storage.Connection)
 	if err != nil {
 		out.Infoln("[FAIL]")
 		out.Fatal(err)
 	}
+
+	db.SetMaxIdleConns(config.Storage.MaxIdleConnection)
+	db.SetMaxOpenConns(config.Storage.MaxOpenConnection)
+
 	out.Infoln("Done.")
 }
 
-func Tx() (*sql.Tx, error) {
-	tx, err := db.Begin()
-	return tx, err
+func Tx() *sqlx.Tx {
+	return db.MustBegin()
+}
+
+func exec(tx *sqlx.Tx, stmt squirrel.Sqlizer) error {
+	query, args, err := stmt.ToSql()
+	if err != nil {
+		return err
+	}
+
+	if tx == nil {
+		_, err = db.Exec(query, args...)
+	} else {
+		_, err = tx.Exec(query, args...)
+	}
+	return err
 }
