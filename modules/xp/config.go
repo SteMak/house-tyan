@@ -5,11 +5,10 @@ import (
 )
 
 type messageFarm struct {
-	Channels      []string `yaml:"channels,omitempty"`
-	XpForChar     float32  `yaml:"xp_for_char,omitempty"`
-	XpForRune     float32  `yaml:"xp_for_rune,omitempty"`
-	XpForEmpty    float32  `yaml:"xp_for_empty,omitempty"`
-	MessageLength int      `yaml:"message_length,omitempty"`
+	Channels   []string `yaml:"channels,omitempty"`
+	XpForChar  float32  `yaml:"xp_for_char,omitempty"`
+	XpForRune  float32  `yaml:"xp_for_rune,omitempty"`
+	XpForEmpty float32  `yaml:"xp_for_empty,omitempty"`
 }
 
 type voiceFarm struct {

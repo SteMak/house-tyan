@@ -3,8 +3,9 @@ package xp
 import (
 	"time"
 
+	"github.com/SteMak/house-tyan/storage"
+
 	"github.com/SteMak/house-tyan/out"
-	"github.com/SteMak/house-tyan/util"
 
 	conf "github.com/SteMak/house-tyan/config"
 	"github.com/pkg/errors"
@@ -13,9 +14,9 @@ import (
 )
 
 type voiceXpWorker struct {
-	config      *config
-	session     *discordgo.Session
-	voiceStates *[]*discordgo.VoiceState
+	config *config
+	state  *discordgo.State
+	guild  *discordgo.Guild
 
 	isRunning bool
 
@@ -31,73 +32,49 @@ func newVoiceXpWorker(c *config) *voiceXpWorker {
 }
 
 func (w *voiceXpWorker) onTick() {
-	if len(*w.voiceStates) < 2 {
+	if len(w.guild.VoiceStates) < 2 {
 		return
-	}
-
-	channels := make(map[string][]*discordgo.VoiceState)
-	for _, state := range *w.voiceStates {
-		channels[state.ChannelID] = append(channels[state.ChannelID], state)
 	}
 
 	out.Debugln()
 
-	for channelID, allStates := range channels {
-		guild, err := w.session.State.Guild(conf.Bot.GuildID)
-		if err != nil || channelID == guild.AfkChannelID {
-			continue
-		}
-
-		var voiceMembers []*discordgo.Member
-		for _, st := range allStates {
-			member, err := w.session.State.Member(st.GuildID, st.UserID)
-			if err != nil || member.User.Bot {
-				out.Err(false, err)
-				continue
-			}
-			if st.SelfDeaf || st.Deaf {
-				continue
-			}
-			if st.SelfMute || st.Mute {
-				continue
+	addXpUsers(
+		w.guild.AfkChannelID,
+		w.config,
+		w.guild.VoiceStates,
+		w.state.Member,
+		func(user *discordgo.User, xp int) {
+			tx, err := storage.Tx()
+			if err != nil {
+				out.Err(true, errors.WithStack(err))
+				return
 			}
 
-			voiceMembers = append(voiceMembers, member)
-		}
-
-		if len(voiceMembers) < 2 {
-			continue
-		}
-
-		roomBoost := 1
-		if len(voiceMembers) > w.config.VoiceFarm.MaxRoomBoost {
-			roomBoost = roomBoost * w.config.VoiceFarm.MaxRoomBoost
-		} else {
-			roomBoost = roomBoost * len(voiceMembers)
-		}
-
-		for _, member := range voiceMembers {
-			if util.EqualAny(w.config.RoleHermit, member.Roles) {
-				continue
+			err = storage.Users.AddXP(tx, user, int64(xp))
+			if err != nil {
+				out.Err(true, errors.WithStack(err))
+				tx.Rollback()
+				return
 			}
 
-			out.Debugln(member.User.ID, w.config.VoiceFarm.XpForVoice*roomBoost)
-		}
-	}
+			tx.Commit()
+		},
+	)
 }
 
 func (w *voiceXpWorker) start(s *discordgo.Session) error {
 	if w.isRunning {
 		return nil
 	}
-	w.session = s
+	w.state = s.State
 
-	guild, err := w.session.State.Guild(conf.Bot.GuildID)
+	guild, err := w.state.Guild(conf.Bot.GuildID)
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
-	w.voiceStates = &guild.VoiceStates
+	w.guild = guild
+
 	t := time.Tick(w.config.VoiceFarm.WaitFor)
 
 	go func() {
