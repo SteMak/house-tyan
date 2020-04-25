@@ -2,9 +2,12 @@
 bin
 vendor
 
+/docs
+
 /cli/bot/cache
 /cli/bot/logs
 
+*.env
 /cli/bot/bot
 /cli/bot/storage.db
 /cli/bot/__debug_bin

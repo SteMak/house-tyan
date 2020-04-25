@@ -8,12 +8,12 @@ CREATE TABLE awards (
     status smallint NOT NULL DEFAULT 0
 );
 
-CREATE TRIGGER tr_on_awards_insert
+CREATE TRIGGER on_insert
     BEFORE INSERT ON awards
     FOR EACH ROW
     EXECUTE PROCEDURE insert_time ();
 
-CREATE TRIGGER tr_on_awards_update
+CREATE TRIGGER on_update
     BEFORE UPDATE ON awards
     FOR EACH ROW
     EXECUTE PROCEDURE update_time ();

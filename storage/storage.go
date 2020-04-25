@@ -26,10 +26,12 @@ var (
 	psql = squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 )
 
+// Tables
 var (
 	Awards  awards
 	Rewards rewards
 	Users   users
+	Clubs   clubs
 )
 
 func Init() {

@@ -9,10 +9,19 @@ cache:
   ttl:
     blank: 5m
     username: 30s
+storage:
+  connection: postgresql://bot:password@localhost:54320/anihouse?sslmode=disable
+  driver: pgx
+  max_idle_connection: 3
+  max_open_connection: 2
+  log:
+    file: ./logs/storage.log
+    level: trace
+    formatter: json
 modules:
   awards:
     config: ./config/dev/modules/awards.yaml
-    enabled: true
+    enabled: false
     prefix: "-"
     log:
       file: ./logs/awards.log
@@ -33,13 +42,11 @@ modules:
       file: ./logs/triggers.log
       level: trace
       formatter: text
+  clubs:
+    enabled: true
+    prefix: "-"
+    log:
+      file: ./logs/clubs.log
+      level: trace
+      formatter: text
 session: {}
-storage:
-  connection: postgresql://bot:password@localhost:54320/anihouse?sslmode=disable
-  driver: pgx
-  max_idle_connection: 3
-  max_open_connection: 2
-  log:
-    file: ./logs/storage.log
-    level: trace
-    formatter: json

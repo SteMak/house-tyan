@@ -3,7 +3,8 @@ package clubs
 import (
 	"io/ioutil"
 
-	"github.com/SteMak/house-tyan/libs"
+	"github.com/sirupsen/logrus"
+
 	"github.com/SteMak/house-tyan/libs/dgutils"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
@@ -17,9 +18,7 @@ type module struct {
 
 	running bool
 
-	cmds *dgutils.Discord
-	unb  *libs.UnbelievaBoatAPI
-
+	cmds         *dgutils.Discord
 	stopHandlers []func()
 }
 
@@ -31,7 +30,7 @@ func (bot module) IsRunning() bool {
 	return bot.running
 }
 
-func (bot *module) Init(prefix, configPath string) error {
+func (bot *module) Init(prefix, configPath string, logger *logrus.Logger) error {
 	data, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		return errors.WithStack(err)

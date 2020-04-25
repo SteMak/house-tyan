@@ -1,10 +1,4 @@
-CREATE TABLE base (
-    id varchar(18) NOT NULL PRIMARY KEY,
-    inserted_at timestamp without time zone NULL,
-    updated_at timestamp without time zone NULL
-);
-
-CREATE FUNCTION insert_time ()
+CREATE OR REPLACE FUNCTION insert_time ()
     RETURNS TRIGGER
     AS $$
 BEGIN
@@ -14,7 +8,7 @@ END;
 $$
 LANGUAGE 'plpgsql';
 
-CREATE FUNCTION update_time ()
+CREATE OR REPLACE FUNCTION update_time ()
     RETURNS TRIGGER
     AS $$
 BEGIN

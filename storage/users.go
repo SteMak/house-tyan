@@ -2,18 +2,20 @@ package storage
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/jmoiron/sqlx"
 )
 
 type User struct {
-	Base
-
-	Name          string `db:"name"`
-	Discriminator string `db:"discriminator"`
-	XP            uint64 `db:"xp"`
-	Balance       uint64 `db:"balance"`
+	ID            string     `db:"id"`
+	InsertedAt    *time.Time `db:"inserted_at"`
+	UpdatedAt     *time.Time `db:"updated_at"`
+	Name          string     `db:"name"`
+	Discriminator string     `db:"discriminator"`
+	XP            uint64     `db:"xp"`
+	Balance       uint64     `db:"balance"`
 }
 
 type users struct{}
