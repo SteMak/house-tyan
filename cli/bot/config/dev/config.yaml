@@ -12,11 +12,11 @@ cache:
 modules:
   awards:
     config: ./config/dev/modules/awards.yaml
-    enabled: false
+    enabled: true
     prefix: "-"
   xp:
     config: ./config/dev/modules/xp.yaml
-    enabled: true
+    enabled: false
     prefix: "-"
   triggers:
     enabled: false

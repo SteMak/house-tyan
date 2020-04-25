@@ -1,0 +1,5 @@
+package clubs
+
+func TestMain() {
+
+}
