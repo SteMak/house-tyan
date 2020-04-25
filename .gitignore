@@ -1,11 +1,13 @@
 .vscode
 bin
 vendor
-
-/docs
+logs
+docs
 
 /cli/bot/cache
-/cli/bot/logs
+
+
+/modules/clubs/cache
 
 *.env
 /cli/bot/bot

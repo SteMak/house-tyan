@@ -2,8 +2,7 @@ package modules
 
 import (
 	"fmt"
-
-	"github.com/pkg/errors"
+	"path/filepath"
 
 	"github.com/SteMak/house-tyan/util"
 
@@ -15,7 +14,10 @@ import (
 )
 
 type Module interface {
-	Init(prefix, configPath string, log *logrus.Logger) error
+	Init(prefix string) error
+
+	LoadConfig(string) error
+	SetLogger(*logrus.Logger)
 
 	ID() string
 
@@ -53,18 +55,32 @@ func loadModules() {
 			continue
 		}
 
-		out.Infoln("Config file:", m.Config)
 		out.Infoln("Prefix:", m.Prefix)
 
-		log, err := util.Logger(m.Log)
-		if err != nil {
-			if !errors.Is(err, util.ErrNoLogger) {
+		if m.Log != nil {
+			log, err := util.Logger(m.Log)
+			if err != nil {
+				out.Err(false, err)
+				continue
+			}
+
+			module.SetLogger(log)
+		}
+
+		if m.Config != nil {
+			configPath := *m.Config
+			if !filepath.IsAbs(configPath) {
+				configPath = filepath.Join(config.Path, *m.Config)
+			}
+
+			out.Infoln("Config file:", configPath)
+
+			if err := module.LoadConfig(configPath); err != nil {
 				out.Err(false, err)
 				continue
 			}
 		}
-
-		if err := module.Init(m.Prefix, m.Config, log); err != nil {
+		if err := module.Init(m.Prefix); err != nil {
 			out.Err(false, err)
 			continue
 		}

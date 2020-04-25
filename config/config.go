@@ -3,12 +3,18 @@ package config
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	"github.com/SteMak/house-tyan/out"
 	"gopkg.in/yaml.v2"
 )
 
 var cfg config
+
+var (
+	// Path абсолютный путь к конфигу
+	Path string
+)
 
 var (
 	Session = &cfg.Session
@@ -27,6 +33,14 @@ type config struct {
 }
 
 func Load(path string) {
+	var err error
+	path, err = filepath.Abs(path)
+	if err != nil {
+		out.Fatal(err)
+	}
+
+	Path = filepath.Dir(path)
+
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		out.Fatal(err)

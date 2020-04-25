@@ -23,7 +23,7 @@ func (bot module) IsRunning() bool {
 	return bot.running
 }
 
-func (bot *module) Init(prefix, configPath string, log *logrus.Logger) error {
+func (bot *module) LoadConfig(path string) error {
 	// data, err := ioutil.ReadFile(configPath)
 	// if err != nil {
 	// 	return err
@@ -33,7 +33,14 @@ func (bot *module) Init(prefix, configPath string, log *logrus.Logger) error {
 	// if err != nil {
 	// 	return err
 	// }
+	return nil
+}
 
+func (bot *module) SetLogger(logger *logrus.Logger) {
+
+}
+
+func (bot *module) Init(prefix string) error {
 	bot.cmds = &dgutils.Discord{
 		Prefix:   prefix,
 		Commands: commands,

@@ -21,7 +21,10 @@ func authentificate() {
 
 	session.StateEnabled = true
 	session.SyncEvents = false
-	session.Debug = tyan.GlobalCtx.GlobalBool("debug")
+
+	if tyan.GlobalCtx != nil {
+		session.Debug = tyan.GlobalCtx.GlobalBool("debug")
+	}
 
 	session.AddHandler(onReady)
 

@@ -32,18 +32,8 @@ func (module) ID() string {
 	return "awards"
 }
 
-func (bot module) IsRunning() bool {
-	return bot.running
-}
-
-func (bot *module) Init(prefix, configPath string, logger *logrus.Logger) error {
-	if logger == nil {
-		return errors.New("Logger is required")
-	}
-
-	log = logger
-
-	data, err := ioutil.ReadFile(configPath)
+func (bot *module) LoadConfig(path string) error {
+	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -51,6 +41,21 @@ func (bot *module) Init(prefix, configPath string, logger *logrus.Logger) error 
 	err = yaml.Unmarshal(data, &bot.config)
 	if err != nil {
 		return errors.WithStack(err)
+	}
+	return nil
+}
+
+func (bot *module) SetLogger(logger *logrus.Logger) {
+	log = logger
+}
+
+func (bot module) IsRunning() bool {
+	return bot.running
+}
+
+func (bot *module) Init(prefix string) error {
+	if log == nil {
+		return errors.New("Logger is required")
 	}
 
 	bot.loadEnv()

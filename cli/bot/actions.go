@@ -29,7 +29,6 @@ func run(c *cli.Context) error {
 	defer cache.Close()
 
 	storage.Init()
-
 	messages.Init()
 
 	modules.Run()

@@ -20,7 +20,7 @@ storage:
     formatter: json
 modules:
   awards:
-    config: ./config/dev/modules/awards.yaml
+    config: ./modules/awards.yaml
     enabled: false
     prefix: "-"
     log:
@@ -28,7 +28,7 @@ modules:
       level: trace
       formatter: text
   xp:
-    config: ./config/dev/modules/xp.yaml
+    config: ./modules/xp.yaml
     enabled: false
     prefix: "-"
     log:
@@ -45,6 +45,7 @@ modules:
   clubs:
     enabled: true
     prefix: "-"
+    config: ./modules/clubs.yaml
     log:
       file: ./logs/clubs.log
       level: trace

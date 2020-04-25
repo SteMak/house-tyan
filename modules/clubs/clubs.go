@@ -12,6 +12,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+var log *logrus.Logger
+
 type module struct {
 	session *discordgo.Session
 	config  config
@@ -30,8 +32,8 @@ func (bot module) IsRunning() bool {
 	return bot.running
 }
 
-func (bot *module) Init(prefix, configPath string, logger *logrus.Logger) error {
-	data, err := ioutil.ReadFile(configPath)
+func (bot *module) LoadConfig(path string) error {
+	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -40,7 +42,14 @@ func (bot *module) Init(prefix, configPath string, logger *logrus.Logger) error 
 	if err != nil {
 		return errors.WithStack(err)
 	}
+	return nil
+}
 
+func (bot *module) SetLogger(logger *logrus.Logger) {
+	log = logger
+}
+
+func (bot *module) Init(prefix string) error {
 	bot.loadEnv()
 
 	bot.cmds = &dgutils.Discord{
