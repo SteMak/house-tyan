@@ -3,13 +3,19 @@ package modules
 import (
 	"fmt"
 
+	"github.com/pkg/errors"
+
+	"github.com/SteMak/house-tyan/util"
+
+	"github.com/sirupsen/logrus"
+
 	"github.com/SteMak/house-tyan/config"
 	"github.com/SteMak/house-tyan/out"
 	"github.com/bwmarrin/discordgo"
 )
 
 type Module interface {
-	Init(prefix, configPath string) error
+	Init(prefix, configPath string, log *logrus.Logger) error
 
 	ID() string
 
@@ -50,7 +56,15 @@ func loadModules() {
 		out.Infoln("Config file:", m.Config)
 		out.Infoln("Prefix:", m.Prefix)
 
-		if err := module.Init(m.Prefix, m.Config); err != nil {
+		log, err := util.Logger(m.Log)
+		if err != nil {
+			if !errors.Is(err, util.ErrNoLogger) {
+				out.Err(false, err)
+				continue
+			}
+		}
+
+		if err := module.Init(m.Prefix, m.Config, log); err != nil {
 			out.Err(false, err)
 			continue
 		}

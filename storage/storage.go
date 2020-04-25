@@ -1,17 +1,27 @@
 package storage
 
 import (
-	"github.com/Masterminds/squirrel"
+	"time"
+
+	"github.com/pkg/errors"
+
+	"github.com/SteMak/house-tyan/util"
+
+	"github.com/jackc/pgx/log/logrusadapter"
+
 	"github.com/SteMak/house-tyan/config"
 	"github.com/SteMak/house-tyan/out"
-	"github.com/jmoiron/sqlx"
 
-	// postgres driver
-	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx"
+	"github.com/jackc/pgx/stdlib"
+	"github.com/jmoiron/sqlx"
+	"github.com/sirupsen/logrus"
 )
 
 var (
-	db *sqlx.DB
+	db  *sqlx.DB
+	log *logrus.Logger
 
 	psql = squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 )
@@ -25,12 +35,32 @@ var (
 func Init() {
 	out.Infoln("\nInit storage...")
 
-	var err error
-	db, err = sqlx.Connect(config.Storage.Driver, config.Storage.Connection)
+	connCfg, err := pgx.ParseURI(config.Storage.Connection)
 	if err != nil {
-		out.Infoln("[FAIL]")
 		out.Fatal(err)
 	}
+
+	log, err = util.Logger(config.Storage.Log)
+	if err != nil {
+		if !errors.Is(err, util.ErrNoLogger) {
+			out.Fatal(err)
+		}
+	}
+
+	if log != nil {
+		connCfg.Logger = logrusadapter.NewLogger(log)
+	}
+	pool, err := pgx.NewConnPool(pgx.ConnPoolConfig{
+		ConnConfig:     connCfg,
+		MaxConnections: 20,
+		AcquireTimeout: 30 * time.Second,
+	})
+	if err != nil {
+		out.Fatal(err)
+	}
+
+	native := stdlib.OpenDBFromPool(pool)
+	db = sqlx.NewDb(native, config.Storage.Driver)
 
 	db.SetMaxIdleConns(config.Storage.MaxIdleConnection)
 	db.SetMaxOpenConns(config.Storage.MaxOpenConnection)

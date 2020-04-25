@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
@@ -26,7 +27,7 @@ func (bot module) IsRunning() bool {
 	return bot.running
 }
 
-func (bot *module) Init(prefix, configPath string) error {
+func (bot *module) Init(prefix, configPath string, log *logrus.Logger) error {
 	data, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		return err

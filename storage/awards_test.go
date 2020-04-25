@@ -38,7 +38,9 @@ func randomBlank(rewardsCount, usersCount int) *cache.Blank {
 }
 
 func Test_Awards_Create(t *testing.T) {
-	tx := Tx()
+	tx, err := Tx()
+	assert.NoError(t, err)
+
 	id, err := Awards.Create(tx, randomBlank(3, 2))
 	assert.NoError(t, err)
 	assert.NotZero(t, id)
@@ -47,7 +49,8 @@ func Test_Awards_Create(t *testing.T) {
 }
 
 func Test_Awards_SetStatus(t *testing.T) {
-	tx := Tx()
+	tx, err := Tx()
+	assert.NoError(t, err)
 
 	id, err := Awards.Create(tx, randomBlank(3, 2))
 	assert.NoError(t, err)
@@ -57,13 +60,14 @@ func Test_Awards_SetStatus(t *testing.T) {
 	id, err = Awards.Create(tx, randomBlank(3, 2))
 	assert.NoError(t, err)
 	assert.NotZero(t, id)
-	assert.NoError(t, Awards.SetStatus(tx, id, AwardStatusDiscard))
+	assert.NoError(t, Awards.SetStatus(tx, id, AwardStatusReject))
 
 	tx.Commit()
 }
 
 func Test_Awards_SetBlankID(t *testing.T) {
-	tx := Tx()
+	tx, err := Tx()
+	assert.NoError(t, err)
 
 	id, err := Awards.Create(tx, randomBlank(3, 2))
 	assert.NoError(t, err)
@@ -74,7 +78,8 @@ func Test_Awards_SetBlankID(t *testing.T) {
 }
 
 func Test_Awards_SetPaid(t *testing.T) {
-	tx := Tx()
+	tx, err := Tx()
+	assert.NoError(t, err)
 
 	blank := randomBlank(3, 2)
 	id, err := Awards.Create(tx, blank)
@@ -93,7 +98,8 @@ func Test_Awards_SetPaid(t *testing.T) {
 }
 
 func Test_Awards_Get(t *testing.T) {
-	tx := Tx()
+	tx, err := Tx()
+	assert.NoError(t, err)
 
 	blank := randomBlank(3, 2)
 	id, err := Awards.Create(tx, blank)
@@ -107,30 +113,6 @@ func Test_Awards_Get(t *testing.T) {
 	tx.Commit()
 
 	award, err := Awards.Get(id)
-	assert.NoError(t, err)
-	assert.Equal(t, award.AuthorID, blank.Author.ID)
-	assert.Equal(t, award.Reason, blank.Reason)
-	assert.Equal(t, award.Status, AwardStatusAccept)
-	if assert.NotNil(t, award.BlankID) {
-		assert.Equal(t, *award.BlankID, blankID)
-	}
-}
-
-func Test_Awards_BlankRewadrs(t *testing.T) {
-	tx := Tx()
-
-	blank := randomBlank(3, 2)
-	id, err := Awards.Create(tx, blank)
-	assert.NoError(t, err)
-	assert.NotZero(t, id)
-	assert.NoError(t, Awards.SetStatus(tx, id, AwardStatusAccept))
-
-	blankID := gofakeit.Numerify("test##############")
-	assert.NoError(t, Awards.SetBlankID(tx, id, blankID))
-
-	tx.Commit()
-
-	award, err := Awards.GetBlankRewards(blankID)
 	assert.NoError(t, err)
 	assert.Equal(t, award.AuthorID, blank.Author.ID)
 	assert.Equal(t, award.Reason, blank.Reason)
