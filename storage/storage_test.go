@@ -13,9 +13,7 @@ import (
 func TestMain(t *testing.M) {
 	gofakeit.Seed(time.Now().UnixNano())
 
-	config.Storage.Driver = "pgx"
-	config.Storage.Connection = "postgresql://bot:password@localhost:54320/anihouse?sslmode=disable"
-
+	config.Load("./../cli/bot/config/dev/config.yaml")
 	Init()
 
 	os.Exit(t.Run())
