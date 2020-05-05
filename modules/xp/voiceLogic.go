@@ -30,7 +30,9 @@ func addXpUsers(
 				continue
 			}
 
-			addXpToUser(member.User, config.VoiceFarm.XpForVoice*roomBoost)
+			xp := config.VoiceFarm.XpForVoice * roomBoost
+			addXpToUser(member.User, xp)
+			_module.handleXp(member.User.ID, uint64(xp))
 		}
 	}
 }
