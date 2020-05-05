@@ -1,12 +1,11 @@
 package clubs
 
 import (
-	"github.com/bwmarrin/discordgo"
-
-	conf "github.com/SteMak/house-tyan/config"
 	"github.com/SteMak/house-tyan/libs/dgutils"
 	"github.com/SteMak/house-tyan/modules"
+	"github.com/SteMak/house-tyan/out"
 	"github.com/SteMak/house-tyan/storage"
+	"strings"
 )
 
 var (
@@ -28,53 +27,51 @@ func (bot *module) onCreateClub(ctx *dgutils.MessageContext) {
 		return
 	}
 
-	tx, err := storage.Tx()
-	if err != nil {
-		modules.SendFail(ctx.Message.ChannelID, "База крашнулась на открытии", "Попробуйте снова позже.")
+	if len(ctx.Args) == 0 || ctx.Args[0] == "" {
+		modules.SendFail(ctx.Message.ChannelID, "Имя клуба не обнаружено", "Имя клуба не должно быть пустым.")
+		return
+	}
+	if !strings.Contains(ctx.Args[0], " ") {
+		modules.SendFail(ctx.Message.ChannelID, "Не найден символ клуба", "Через пробел нужно указать символ клуба и его название.")
 		return
 	}
 
-	clubName := ctx.Args[0]
-	clubChannel, err := ctx.Session.GuildChannelCreateComplex(conf.Bot.GuildID, discordgo.GuildChannelCreateData{
-		NSFW:     true,
-		Name:     clubName,
-		ParentID: "",
-		PermissionOverwrites: []*discordgo.PermissionOverwrite{
-			&discordgo.PermissionOverwrite{
-				
-			},
-		},
-		Topic: "",
-		Type:  0,
-	})
-	if err != nil {
-		modules.SendFail(ctx.Message.ChannelID, "Канал создать не удалось", "Попробуйте снова позже.")
+	clubSymbolName := strings.SplitN(ctx.Args[0], " ", 2)
+	clubSymbol := clubSymbolName[0]
+	clubName := clubSymbolName[1]
+	if len(clubSymbol) == 0 {
+		modules.SendFail(ctx.Message.ChannelID, "Символ не найден", "Символ не должен быть пустым.")
 		return
 	}
-	clubRole, err := ctx.Session.GuildRoleCreate(conf.Bot.GuildID)
-	if err != nil {
-		modules.SendFail(ctx.Message.ChannelID, "Роль создать не удалось", "Попробуйте снова позже.")
+	if len(clubName) == 0 {
+		modules.SendFail(ctx.Message.ChannelID, "Имя клуба не обнаружено", "Имя клуба не должно быть пустым.")
 		return
 	}
-	clubRole, err = ctx.Session.GuildRoleEdit(conf.Bot.GuildID, clubRole.ID, "[] "+clubName+"_club", 0, false, 0, false)
+
+	tx, err := storage.Tx()
 	if err != nil {
-		modules.SendFail(ctx.Message.ChannelID, "Отредачить роль не удалось", "Попробуйте снова позже.")
+		go out.Err(true, err)
+		go modules.SendFail(ctx.Message.ChannelID, "База крашнулась на открытии", "Попробуйте снова позже.")
 		return
 	}
 
 	err = storage.Clubs.Create(tx, &storage.Club{
-		OwnerID:   ctx.Message.Author.ID,
-		ChannelID: clubChannel.ID,
-		RoleID:    clubRole.ID,
-		Title:     clubName,
+		OwnerID: ctx.Message.Author.ID,
+		Title:   clubName,
+		Symbol:  clubSymbol,
 	})
 	if err != nil {
+		go out.Err(true, err)
+		go modules.SendFail(ctx.Message.ChannelID, "Создание клуба полетело", "Попробуйте снова позже.")
 		return
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		modules.SendFail(ctx.Message.ChannelID, "База крашнулась на закрытии", "Обратитесь к админам.")
+		go out.Err(true, err)
+		modules.SendFail(ctx.Message.ChannelID, "База крашнулась на закрытии", "Попробуйте снова позже.")
 		return
 	}
+
+	modules.SendFail(ctx.Message.ChannelID, "Всё ок!", "Получилось!")
 }
