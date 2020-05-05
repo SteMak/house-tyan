@@ -13,6 +13,15 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+// Events
+var (
+	Event Events
+)
+
+var (
+	modules = make(map[string]Module)
+)
+
 type Module interface {
 	Init(prefix string) error
 
@@ -26,10 +35,6 @@ type Module interface {
 
 	IsRunning() bool
 }
-
-var (
-	modules = make(map[string]Module)
-)
 
 func Register(name string, module Module) {
 	modules[name] = module

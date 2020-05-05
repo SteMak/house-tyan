@@ -1,8 +1,11 @@
 package storage
 
 import (
+	"database/sql"
+	"errors"
 	"time"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/brianvoe/gofakeit/v5"
 	"github.com/jmoiron/sqlx"
 )
@@ -12,6 +15,7 @@ type Club struct {
 	InsertedAt  *time.Time `db:"inserted_at"`
 	UpdatedAt   *time.Time `db:"updated_at"`
 	OwnerID     string     `db:"owner_id"`
+	ChannelID   string     `db:"channel_id"`
 	RoleID      string     `db:"role_id"`
 	Title       string     `db:"title"`
 	Description *string    `db:"description"`
@@ -24,6 +28,7 @@ func (c *Club) randomize() {
 	desc := gofakeit.Paragraph(1, 1, 10, "")
 
 	c.OwnerID = gofakeit.Numerify("test##############")
+	c.ChannelID = gofakeit.Numerify("test##############")
 	c.RoleID = gofakeit.Numerify("test##############")
 	c.Title = gofakeit.Word()
 	c.Symbol = gofakeit.Emoji()

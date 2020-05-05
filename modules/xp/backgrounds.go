@@ -58,6 +58,7 @@ func (w *voiceXpWorker) onTick() {
 			}
 
 			tx.Commit()
+
 		},
 	)
 }

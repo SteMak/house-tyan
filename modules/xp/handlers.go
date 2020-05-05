@@ -19,7 +19,8 @@ func (bot *module) handlerXpMessage(s *discordgo.Session, m *discordgo.MessageCr
 		return
 	}
 
-	err = storage.Users.AddXP(tx, m.Author, int64(howMuchXp(m.Content, bot.config.MessageFarm)))
+	xp := howMuchXp(m.Content, bot.config.MessageFarm)
+	err = storage.Users.AddXP(tx, m.Author, int64(xp))
 	if err != nil {
 		out.Err(true, errors.WithStack(err))
 		tx.Rollback()
@@ -27,4 +28,5 @@ func (bot *module) handlerXpMessage(s *discordgo.Session, m *discordgo.MessageCr
 	}
 
 	tx.Commit()
+	bot.handleXp(m.Author.ID, uint64(xp))
 }
