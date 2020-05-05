@@ -10,6 +10,16 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+type module struct {
+	session *discordgo.Session
+	config  config
+
+	running bool
+
+	cmds         *dgutils.Discord
+	stopHandlers []func()
+}
+
 func (module) ID() string {
 	return "clubs"
 }
