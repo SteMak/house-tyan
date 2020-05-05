@@ -30,3 +30,24 @@ func TestClubsCreate(t *testing.T) {
 
 	tx.Commit()
 }
+
+func TestGetClubByUser(t *testing.T) {
+	tx, err := Tx()
+	assert.NoError(t, err)
+
+	var club Club
+	club.randomize()
+	err = Clubs.Create(tx, &club)
+	assert.NoError(t, err)
+	assert.NotZero(t, club.ID)
+
+	tx.Commit()
+
+	c, err := Clubs.GetClubByUser(club.OwnerID)
+	assert.NoError(t, err)
+	assert.Equal(t, club.ID, c.ID)
+
+	c, err = Clubs.GetClubByUser("not an id")
+	assert.NoError(t, err)
+	assert.Nil(t, c)
+}

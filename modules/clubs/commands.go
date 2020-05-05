@@ -1,67 +1,80 @@
 package clubs
 
 import (
-	"time"
+	"github.com/bwmarrin/discordgo"
 
 	conf "github.com/SteMak/house-tyan/config"
-
-	"github.com/SteMak/house-tyan/cache"
 	"github.com/SteMak/house-tyan/libs/dgutils"
 	"github.com/SteMak/house-tyan/modules"
-	"github.com/SteMak/house-tyan/out"
-	"github.com/pkg/errors"
+	"github.com/SteMak/house-tyan/storage"
 )
 
 var (
 	commands = map[string]interface{}{
-		"запрос": &dgutils.Command{
+		"createclub": &dgutils.Command{
 			Raw: true,
 			Handlers: []func(*dgutils.MessageContext){
 				_module.middlewareChannel,
+				_module.middlewareClub,
 			},
-			Function: _module.onCreateBlank,
+			Function: _module.onCreateClub,
 		},
 	}
 )
 
-func (bot *module) onCreateBlank(ctx *dgutils.MessageContext) {
-	exists, err := cache.Blanks.Exists(ctx.Message.Author.ID)
+func (bot *module) onCreateClub(ctx *dgutils.MessageContext) {
+	if ctx.Param("club") != nil {
+		modules.SendFail(ctx.Message.ChannelID, "Вы уже состоите в клубе", "Покинте текущий клуб, чтобы создать новый.")
+		return
+	}
+
+	tx, err := storage.Tx()
 	if err != nil {
-		go out.Err(true, errors.WithStack(err))
-		go modules.SendFail(ctx.Message.ChannelID, "Ошибка", "Не удалось создать заявку")
+		modules.SendFail(ctx.Message.ChannelID, "База крашнулась на открытии", "Попробуйте снова позже.")
 		return
 	}
 
-	if exists {
-		return
-	}
-
-	blank := &cache.Blank{
-		ID:     ctx.Message.Author.ID,
-		Reason: ctx.Args[0],
-		Author: *ctx.Message.Author,
-		Actions: cache.BlankActions{
-			SetUsers: true,
-			Discard:  true,
+	clubName := ctx.Args[0]
+	clubChannel, err := ctx.Session.GuildChannelCreateComplex(conf.Bot.GuildID, discordgo.GuildChannelCreateData{
+		NSFW:     true,
+		Name:     clubName,
+		ParentID: "",
+		PermissionOverwrites: []*discordgo.PermissionOverwrite{
+			&discordgo.PermissionOverwrite{
+				
+			},
 		},
-		ExpiresAt: time.Now().UTC().Add(conf.Cache.TTL.Blank),
+		Topic: "",
+		Type:  0,
+	})
+	if err != nil {
+		modules.SendFail(ctx.Message.ChannelID, "Канал создать не удалось", "Попробуйте снова позже.")
+		return
 	}
-
-	m := modules.Send(ctx.Message.ChannelID, "awards/blank.users.xml", map[string]interface{}{
-		"Author": ctx.Message.Author,
-		"Blank":  blank,
-	}, nil)
-
-	if m == nil {
-		go modules.SendFail(ctx.Message.ChannelID, "Ошибка", "Не удалось создать заявку")
+	clubRole, err := ctx.Session.GuildRoleCreate(conf.Bot.GuildID)
+	if err != nil {
+		modules.SendFail(ctx.Message.ChannelID, "Роль создать не удалось", "Попробуйте снова позже.")
+		return
+	}
+	clubRole, err = ctx.Session.GuildRoleEdit(conf.Bot.GuildID, clubRole.ID, "[] "+clubName+"_club", 0, false, 0, false)
+	if err != nil {
+		modules.SendFail(ctx.Message.ChannelID, "Отредачить роль не удалось", "Попробуйте снова позже.")
 		return
 	}
 
-	blank.Message = *m
+	err = storage.Clubs.Create(tx, &storage.Club{
+		OwnerID:   ctx.Message.Author.ID,
+		ChannelID: clubChannel.ID,
+		RoleID:    clubRole.ID,
+		Title:     clubName,
+	})
+	if err != nil {
+		return
+	}
 
-	if err := cache.Blanks.Create(blank); err != nil {
-		go out.Err(true, errors.WithStack(err))
-		go modules.SendFail(ctx.Message.ChannelID, "Ошибка", "Не удалось создать заявку")
+	err = tx.Commit()
+	if err != nil {
+		modules.SendFail(ctx.Message.ChannelID, "База крашнулась на закрытии", "Обратитесь к админам.")
 		return
 	}
 }

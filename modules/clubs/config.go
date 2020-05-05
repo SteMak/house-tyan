@@ -1,4 +1,3 @@
 package clubs
 
-type config struct {
-}
+type config struct{}

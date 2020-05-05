@@ -49,8 +49,8 @@ type clubs struct{}
 
 func (c *clubs) Create(tx *sqlx.Tx, club *Club) error {
 	err := psql.Insert("clubs").
-		Columns("owner_id", "role_id", "title", "description", "symbol").
-		Values(club.OwnerID, club.RoleID, club.Title, club.Description, club.Symbol).
+		Columns("owner_id", "channel_id", "role_id", "title").
+		Values(club.OwnerID, club.ChannelID, club.RoleID, club.Title).
 		Suffix("RETURNING id").
 		RunWith(tx).
 		QueryRow().Scan(&club.ID)
@@ -60,4 +60,29 @@ func (c *clubs) Create(tx *sqlx.Tx, club *Club) error {
 	}
 
 	return club.AddMember(tx, club.OwnerID)
+}
+
+func (c *clubs) GetClubByUser(userID string) (*Club, error) {
+	query, args, err := psql.Select("c.*").
+		From("club_members cm").
+		Join("clubs c ON c.id=cm.club_id").
+		Where(squirrel.Eq{"cm.user_id": userID}).
+		Limit(1).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	club := new(Club)
+	err = db.Get(club, query, args...)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	return club, nil
 }
