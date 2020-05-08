@@ -137,3 +137,15 @@ func SendFail(channelID string, title, msg string) {
 
 	Send(channelID, "fail.xml", data, nil)
 }
+
+func SendGood(channelID string, title, msg string) {
+	data := map[string]interface{}{
+		"Message": msg,
+	}
+
+	if title != "" {
+		data["Title"] = title
+	}
+
+	Send(channelID, "good.xml", data, nil)
+}
