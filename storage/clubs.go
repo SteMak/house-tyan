@@ -37,10 +37,28 @@ func (c *Club) randomize() {
 	c.Description = &desc
 }
 
-func (c *Club) AddMember(tx *sqlx.Tx, userID string) error {
+func (c *Club) AddMember(tx *sqlx.Tx, memberID string) error {
 	return exec(tx, psql.Insert("club_members").
-		Values(c.ID, userID).
+		Values(c.ID, memberID).
 		Suffix("ON CONFLICT DO NOTHING"),
+	)
+}
+
+func (c *Club) DeleteMember(tx *sqlx.Tx, memberID string) error {
+	return exec(tx, psql.Delete("club_members").
+		Where(squirrel.Eq{"user_id": memberID}),
+	)
+}
+
+// func (c *Club) HasMember(tx *sqlx.Tx, memberID string) (bool, error) {
+// 	return exec(tx, psql.Delete("club_members").
+// 		Where(squirrel.Eq{"user_id": memberID}),
+// 	)
+// }
+
+func (c *Club) Delete(tx *sqlx.Tx) error {
+	return exec(tx, psql.Delete("clubs").
+		Where(squirrel.Eq{"id": c.ID}),
 	)
 }
 
@@ -67,6 +85,12 @@ func (c *clubs) Create(tx *sqlx.Tx, club *Club) error {
 	}
 
 	return club.AddMember(tx, club.OwnerID)
+}
+
+func (c *clubs) DeleteByOwner(tx *sqlx.Tx, ownerID string) error {
+	return exec(tx, psql.Delete("clubs").
+		Where(squirrel.Eq{"owner_id": ownerID}),
+	)
 }
 
 func (c *clubs) GetClubByUser(userID string) (*Club, error) {
