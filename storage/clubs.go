@@ -55,7 +55,7 @@ func (c *Club) HasMember(memberID string) (bool, error) {
 		result bool
 		err    error
 	)
-	err = db.Get(result, `SELECT EXISTS(SELECT 1 FROM club_members WHERE user_id = $1)`, memberID)
+	err = db.Get(&result, `SELECT EXISTS(SELECT 1 FROM club_members WHERE user_id = $1)`, memberID)
 	return result, err
 }
 
