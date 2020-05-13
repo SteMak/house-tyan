@@ -3,6 +3,8 @@ package awards
 import (
 	"strings"
 
+	"github.com/SteMak/house-tyan/libs"
+
 	"github.com/SteMak/house-tyan/storage"
 
 	"github.com/SteMak/house-tyan/modules"
@@ -61,7 +63,7 @@ func (bot *module) handlerBlankProcess(s *discordgo.Session, m *discordgo.Messag
 
 		var failed []string
 		for _, reward := range rewards {
-			if err := bot.unb.AddToBalance(reward.UserID, int64(reward.Amount), award.Reason); err != nil {
+			if err := libs.Unb.AddToBalance(reward.UserID, int64(reward.Amount), award.Reason); err != nil {
 				go out.Err(true, errors.WithStack(err))
 				failed = append(failed, "<@"+reward.UserID+">")
 				continue

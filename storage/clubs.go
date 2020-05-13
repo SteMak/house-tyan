@@ -50,11 +50,14 @@ func (c *Club) DeleteMember(tx *sqlx.Tx, memberID string) error {
 	)
 }
 
-// func (c *Club) HasMember(tx *sqlx.Tx, memberID string) (bool, error) {
-// 	return exec(tx, psql.Delete("club_members").
-// 		Where(squirrel.Eq{"user_id": memberID}),
-// 	)
-// }
+func (c *Club) HasMember(memberID string) (bool, error) {
+	var (
+		result bool
+		err    error
+	)
+	err = db.Get(result, `SELECT EXISTS(SELECT 1 FROM club_members WHERE user_id = $1)`, memberID)
+	return result, err
+}
 
 func (c *Club) Delete(tx *sqlx.Tx) error {
 	return exec(tx, psql.Delete("clubs").

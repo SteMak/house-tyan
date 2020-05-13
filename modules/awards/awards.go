@@ -3,7 +3,6 @@ package awards
 import (
 	"io/ioutil"
 
-	"github.com/SteMak/house-tyan/libs"
 	"github.com/SteMak/house-tyan/libs/dgutils"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -23,7 +22,6 @@ type module struct {
 	running bool
 
 	cmds *dgutils.Discord
-	unb  *libs.UnbelievaBoatAPI
 
 	stopHandlers []func()
 }
@@ -58,14 +56,10 @@ func (bot *module) Init(prefix string) error {
 		return errors.New("Logger is required")
 	}
 
-	bot.loadEnv()
-
 	bot.cmds = &dgutils.Discord{
 		Prefix:   prefix,
 		Commands: commands,
 	}
-
-	bot.unb = libs.NewUnbelievaBoatAPI(bot.config.Bank.Token)
 
 	return nil
 }

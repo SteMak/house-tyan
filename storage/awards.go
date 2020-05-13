@@ -85,34 +85,30 @@ func (awards) Create(tx *sqlx.Tx, blank *cache.Blank) (uint64, error) {
 }
 
 func (awards) SetStatus(tx *sqlx.Tx, awardID uint64, status AwardStatus) error {
-	return exec(tx,
-		psql.Update("awards").
-			Where(squirrel.Eq{"id": awardID}).
-			Set("status", status),
+	return exec(tx, psql.Update("awards").
+		Where(squirrel.Eq{"id": awardID}).
+		Set("status", status),
 	)
 }
 
 func (awards) Accept(tx *sqlx.Tx, blankID string) error {
-	return exec(tx,
-		psql.Update("awards").
-			Where(squirrel.Eq{"blank_mid": blankID}).
-			Set("status", AwardStatusAccept),
+	return exec(tx, psql.Update("awards").
+		Where(squirrel.Eq{"blank_mid": blankID}).
+		Set("status", AwardStatusAccept),
 	)
 }
 
 func (awards) Reject(tx *sqlx.Tx, blankID string) error {
-	return exec(tx,
-		psql.Update("awards").
-			Where(squirrel.Eq{"blank_mid": blankID}).
-			Set("status", AwardStatusReject),
+	return exec(tx, psql.Update("awards").
+		Where(squirrel.Eq{"blank_mid": blankID}).
+		Set("status", AwardStatusReject),
 	)
 }
 
 func (awards) SetBlankID(tx *sqlx.Tx, awardID uint64, blankID string) error {
-	return exec(tx,
-		psql.Update("awards").
-			Where(squirrel.Eq{"id": awardID}).
-			Set("blank_mid", blankID),
+	return exec(tx, psql.Update("awards").
+		Where(squirrel.Eq{"id": awardID}).
+		Set("blank_mid", blankID),
 	)
 }
 

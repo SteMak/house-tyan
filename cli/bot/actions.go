@@ -6,15 +6,16 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/urfave/cli"
+
 	tyan "github.com/SteMak/house-tyan"
 	"github.com/SteMak/house-tyan/cache"
-	"github.com/SteMak/house-tyan/messages"
-
 	"github.com/SteMak/house-tyan/config"
+	"github.com/SteMak/house-tyan/libs"
+	"github.com/SteMak/house-tyan/messages"
 	"github.com/SteMak/house-tyan/modules"
 	"github.com/SteMak/house-tyan/out"
 	"github.com/SteMak/house-tyan/storage"
-	"github.com/urfave/cli"
 )
 
 func run(c *cli.Context) error {
@@ -30,6 +31,9 @@ func run(c *cli.Context) error {
 
 	storage.Init()
 	messages.Init()
+
+	//инициализация зависимостей (сторонних библиотек)
+	libs.Init()
 
 	modules.Run()
 	defer modules.Stop()
