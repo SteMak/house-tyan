@@ -56,6 +56,7 @@ func (bot *module) onClubCreate(ctx *dgutils.MessageContext) {
 	if err != nil {
 		go out.Err(true, err)
 		go modules.SendFail(ctx.Message.ChannelID, "Создание клуба полетело", "Попробуйте снова позже.")
+		tx.Rollback()
 		return
 	}
 
@@ -81,6 +82,7 @@ func (bot *module) onClubDelete(ctx *dgutils.MessageContext) {
 	if err != nil {
 		go out.Err(true, err)
 		go modules.SendFail(ctx.Message.ChannelID, "Удаление клуба полетело", "Попробуйте снова позже.")
+		tx.Rollback()
 		return
 	}
 
@@ -105,7 +107,13 @@ func (bot *module) onClubKick(ctx *dgutils.MessageContext) {
 	club := ctx.Param("club").(*storage.Club)
 	userID := ctx.Param("userID").(string)
 
-	club.DeleteMember(tx, userID)
+	err = club.DeleteMember(tx, userID)
+	if err != nil {
+		go out.Err(true, err)
+		go modules.SendFail(ctx.Message.ChannelID, "Ошибка удаления учасника", "Попробуйте снова позже.")
+		tx.Rollback()
+		return
+	}
 
 	err = tx.Commit()
 	if err != nil {

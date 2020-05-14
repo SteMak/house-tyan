@@ -46,8 +46,6 @@ func (bot *module) SetLogger(logger *logrus.Logger) {
 }
 
 func (bot *module) Init(prefix string) error {
-	bot.loadEnv()
-
 	bot.cmds = &dgutils.Discord{
 		Prefix:   prefix,
 		Commands: commands,
