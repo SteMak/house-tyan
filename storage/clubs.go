@@ -22,6 +22,7 @@ type Club struct {
 	Symbol      string     `db:"symbol"`
 	IconURL     *string    `db:"icon_url"`
 	XP          uint64     `db:"xp"`
+	Verified    bool       `db:"verified"`
 }
 
 func (c *Club) randomize() {

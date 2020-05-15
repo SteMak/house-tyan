@@ -12,6 +12,8 @@ import (
 	"github.com/SteMak/house-tyan/messages"
 	"github.com/SteMak/house-tyan/modules"
 	"github.com/SteMak/house-tyan/storage"
+
+	_ "github.com/SteMak/house-tyan/modules/xp"
 )
 
 func TestMain(t *testing.M) {

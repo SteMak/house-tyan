@@ -3,12 +3,17 @@ package clubs
 import (
 	"strings"
 
+	conf "github.com/SteMak/house-tyan/config"
+
 	"github.com/SteMak/house-tyan/libs/dgutils"
 	"github.com/SteMak/house-tyan/modules"
 	"github.com/SteMak/house-tyan/storage"
 )
 
 func (bot *module) middlewareChannel(ctx *dgutils.MessageContext) {
+	if conf.Bot.Channels.Console != ctx.Message.ChannelID {
+		return
+	}
 	ctx.Next()
 }
 

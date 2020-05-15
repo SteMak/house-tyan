@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 
 	"github.com/SteMak/house-tyan/libs/dgutils"
+	"github.com/SteMak/house-tyan/modules"
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -61,6 +62,8 @@ func (bot *module) Start(session *discordgo.Session) {
 	bot.stopHandlers = []func(){}
 
 	bot.cmds.Start(session)
+
+	modules.Cron.AddFunc("@daily", bot.removeNotVerified)
 
 	log.Trace("Started.")
 }

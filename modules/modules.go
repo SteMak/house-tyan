@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/SteMak/house-tyan/util"
+	"github.com/robfig/cron/v3"
 
 	"github.com/sirupsen/logrus"
 
@@ -13,13 +14,13 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-// Events
-var (
-	Event Events
-)
-
 var (
 	modules = make(map[string]Module)
+)
+
+//
+var (
+	Cron *cron.Cron
 )
 
 type Module interface {

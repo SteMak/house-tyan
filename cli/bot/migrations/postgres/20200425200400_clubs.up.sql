@@ -9,7 +9,8 @@ CREATE TABLE clubs (
     description text NULL,
     symbol varchar(60) NOT NULL UNIQUE,
     icon_url varchar(128) NULL,
-    xp bigint NOT NULL DEFAULT 0
+    xp bigint NOT NULL DEFAULT 0,
+    verified boolean NOT NULL DEFAULT false
 );
 
 CREATE TRIGGER on_insert

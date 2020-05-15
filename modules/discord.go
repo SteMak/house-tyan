@@ -116,14 +116,14 @@ func SendError(err error) {
 		return
 	}
 
-	_, err = session.ChannelMessageSendComplex(*config.Bot.ErrorsChannel, &m.MessageSend)
+	_, err = session.ChannelMessageSendComplex(config.Bot.Channels.Errors, &m.MessageSend)
 	if err != nil {
 		out.Err(false, err)
 	}
 }
 
 func SendLog(tplName string, data interface{}) {
-	Send(*config.Bot.LogChannel, tplName, data, nil)
+	Send(config.Bot.Channels.Logs, tplName, data, nil)
 }
 
 func SendFail(channelID string, title, msg string) {

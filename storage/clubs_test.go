@@ -11,7 +11,6 @@ func randomClub() *Club {
 	desc := gofakeit.Paragraph(1, 1, 10, "")
 	return &Club{
 		OwnerID:     gofakeit.Numerify("test##############"),
-		RoleID:      gofakeit.Numerify("test##############"),
 		Title:       gofakeit.Word(),
 		Symbol:      gofakeit.Emoji(),
 		Description: &desc,

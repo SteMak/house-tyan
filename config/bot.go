@@ -1,9 +1,13 @@
 package config
 
+type channels struct {
+	Console string `yaml:"console,omitempty"`
+	Errors  string `yaml:"errors,omitempty"`
+	Logs    string `yaml:"logs,omitempty"`
+}
+
 type bot struct {
-	GuildID        string  `yaml:"guild_id,omitempty"`
-	LogChannel     *string `yaml:"log_channel,omitempty"`
-	ErrorsChannel  *string `yaml:"errors_channel,omitempty"`
-	ConsoleChannel *string `yaml:"console_channel,omitempty"`
-	Templates      string  `yaml:"templates,omitempty"`
+	GuildID   string   `yaml:"guild_id,omitempty"`
+	Channels  channels `yaml:"channels,omitempty"`
+	Templates string   `yaml:"templates,omitempty"`
 }

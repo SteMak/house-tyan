@@ -1,8 +1,9 @@
 bot:
   guild_id: "615264378014531724"
-  console_channel: "691362207300321381"
-  errors_channel: "691362207300321381"
-  log_channel: "691362207300321381"
+  channels:
+    console: "691362207300321381"
+    errors: "691362207300321381"
+    logs: "691362207300321381"
   templates: ./assets/templates/
 cache:
   path: ./cache/
