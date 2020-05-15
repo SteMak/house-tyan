@@ -45,6 +45,7 @@ func (bot *module) onClubCreate(ctx *dgutils.MessageContext) {
 	if err != nil {
 		go out.Err(true, err)
 		go modules.SendFail(ctx.Message.ChannelID, "База крашнулась на открытии", "Попробуйте снова позже.")
+		go log.Error(err)
 		return
 	}
 
@@ -56,6 +57,7 @@ func (bot *module) onClubCreate(ctx *dgutils.MessageContext) {
 	if err != nil {
 		go out.Err(true, err)
 		go modules.SendFail(ctx.Message.ChannelID, "Создание клуба полетело", "Попробуйте снова позже.")
+		go log.Error(err)
 		tx.Rollback()
 		return
 	}
@@ -63,7 +65,8 @@ func (bot *module) onClubCreate(ctx *dgutils.MessageContext) {
 	err = tx.Commit()
 	if err != nil {
 		go out.Err(true, err)
-		modules.SendFail(ctx.Message.ChannelID, "База крашнулась на закрытии", "Попробуйте снова позже.")
+		go modules.SendFail(ctx.Message.ChannelID, "База крашнулась на закрытии", "Попробуйте снова позже.")
+		go log.Error(err)
 		return
 	}
 
@@ -75,6 +78,7 @@ func (bot *module) onClubDelete(ctx *dgutils.MessageContext) {
 	if err != nil {
 		go out.Err(true, err)
 		go modules.SendFail(ctx.Message.ChannelID, "База крашнулась на открытии", "Попробуйте снова позже.")
+		go log.Error(err)
 		return
 	}
 
@@ -82,6 +86,7 @@ func (bot *module) onClubDelete(ctx *dgutils.MessageContext) {
 	if err != nil {
 		go out.Err(true, err)
 		go modules.SendFail(ctx.Message.ChannelID, "Удаление клуба полетело", "Попробуйте снова позже.")
+		go log.Error(err)
 		tx.Rollback()
 		return
 	}
@@ -89,7 +94,8 @@ func (bot *module) onClubDelete(ctx *dgutils.MessageContext) {
 	err = tx.Commit()
 	if err != nil {
 		go out.Err(true, err)
-		modules.SendFail(ctx.Message.ChannelID, "База крашнулась на закрытии", "Попробуйте снова позже.")
+		go modules.SendFail(ctx.Message.ChannelID, "База крашнулась на закрытии", "Попробуйте снова позже.")
+		go log.Error(err)
 		return
 	}
 
@@ -101,6 +107,7 @@ func (bot *module) onClubKick(ctx *dgutils.MessageContext) {
 	if err != nil {
 		go out.Err(true, err)
 		go modules.SendFail(ctx.Message.ChannelID, "База крашнулась на открытии", "Попробуйте снова позже.")
+		go log.Error(err)
 		return
 	}
 
@@ -111,6 +118,7 @@ func (bot *module) onClubKick(ctx *dgutils.MessageContext) {
 	if err != nil {
 		go out.Err(true, err)
 		go modules.SendFail(ctx.Message.ChannelID, "Ошибка удаления учасника", "Попробуйте снова позже.")
+		go log.Error(err)
 		tx.Rollback()
 		return
 	}
@@ -118,7 +126,8 @@ func (bot *module) onClubKick(ctx *dgutils.MessageContext) {
 	err = tx.Commit()
 	if err != nil {
 		go out.Err(true, err)
-		modules.SendFail(ctx.Message.ChannelID, "База крашнулась на закрытии", "Попробуйте снова позже.")
+		go modules.SendFail(ctx.Message.ChannelID, "База крашнулась на закрытии", "Попробуйте снова позже.")
+		go log.Error(err)
 		return
 	}
 

@@ -1,7 +1,9 @@
 package storage
 
 import (
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/brianvoe/gofakeit/v5"
 	"github.com/stretchr/testify/assert"
@@ -49,4 +51,10 @@ func TestGetClubByUser(t *testing.T) {
 	c, err = Clubs.GetClubByUser("not an id")
 	assert.NoError(t, err)
 	assert.Nil(t, c)
+}
+
+func TestGetExpired(t *testing.T) {
+	clubs, err := Clubs.GetExpired(72 * time.Hour)
+	assert.NoError(t, err)
+	fmt.Println(len(clubs))
 }

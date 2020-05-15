@@ -4,12 +4,12 @@ vendor
 logs
 docs
 
-/cli/bot/cache
-
-
 /modules/clubs/cache
 
 *.env
 /cli/bot/bot
+/cli/bot/cache
 /cli/bot/storage.db
 /cli/bot/__debug_bin
+
+!/vendor

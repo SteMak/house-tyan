@@ -3,20 +3,18 @@ package storage
 import (
 	"time"
 
-	"github.com/pkg/errors"
-
-	"github.com/SteMak/house-tyan/util"
-
-	"github.com/jackc/pgx/log/logrusadapter"
-
+	"github.com/Masterminds/squirrel"
 	"github.com/SteMak/house-tyan/config"
 	"github.com/SteMak/house-tyan/out"
-
-	"github.com/Masterminds/squirrel"
+	"github.com/SteMak/house-tyan/util"
 	"github.com/jackc/pgx"
+	"github.com/jackc/pgx/log/logrusadapter"
 	"github.com/jackc/pgx/stdlib"
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+
+	_ "github.com/jackc/pgx/pgtype"
 )
 
 var (

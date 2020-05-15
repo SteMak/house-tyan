@@ -22,3 +22,7 @@ func TimeFromID(id string) (time.Time, error) {
 
 	return time.Unix(s, ns), nil
 }
+
+func Midnight(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day()+1, 0, 0, 0, 0, time.Local)
+}

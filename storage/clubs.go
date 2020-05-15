@@ -51,6 +51,12 @@ func (c *Club) DeleteMember(tx *sqlx.Tx, memberID string) error {
 	)
 }
 
+func (c *Club) DeleteMembers(tx *sqlx.Tx) error {
+	return exec(tx, psql.Delete("club_members").
+		Where(squirrel.Eq{"club_id": c.ID}),
+	)
+}
+
 func (c *Club) HasMember(memberID string) (result bool, err error) {
 	err = db.Get(&result, `SELECT EXISTS(SELECT 1 FROM club_members WHERE user_id = $1)`, memberID)
 	return
@@ -116,4 +122,13 @@ func (c *clubs) GetClubByUser(userID string) (*Club, error) {
 		return nil, err
 	}
 	return club, nil
+}
+
+func (c *clubs) GetExpired(expiredAfter time.Duration) (clubs []Club, err error) {
+	err = db.Select(&clubs, `
+		SELECT * FROM clubs
+		WHERE NOT verified
+			AND localtimestamp >= date_trunc('day', inserted_at) + $1
+	`, expiredAfter)
+	return
 }
