@@ -117,11 +117,7 @@ func (c *clubs) GetClubByUser(userID string) (*Club, error) {
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
-
-	if err != nil {
-		return nil, err
-	}
-	return club, nil
+	return club, err
 }
 
 func (c *clubs) GetExpired(expiredAfter time.Duration) (clubs []Club, err error) {
@@ -130,5 +126,9 @@ func (c *clubs) GetExpired(expiredAfter time.Duration) (clubs []Club, err error)
 		WHERE NOT verified
 			AND localtimestamp >= date_trunc('day', inserted_at) + $1
 	`, expiredAfter)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
 	return
 }

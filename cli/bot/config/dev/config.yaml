@@ -1,3 +1,8 @@
+session:
+  log:
+    file: ./logs/session.log
+    level: info
+    formatter: text
 bot:
   guild_id: "615264378014531724"
   channels:
@@ -18,7 +23,7 @@ storage:
   log:
     file: ./logs/storage.log
     level: trace
-    formatter: json
+    formatter: text
 modules:
   awards:
     config: ./modules/awards.yaml

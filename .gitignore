@@ -12,4 +12,4 @@ docs
 /cli/bot/storage.db
 /cli/bot/__debug_bin
 
-!/vendor
+!/vendor/

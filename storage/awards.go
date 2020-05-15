@@ -32,8 +32,7 @@ type Award struct {
 func (award Award) Reawrds() ([]Reward, error) {
 	var rewards []Reward
 
-	query, args, err := psql.Select("*").
-		From("rewards").
+	query, args, err := psql.Select("*").From("rewards").
 		Where(squirrel.Eq{
 			"award_id": award.ID,
 		}).ToSql()
@@ -46,12 +45,10 @@ func (award Award) Reawrds() ([]Reward, error) {
 	}
 
 	err = db.Select(&rewards, query, args...)
-
-	if err != nil {
-		return nil, err
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
 	}
-
-	return rewards, nil
+	return rewards, err
 }
 
 type awards struct{}
