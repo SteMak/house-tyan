@@ -54,16 +54,33 @@ func (bot *module) onClubCreate(ctx *dgutils.MessageContext) {
 
 	expiredAt := util.Midnight(time.Now().UTC().Add(bot.config.NotVerifiedLifetime))
 
-	err = storage.Clubs.Create(tx, &storage.Club{
+	club := storage.Club{
 		OwnerID:   ctx.Message.Author.ID,
 		Title:     ctx.Param("name").(string),
 		Symbol:    ctx.Param("symbol").(string),
 		ExpiredAt: &expiredAt,
-	})
+	}
+
+	err = storage.Clubs.Create(tx, &club)
 	if err != nil {
 		go out.Err(true, err)
 		go modules.SendFail(ctx.Message.ChannelID, "Создание клуба полетело", "Попробуйте снова позже.")
 		go log.Error(err)
+		tx.Rollback()
+		return
+	}
+
+	data := map[string]interface{}{
+		"Prefix":     bot.cmds.Prefix,
+		"Owner":      ctx.Message.Author,
+		"Club":       club,
+		"MinMembers": bot.config.MinimumMembers,
+		"Price":      int64(bot.config.Price),
+	}
+
+	m := modules.Send(ctx.Message.ChannelID, "clubs/created.xml", data, nil)
+	if m == nil {
+		go modules.SendFail(ctx.Message.ChannelID, "Создание клуба полетело", "Попробуйте снова позже.")
 		tx.Rollback()
 		return
 	}
@@ -75,8 +92,6 @@ func (bot *module) onClubCreate(ctx *dgutils.MessageContext) {
 		go log.Error(err)
 		return
 	}
-
-	modules.SendGood(ctx.Message.ChannelID, "Клуб создан", "Создание прошло успешно")
 }
 
 func (bot *module) onClubDelete(ctx *dgutils.MessageContext) {

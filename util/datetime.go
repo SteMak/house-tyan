@@ -24,5 +24,5 @@ func TimeFromID(id string) (time.Time, error) {
 }
 
 func Midnight(t time.Time) time.Time {
-	return time.Date(t.Year(), t.Month(), t.Day()+1, 0, 0, 0, 0, time.Local)
+	return time.Date(t.Year(), t.Month(), t.Day()+1, 0, 0, 0, 0, t.Location())
 }

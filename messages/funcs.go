@@ -1,6 +1,7 @@
 package messages
 
 import (
+	"fmt"
 	"html/template"
 	"time"
 
@@ -25,7 +26,7 @@ func init() {
 		return user.Mention()
 	}
 
-	funcs["bold"] = func(s string) string {
-		return "**" + s + "**"
+	funcs["bold"] = func(s interface{}) string {
+		return "**" + fmt.Sprint(s) + "**"
 	}
 }

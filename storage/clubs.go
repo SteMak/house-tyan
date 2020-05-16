@@ -81,8 +81,8 @@ type clubs struct{}
 
 func (c *clubs) Create(tx *sqlx.Tx, club *Club) error {
 	err := psql.Insert("clubs").
-		Columns("owner_id", "title", "symbol").
-		Values(club.OwnerID, club.Title, club.Symbol).
+		Columns("owner_id", "title", "symbol", "expired_at").
+		Values(club.OwnerID, club.Title, club.Symbol, club.ExpiredAt).
 		Suffix("RETURNING id").
 		RunWith(tx).
 		QueryRow().Scan(&club.ID)
