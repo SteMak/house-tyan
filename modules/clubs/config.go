@@ -5,7 +5,7 @@ import (
 )
 
 type config struct {
-	Cost                uint          `yaml:"cost,omitempty"`
+	Price               uint          `yaml:"price,omitempty"`
 	MinimumMembers      uint          `yaml:"minimum_members,omitempty"`
 	NotVerifiedLifetime time.Duration `yaml:"not_verified_lifetime,omitempty"`
 }

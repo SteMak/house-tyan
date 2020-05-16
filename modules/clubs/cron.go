@@ -6,7 +6,7 @@ import (
 )
 
 func (bot *module) removeNotVerified() {
-	clubs, err := storage.Clubs.GetExpired(bot.config.NotVerifiedLifetime)
+	clubs, err := storage.Clubs.GetExpired()
 	if err != nil {
 		go out.Err(true, err)
 		go log.Error(err)

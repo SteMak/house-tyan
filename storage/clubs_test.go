@@ -3,7 +3,6 @@ package storage
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/brianvoe/gofakeit/v5"
 	"github.com/stretchr/testify/assert"
@@ -54,7 +53,7 @@ func TestGetClubByUser(t *testing.T) {
 }
 
 func TestGetExpired(t *testing.T) {
-	clubs, err := Clubs.GetExpired(72 * time.Hour)
+	clubs, err := Clubs.GetExpired()
 	assert.NoError(t, err)
 	fmt.Println(len(clubs))
 }

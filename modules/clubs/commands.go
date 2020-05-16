@@ -1,10 +1,13 @@
 package clubs
 
 import (
+	"time"
+
 	"github.com/SteMak/house-tyan/libs/dgutils"
 	"github.com/SteMak/house-tyan/modules"
 	"github.com/SteMak/house-tyan/out"
 	"github.com/SteMak/house-tyan/storage"
+	"github.com/SteMak/house-tyan/util"
 )
 
 var (
@@ -49,10 +52,13 @@ func (bot *module) onClubCreate(ctx *dgutils.MessageContext) {
 		return
 	}
 
+	expiredAt := util.Midnight(time.Now().UTC().Add(bot.config.NotVerifiedLifetime))
+
 	err = storage.Clubs.Create(tx, &storage.Club{
-		OwnerID: ctx.Message.Author.ID,
-		Title:   ctx.Param("name").(string),
-		Symbol:  ctx.Param("symbol").(string),
+		OwnerID:   ctx.Message.Author.ID,
+		Title:     ctx.Param("name").(string),
+		Symbol:    ctx.Param("symbol").(string),
+		ExpiredAt: &expiredAt,
 	})
 	if err != nil {
 		go out.Err(true, err)

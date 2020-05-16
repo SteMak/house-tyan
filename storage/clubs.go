@@ -22,6 +22,7 @@ type Club struct {
 	Symbol      string     `db:"symbol"`
 	IconURL     *string    `db:"icon_url"`
 	XP          uint64     `db:"xp"`
+	ExpiredAt   *time.Time `db:"expired_at"`
 	Verified    bool       `db:"verified"`
 }
 
@@ -120,12 +121,12 @@ func (c *clubs) GetClubByUser(userID string) (*Club, error) {
 	return club, err
 }
 
-func (c *clubs) GetExpired(expiredAfter time.Duration) (clubs []Club, err error) {
+func (c *clubs) GetExpired() (clubs []Club, err error) {
 	err = db.Select(&clubs, `
 		SELECT * FROM clubs
 		WHERE NOT verified
-			AND localtimestamp >= date_trunc('day', inserted_at) + $1
-	`, expiredAfter)
+			AND localtimestamp >= expired_at
+	`)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil

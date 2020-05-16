@@ -10,6 +10,7 @@ CREATE TABLE clubs (
     symbol varchar(60) NOT NULL UNIQUE,
     icon_url varchar(128) NULL,
     xp bigint NOT NULL DEFAULT 0,
+    expired_at timestamp without time zone NULL,
     verified boolean NOT NULL DEFAULT false
 );
 
