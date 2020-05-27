@@ -43,11 +43,19 @@ modules:
       level: trace
       formatter: text
   clubs:
-    enabled: true
+    enabled: false
     prefix: "-"
     config: ./modules/clubs.yaml
     log:
       file: ./logs/clubs.log
+      level: trace
+      formatter: text
+  mafia:
+    enabled: true
+    prefix: "-"
+    config: ./modules/mafia.yaml
+    log:
+      file: ./logs/mafia.log
       level: trace
       formatter: text
 session: {}

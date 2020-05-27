@@ -5,6 +5,7 @@ import (
 
 	_ "github.com/SteMak/house-tyan/modules/awards"
 	_ "github.com/SteMak/house-tyan/modules/clubs"
+	_ "github.com/SteMak/house-tyan/modules/mafia"
 	_ "github.com/SteMak/house-tyan/modules/triggers"
 	_ "github.com/SteMak/house-tyan/modules/xp"
 
