@@ -11,5 +11,3 @@ docs
 /cli/bot/cache
 /cli/bot/storage.db
 /cli/bot/__debug_bin
-
-!/vendor/

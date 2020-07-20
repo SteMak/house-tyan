@@ -1,11 +1,11 @@
 package storage
 
 import (
-	"database/sql"
 	"errors"
 	"time"
 
-	"github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx"
+
 	"github.com/brianvoe/gofakeit/v5"
 	"github.com/jmoiron/sqlx"
 )
@@ -39,34 +39,57 @@ func (c *Club) randomize() {
 	c.Description = &desc
 }
 
-func (c *Club) AddMember(tx *sqlx.Tx, memberID string) error {
-	return exec(tx, psql.Insert("club_members").
-		Values(c.ID, memberID).
-		Suffix("ON CONFLICT DO NOTHING"),
+func (c *Club) AddMember(tx *pgx.Tx, memberID string) (err error) {
+	_, err = tx.Exec(`
+		INSERT INTO "club_members"("club_id","user_id") 
+		VALUES($1, $2)
+		ON CONFLICT DO NOTHING
+	`,
+		c.ID,
+		memberID,
 	)
-}
-
-func (c *Club) DeleteMember(tx *sqlx.Tx, memberID string) error {
-	return exec(tx, psql.Delete("club_members").
-		Where(squirrel.Eq{"user_id": memberID}),
-	)
-}
-
-func (c *Club) DeleteMembers(tx *sqlx.Tx) error {
-	return exec(tx, psql.Delete("club_members").
-		Where(squirrel.Eq{"club_id": c.ID}),
-	)
-}
-
-func (c *Club) HasMember(memberID string) (result bool, err error) {
-	err = db.Get(&result, `SELECT EXISTS(SELECT 1 FROM club_members WHERE user_id = $1)`, memberID)
 	return
 }
 
-func (c *Club) Delete(tx *sqlx.Tx) error {
-	return exec(tx, psql.Delete("clubs").
-		Where(squirrel.Eq{"id": c.ID}),
+func (c *Club) DeleteMember(tx *pgx.Tx, memberID string) (err error) {
+	_, err = tx.Exec(`
+		DELETE FROM club_members 
+		WHERE user_id = $1
+	`,
+		memberID,
 	)
+	return
+}
+
+func (c *Club) DeleteMembers(tx *sqlx.Tx) (err error) {
+	_, err = tx.Exec(`
+		DELETE FROM club_members 
+		WHERE club_id = $1
+	`,
+		c.ID,
+	)
+	return
+}
+
+func (c *Club) HasMember(memberID string) (result bool, err error) {
+	err = pgxconn.QueryRow(`
+		SELECT EXISTS(SELECT 1 FROM club_members WHERE user_id = $1)
+	`,
+		memberID,
+	).Scan(
+		&result,
+	)
+	return
+}
+
+func (c *Club) Delete(tx *sqlx.Tx) (err error) {
+	_, err = pgxconn.Exec(`
+		DELETE FROM clubs WHERE id = $1;
+		DELETE FROM club_members WHERE club_id = $1;
+	`,
+		c.ID,
+	)
+	return
 }
 
 type ClubMember struct {
@@ -79,57 +102,200 @@ type ClubMember struct {
 
 type clubs struct{}
 
-func (c *clubs) Create(tx *sqlx.Tx, club *Club) error {
-	err := psql.Insert("clubs").
-		Columns("owner_id", "title", "symbol", "expired_at").
-		Values(club.OwnerID, club.Title, club.Symbol, club.ExpiredAt).
-		Suffix("RETURNING id").
-		RunWith(tx).
-		QueryRow().Scan(&club.ID)
-
-	if err != nil {
-		return err
-	}
-
-	return club.AddMember(tx, club.OwnerID)
+func (c *clubs) Create(tx *pgx.Tx, club *Club) (err error) {
+	err = tx.QueryRow(`
+		WITH club_id as (
+			INSERT INTO clubs(owner_id, title, symbol, expired_at)
+			VALUES ($1, $2, $3, $4)
+			RETURNING id
+		), owner_user as (
+			INSERT INTO club_members(club_id, user_id) VALUES
+			((SELECT id FROM club_id LIMIT 1), $1)
+		)
+		SELECT id FROM club_id
+	`,
+		club.OwnerID,
+		club.Title,
+		club.Symbol,
+		club.ExpiredAt,
+	).Scan(&club.ID)
+	return
 }
 
-func (c *clubs) DeleteByOwner(tx *sqlx.Tx, ownerID string) error {
-	return exec(tx, psql.Delete("clubs").
-		Where(squirrel.Eq{"owner_id": ownerID}),
+func (c *clubs) DeleteByOwner(tx *pgx.Tx, ownerID string) (err error) {
+	_, err = tx.Exec(`
+		WITH club_id as (
+			DELETE FROM clubs WHERE owner_id = $1
+			RETURNING id
+		), owner_user as (
+			DELETE FROM club_members
+			WHERE club_id = (SELECT id FROM club_id LIMIT 1)
+		)
+		SELECT * FROM club_id
+	`,
+		ownerID,
 	)
+	return
 }
 
-func (c *clubs) GetClubByUser(userID string) (*Club, error) {
-	query, args, err := psql.Select("c.*").
-		From("club_members cm").
-		Join("clubs c ON c.id=cm.club_id").
-		Where(squirrel.Eq{"cm.user_id": userID}).
-		Limit(1).
-		ToSql()
+func (c *clubs) GetClubByUser(userID string) (club *Club, err error) {
+	club = new(Club)
+	err = pgxconn.QueryRow(`
+		SELECT
+			c.id,
+			c.inserted_at,
+			c.updated_at,
+			c.owner_id,
+			c.role_id,
+			c.channel_id,
+			c.title,
+			c.description,
+			c.symbol,
+			c.icon_url,
+			c.xp,
+			c.expired_at,
+			c.verified
+		FROM clubs c
+		JOIN club_members cm on c.id = cm.club_id
+		WHERE cm.user_id = $1
+	`,
+		userID,
+	).Scan(
+		&club.ID,
+		&club.InsertedAt,
+		&club.UpdatedAt,
+		&club.OwnerID,
+		&club.RoleID,
+		&club.ChannelID,
+		&club.Title,
+		&club.Description,
+		&club.Symbol,
+		&club.IconURL,
+		&club.XP,
+		&club.ExpiredAt,
+		&club.Verified,
+	)
 
-	if err != nil {
-		return nil, err
-	}
-
-	club := new(Club)
-	err = db.Get(club, query, args...)
-
-	if errors.Is(err, sql.ErrNoRows) {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	return club, err
 }
 
-func (c *clubs) GetExpired() (clubs []Club, err error) {
-	err = db.Select(&clubs, `
-		SELECT * FROM clubs
+func (c *clubs) GetExpired() ([]Club, error) {
+	rows, err := pgxconn.Query(`
+		SELECT
+			id,
+			inserted_at,
+			updated_at,
+			owner_id,
+			role_id,
+			channel_id,
+			title,
+			description,
+			symbol,
+			icon_url,
+			xp,
+			expired_at,
+			verified
+		FROM clubs
 		WHERE NOT verified
 			AND localtimestamp >= expired_at
 	`)
 
-	if errors.Is(err, sql.ErrNoRows) {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
-	return
+
+	if err != nil {
+		return nil, err
+	}
+
+	var clubs []Club
+	for rows.Next() {
+		var club Club
+		err = rows.Scan(
+			&club.ID,
+			&club.InsertedAt,
+			&club.UpdatedAt,
+			&club.OwnerID,
+			&club.RoleID,
+			&club.ChannelID,
+			&club.Title,
+			&club.Description,
+			&club.Symbol,
+			&club.IconURL,
+			&club.XP,
+			&club.ExpiredAt,
+			&club.Verified,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+		clubs = append(clubs, club)
+	}
+	return clubs, nil
+}
+
+func (c *clubs) RemoveExpired() ([]Club, error) {
+	rows, err := pgxconn.Query(`
+		WITH club_id as (
+			DELETE FROM clubs WHERE NOT verified
+				AND localtimestamp >= expired_at
+			RETURNING *
+		), owner_user as (
+			DELETE FROM club_members
+			WHERE club_id IN (SELECT id FROM club_id)
+		)
+		SELECT 
+			id,
+			inserted_at,
+			updated_at,
+			owner_id,
+			role_id,
+			channel_id,
+			title,
+			description,
+			symbol,
+			icon_url,
+			xp,
+			expired_at,
+			verified
+		FROM club_id
+	`)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	var clubs []Club
+	for rows.Next() {
+		var club Club
+		err = rows.Scan(
+			&club.ID,
+			&club.InsertedAt,
+			&club.UpdatedAt,
+			&club.OwnerID,
+			&club.RoleID,
+			&club.ChannelID,
+			&club.Title,
+			&club.Description,
+			&club.Symbol,
+			&club.IconURL,
+			&club.XP,
+			&club.ExpiredAt,
+			&club.Verified,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+		clubs = append(clubs, club)
+	}
+	return clubs, nil
 }

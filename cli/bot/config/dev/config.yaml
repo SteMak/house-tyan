@@ -10,13 +10,17 @@ bot:
     errors: "691362207300321381"
     logs: "691362207300321381"
   templates: ./assets/templates/
+  log:
+    file: ./logs/bot.log
+    level: trace
+    formatter: text
 cache:
   path: ./cache/
   ttl:
     blank: 5m
     username: 30s
 storage:
-  connection: postgresql://bot:password@localhost:54320/anihouse?sslmode=disable
+  connection: postgresql://admin:admin@localhost:54320/bot?sslmode=disable
   driver: pgx
   max_idle_connection: 3
   max_open_connection: 2
@@ -56,4 +60,3 @@ modules:
       file: ./logs/clubs.log
       level: trace
       formatter: text
-session: {}

@@ -4,16 +4,62 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/bwmarrin/discordgo"
 )
 
-func TestCommand(t *testing.T) {
-	testmod := NewModule("testing", ".")
-	testmod.On("ping").Handle(func(ctx *Context) error {
-		fmt.Println("pong")
-		return nil
-	})
-	testmod.Enable()
+func mess(s string) *discordgo.MessageCreate {
+	return &discordgo.MessageCreate{
+		Message: &discordgo.Message{
+			Content: s,
+		},
+	}
+}
 
-	app.onHandle(nil, &discordgo.MessageCreate{Message: &discordgo.Message{Content: ".testing ping"}})
+func TestCommand(t *testing.T) {
+	mod := NewModule("testing", ".")
+	mod.On("ping").Handle(func(ctx *Context) {
+		fmt.Println("pong")
+	})
+	mod.Enable()
+
+	app.onHandle(nil, mess(".testing ping    argv0 argv1 argv2"))
+}
+
+func TestGroup(t *testing.T) {
+	mod := NewModule("testing", ".")
+	mod.Enable()
+
+	var result string
+
+	clubgroup := mod.Group("club")
+
+	clubgroup.Use(func(ctx *Context) {
+		fmt.Println("middleware")
+	})
+
+	clubgroup.On().Handle(func(ctx *Context) {
+		result = "club"
+		fmt.Println(result)
+	})
+
+	clubgroup.On("create").Handle(func(ctx *Context) {
+		result = "club create"
+		fmt.Println(result)
+	})
+
+	clubgroup.On("lb").Handle(func(ctx *Context) {
+		result = "club lb"
+		fmt.Println(result)
+	})
+
+	app.onHandle(nil, mess(".club"))
+	assert.Equal(t, "club", result)
+
+	app.onHandle(nil, mess(".club lb"))
+	assert.Equal(t, "club lb", result)
+
+	app.onHandle(nil, mess(".club create"))
+	assert.Equal(t, "club create", result)
 }

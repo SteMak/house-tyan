@@ -7,7 +7,7 @@ import (
 )
 
 type (
-	HandlerFunc  func(*Context) error
+	HandlerFunc  func(*Context)
 	HandlerChain []HandlerFunc
 )
 
@@ -32,14 +32,21 @@ type Application struct {
 }
 
 func (a *Application) onHandle(s *discordgo.Session, m *discordgo.MessageCreate) {
-	var ctxs []Context
+	var ctxs []*Context
 	wg := sync.WaitGroup{}
 	for _, module := range a.modules {
 		wg.Add(1)
-		module.buildCommands(&wg, m.Content, &ctxs, a.middlewares)
+		ctx := module.buildCommands(&wg, s, m.Message)
+		if ctx != nil {
+			ctxs = append(ctxs, ctx)
+		}
 	}
 	wg.Wait()
 
+	for _, ctx := range ctxs {
+		ctx.index = -1
+		ctx.Next()
+	}
 }
 
 func Init(s *discordgo.Session) {
@@ -48,10 +55,16 @@ func Init(s *discordgo.Session) {
 
 func NewModule(module, prefix string) *Module {
 	m := &Module{
-		CommandGroup{
+		CommandGroup: CommandGroup{
 			alias: prefix,
 		},
+		Prefix: prefix,
+		Name:   module,
 	}
 	app.modules[module] = m
 	return m
+}
+
+func Use(handlers ...HandlerFunc) {
+	app.Use(handlers...)
 }

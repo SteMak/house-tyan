@@ -3,47 +3,14 @@ package clubs
 import (
 	"time"
 
-	"github.com/SteMak/house-tyan/libs/dgutils"
+	"github.com/SteMak/house-tyan/app"
 	"github.com/SteMak/house-tyan/modules"
 	"github.com/SteMak/house-tyan/out"
 	"github.com/SteMak/house-tyan/storage"
 	"github.com/SteMak/house-tyan/util"
 )
 
-var (
-	commands = map[string]interface{}{
-		"club": &dgutils.Group{
-			Commands: map[string]interface{}{
-				"create": &dgutils.Command{
-					Raw: true,
-					Handlers: []func(*dgutils.MessageContext){
-						_module.middlewareChannel,
-						_module.middlewareClubCreate,
-					},
-					Function: _module.onClubCreate,
-				},
-				"delete": &dgutils.Command{
-					Raw: true,
-					Handlers: []func(*dgutils.MessageContext){
-						_module.middlewareChannel,
-						_module.middlewareClubDelete,
-					},
-					Function: _module.onClubDelete,
-				},
-				"kick": &dgutils.Command{
-					Raw: true,
-					Handlers: []func(*dgutils.MessageContext){
-						_module.middlewareChannel,
-						_module.middlewareClubKick,
-					},
-					Function: _module.onClubKick,
-				},
-			},
-		},
-	}
-)
-
-func (bot *module) onClubCreate(ctx *dgutils.MessageContext) {
+func (bot *module) onClubCreate(ctx *app.Context) {
 	tx, err := storage.Tx()
 	if err != nil {
 		go out.Err(true, err)
@@ -71,7 +38,7 @@ func (bot *module) onClubCreate(ctx *dgutils.MessageContext) {
 	}
 
 	data := map[string]interface{}{
-		"Prefix":     bot.cmds.Prefix,
+		"Prefix":     bot.cmd.Prefix,
 		"Owner":      ctx.Message.Author,
 		"Club":       club,
 		"MinMembers": bot.config.MinimumMembers,
@@ -94,7 +61,7 @@ func (bot *module) onClubCreate(ctx *dgutils.MessageContext) {
 	}
 }
 
-func (bot *module) onClubDelete(ctx *dgutils.MessageContext) {
+func (bot *module) onClubDelete(ctx *app.Context) {
 	tx, err := storage.Tx()
 	if err != nil {
 		go out.Err(true, err)
@@ -123,7 +90,7 @@ func (bot *module) onClubDelete(ctx *dgutils.MessageContext) {
 	modules.SendGood(ctx.Message.ChannelID, "Клуб удалён", "Стирание прошло успешно")
 }
 
-func (bot *module) onClubKick(ctx *dgutils.MessageContext) {
+func (bot *module) onClubKick(ctx *app.Context) {
 	tx, err := storage.Tx()
 	if err != nil {
 		go out.Err(true, err)

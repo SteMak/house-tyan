@@ -3,14 +3,11 @@ package storage
 import (
 	"time"
 
-	"github.com/Masterminds/squirrel"
 	"github.com/SteMak/house-tyan/config"
 	"github.com/SteMak/house-tyan/out"
 	"github.com/SteMak/house-tyan/util"
 	"github.com/jackc/pgx"
 	"github.com/jackc/pgx/log/logrusadapter"
-	"github.com/jackc/pgx/stdlib"
-	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
@@ -18,10 +15,8 @@ import (
 )
 
 var (
-	db  *sqlx.DB
-	log *logrus.Logger
-
-	psql = squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
+	pgxconn *pgx.Conn
+	log     *logrus.Logger
 )
 
 // Tables
@@ -50,38 +45,23 @@ func Init() {
 	if log != nil {
 		connCfg.Logger = logrusadapter.NewLogger(log)
 	}
+
 	pool, err := pgx.NewConnPool(pgx.ConnPoolConfig{
 		ConnConfig:     connCfg,
 		MaxConnections: 20,
 		AcquireTimeout: 30 * time.Second,
 	})
+
 	if err != nil {
 		out.Fatal(err)
 	}
 
-	native := stdlib.OpenDBFromPool(pool)
-	db = sqlx.NewDb(native, config.Storage.Driver)
-
-	db.SetMaxIdleConns(config.Storage.MaxIdleConnection)
-	db.SetMaxOpenConns(config.Storage.MaxOpenConnection)
-
-	out.Infoln("Done.")
-}
-
-func Tx() (*sqlx.Tx, error) {
-	return db.Beginx()
-}
-
-func exec(tx *sqlx.Tx, stmt squirrel.Sqlizer) error {
-	query, args, err := stmt.ToSql()
+	pgxconn, err = pool.Acquire()
 	if err != nil {
-		return err
+		out.Fatal(err)
 	}
+}
 
-	if tx == nil {
-		_, err = db.Exec(query, args...)
-	} else {
-		_, err = tx.Exec(query, args...)
-	}
-	return err
+func Tx() (*pgx.Tx, error) {
+	return pgxconn.Begin()
 }

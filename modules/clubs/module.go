@@ -3,7 +3,8 @@ package clubs
 import (
 	"io/ioutil"
 
-	"github.com/SteMak/house-tyan/libs/dgutils"
+	"github.com/SteMak/house-tyan/app"
+
 	"github.com/SteMak/house-tyan/modules"
 	"github.com/bwmarrin/discordgo"
 	"github.com/pkg/errors"
@@ -17,7 +18,7 @@ type module struct {
 
 	running bool
 
-	cmds         *dgutils.Discord
+	cmd          *app.Module
 	stopHandlers []func()
 }
 
@@ -47,11 +48,11 @@ func (bot *module) SetLogger(logger *logrus.Logger) {
 }
 
 func (bot *module) Init(prefix string) error {
-	bot.cmds = &dgutils.Discord{
-		Prefix:   prefix,
-		Commands: commands,
-	}
-
+	bot.cmd = app.NewModule(_module.ID(), prefix)
+	group := bot.cmd.Group("club")
+	group.On("create").Handle(bot.onClubCreate)
+	group.On("delete").Handle(bot.onClubDelete)
+	group.On("kick").Handle(bot.onClubKick)
 	return nil
 }
 
@@ -61,7 +62,7 @@ func (bot *module) Start(session *discordgo.Session) {
 
 	bot.stopHandlers = []func(){}
 
-	bot.cmds.Start(session)
+	bot.cmd.Enable()
 
 	modules.Cron.AddFunc("@daily", bot.removeNotVerified)
 
@@ -69,7 +70,7 @@ func (bot *module) Start(session *discordgo.Session) {
 }
 
 func (bot *module) Stop() {
-	bot.cmds.Stop()
+	bot.cmd.Disable()
 
 	for _, stopHandler := range bot.stopHandlers {
 		stopHandler()

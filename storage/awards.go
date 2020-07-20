@@ -6,9 +6,8 @@ import (
 
 	"errors"
 
-	"github.com/Masterminds/squirrel"
 	"github.com/SteMak/house-tyan/cache"
-	"github.com/jmoiron/sqlx"
+	"github.com/jackc/pgx"
 )
 
 type AwardStatus uint8
@@ -30,37 +29,53 @@ type Award struct {
 }
 
 func (award Award) Reawrds() ([]Reward, error) {
-	var rewards []Reward
-
-	query, args, err := psql.Select("*").From("rewards").
-		Where(squirrel.Eq{
-			"award_id": award.ID,
-		}).ToSql()
-
-	if errors.Is(err, sql.ErrNoRows) {
+	rows, err := pgxconn.Query(`
+		SELECT
+			award_id,
+			user_id,
+			amount,
+			paid
+		FROM rewards
+		WHERE award_id = $1
+	`,
+		award.ID,
+	)
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
 
-	err = db.Select(&rewards, query, args...)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
+	var rewards []Reward
+	for rows.Next() {
+		var reward Reward
+		err = rows.Scan(
+			&reward.AwardID,
+			&reward.UserID,
+			&reward.Amount,
+			&reward.Paid,
+		)
+		if err != nil {
+			return nil, err
+		}
+		rewards = append(rewards, reward)
 	}
-	return rewards, err
+	return rewards, nil
 }
 
 type awards struct{}
 
-func (awards) Create(tx *sqlx.Tx, blank *cache.Blank) (uint64, error) {
+func (awards) Create(tx *pgx.Tx, blank *cache.Blank) (uint64, error) {
 	var id uint64
-	err := psql.Insert("awards").
-		Columns("author_id", "reason").
-		Values(blank.Author.ID, blank.Reason).
-		Suffix("RETURNING id").
-		RunWith(tx).
-		QueryRow().Scan(&id)
+	err := tx.QueryRow(`
+		INSERT INTO awards(author_id,reason)
+		VALUES($1,$2)
+		RETURNING id
+	`,
+		blank.Author.ID,
+		blank.Reason,
+	).Scan(&id)
 
 	if err != nil {
 		return 0, err
@@ -68,10 +83,14 @@ func (awards) Create(tx *sqlx.Tx, blank *cache.Blank) (uint64, error) {
 
 	for _, r := range blank.Rewards {
 		for _, u := range r.Users {
-			_, err = psql.Insert("rewards").
-				Columns("award_id", "user_id", "amount").
-				Values(id, u.ID, r.Amount).
-				RunWith(tx).Exec()
+			_, err = tx.Exec(`
+				INSERT INTO rewards(award_id,user_id,amount)
+				VALUES ($1,$2,$3)
+			`,
+				id,
+				u.ID,
+				r.Amount,
+			)
 
 			if err != nil {
 				return 0, err
@@ -81,49 +100,82 @@ func (awards) Create(tx *sqlx.Tx, blank *cache.Blank) (uint64, error) {
 	return id, nil
 }
 
-func (awards) SetStatus(tx *sqlx.Tx, awardID uint64, status AwardStatus) error {
-	return exec(tx, psql.Update("awards").
-		Where(squirrel.Eq{"id": awardID}).
-		Set("status", status),
+func (awards) SetStatus(tx *pgx.Tx, awardID uint64, status AwardStatus) error {
+	_, err := tx.Exec(`
+		UPDATE awards SET status=$2 WHERE id = $1
+	`,
+		awardID,
+		status,
 	)
+	return err
 }
 
-func (awards) Accept(tx *sqlx.Tx, blankID string) error {
-	return exec(tx, psql.Update("awards").
-		Where(squirrel.Eq{"blank_mid": blankID}).
-		Set("status", AwardStatusAccept),
+func (awards) Accept(tx *pgx.Tx, blankID string) error {
+	_, err := tx.Exec(`
+		UPDATE awards SET status=$2 WHERE blank_mid = $1
+	`,
+		blankID,
+		AwardStatusAccept,
 	)
+	return err
 }
 
-func (awards) Reject(tx *sqlx.Tx, blankID string) error {
-	return exec(tx, psql.Update("awards").
-		Where(squirrel.Eq{"blank_mid": blankID}).
-		Set("status", AwardStatusReject),
+func (awards) Reject(tx *pgx.Tx, blankID string) error {
+	_, err := tx.Exec(`
+		UPDATE awards SET status=$2 WHERE blank_mid = $1
+	`,
+		blankID,
+		AwardStatusReject,
 	)
+	return err
 }
 
-func (awards) SetBlankID(tx *sqlx.Tx, awardID uint64, blankID string) error {
-	return exec(tx, psql.Update("awards").
-		Where(squirrel.Eq{"id": awardID}).
-		Set("blank_mid", blankID),
+func (awards) SetBlankID(tx *pgx.Tx, awardID uint64, blankID string) error {
+	_, err := tx.Exec(`
+		UPDATE awards SET blank_mid=$2 WHERE id = $1
+	`,
+		awardID,
+		blankID,
 	)
+	return err
 }
 
-func (awards) SetPaid(tx *sqlx.Tx, awardID uint64, userID string) error {
-	return exec(tx,
-		psql.Update("rewards").
-			Where(squirrel.Eq{
-				"award_id": awardID,
-				"user_id":  userID,
-			}).
-			Set("paid", true),
+func (awards) SetPaid(tx *pgx.Tx, awardID uint64, userID string) error {
+	_, err := tx.Exec(`
+		UPDATE rewards SET paid=true 
+		WHERE award_id = $1 
+			AND user_id = $2
+	`,
+		awardID,
+		userID,
 	)
+	return err
 }
 
 func (awards) Get(awardID uint64) (*Award, error) {
-	query := `SELECT * FROM awards WHERE id = $1 LIMIT 1`
 	award := new(Award)
-	err := db.Get(award, query, awardID)
+	err := pgxconn.QueryRow(`
+		SELECT
+			id, 
+			inserted_at, 
+			updated_at, 
+			author_id, 
+			blank_mid, 
+			reason, 
+			status
+		FROM awards
+		WHERE id=$1
+	`,
+		awardID,
+	).Scan(
+		&award.ID,
+		&award.InsertedAt,
+		&award.UpdatedAt,
+		&award.AuthorID,
+		&award.BlankID,
+		&award.Reason,
+		&award.Status,
+	)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -136,9 +188,29 @@ func (awards) Get(awardID uint64) (*Award, error) {
 }
 
 func (awards) GetByBlankID(blankID string) (*Award, error) {
-	query := `SELECT * FROM awards WHERE blank_mid = $1 LIMIT 1`
 	award := new(Award)
-	err := db.Get(award, query, blankID)
+	err := pgxconn.QueryRow(`
+		SELECT
+			id, 
+			inserted_at, 
+			updated_at, 
+			author_id, 
+			blank_mid, 
+			reason, 
+			status
+		FROM awards
+		WHERE blank_mid=$1
+	`,
+		blankID,
+	).Scan(
+		&award.ID,
+		&award.InsertedAt,
+		&award.UpdatedAt,
+		&award.AuthorID,
+		&award.BlankID,
+		&award.Reason,
+		&award.Status,
+	)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil

@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/SteMak/house-tyan/middleware"
+
+	"github.com/SteMak/house-tyan/app"
+
 	"github.com/SteMak/house-tyan/util"
 	"github.com/robfig/cron/v3"
 
@@ -104,6 +108,13 @@ func Run() {
 	out.ErrorHandler = SendError
 
 	authentificate()
+
+	logger, err := util.Logger(config.Bot.Log)
+	if err == nil {
+		app.Use(middleware.Log(logger))
+	}
+	app.Init(session)
+
 }
 
 func Stop() {

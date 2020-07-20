@@ -3,7 +3,7 @@ module github.com/SteMak/house-tyan
 go 1.14
 
 require (
-	github.com/Masterminds/squirrel v1.4.0
+	github.com/Masterminds/squirrel v1.4.0 // indirect
 	github.com/brianvoe/gofakeit/v5 v5.6.3
 	github.com/bwmarrin/discordgo v0.20.3
 	github.com/cockroachdb/apd v1.1.0 // indirect

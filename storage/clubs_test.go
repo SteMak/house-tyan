@@ -19,7 +19,7 @@ func randomClub() *Club {
 }
 
 func TestClubsCreate(t *testing.T) {
-	tx, err := Tx()
+	tx, err := pgxconn.Begin()
 	assert.NoError(t, err)
 
 	var club Club
@@ -32,7 +32,7 @@ func TestClubsCreate(t *testing.T) {
 }
 
 func TestGetClubByUser(t *testing.T) {
-	tx, err := Tx()
+	tx, err := pgxconn.Begin()
 	assert.NoError(t, err)
 
 	var club Club
@@ -54,6 +54,12 @@ func TestGetClubByUser(t *testing.T) {
 
 func TestGetExpired(t *testing.T) {
 	clubs, err := Clubs.GetExpired()
+	assert.NoError(t, err)
+	fmt.Println(len(clubs))
+}
+
+func TestRemoveExpired(t *testing.T) {
+	clubs, err := Clubs.RemoveExpired()
 	assert.NoError(t, err)
 	fmt.Println(len(clubs))
 }

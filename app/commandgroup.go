@@ -1,13 +1,11 @@
 package app
 
-import "sync"
-
 type middleware struct {
 	middlewares HandlerChain
 }
 
 func (m *middleware) Use(handlers ...HandlerFunc) {
-	m.middlewares = append(m.middlewares, handlers...)
+	m.middlewares.append(handlers...)
 }
 
 type CommandGroup struct {
@@ -17,7 +15,7 @@ type CommandGroup struct {
 	enabled  bool
 	root     *Command
 	commands []*Command
-	groups   []CommandGroup
+	groups   []*CommandGroup
 }
 
 func (g *CommandGroup) On(aliases ...string) *Command {
@@ -40,7 +38,7 @@ func (g *CommandGroup) Group(alias string) *CommandGroup {
 	var group CommandGroup
 	group.Enable()
 	group.alias = alias
-	g.groups = append(g.groups, group)
+	g.groups = append(g.groups, &group)
 	return &group
 }
 
@@ -66,10 +64,22 @@ func matchAliases(args string, cmd *Command) (bool, string) {
 	return false, ""
 }
 
-func (g *CommandGroup) buildCommands(wg *sync.WaitGroup, args string, ctxs *[]Context, chain HandlerChain) {
-	defer wg.Done()
-
+func (g *CommandGroup) buildCommands(ctx *Context) {
 	if !g.enabled {
+		return
+	}
+
+	ctx.handlers.append(g.middlewares...)
+
+	for _, group := range g.groups {
+		match, args := matchCommand(group.alias, ctx.args)
+		if !match {
+			continue
+		}
+
+		ctx.args = args
+		group.buildCommands(ctx)
+
 		return
 	}
 
@@ -78,21 +88,14 @@ func (g *CommandGroup) buildCommands(wg *sync.WaitGroup, args string, ctxs *[]Co
 			continue
 		}
 
-		match, args := matchAliases(args, cmd)
+		match, args := matchAliases(ctx.args, cmd)
 		if !match {
 			continue
 		}
 
-		chain.append(g.middlewares...)
-
-		var ctx Context
 		ctx.args = args
-		ctx.params = make(map[string]interface{})
-		ctx.handlers = append(chain, cmd.Handler)
-		*ctxs = append(*ctxs, ctx)
-	}
+		ctx.handlers.append(cmd.Handler)
 
-	if len(*ctxs) != 0 {
 		return
 	}
 
@@ -103,20 +106,5 @@ func (g *CommandGroup) buildCommands(wg *sync.WaitGroup, args string, ctxs *[]Co
 	if g.root.Handler == nil {
 		return
 	}
-
-	var ctx Context
-	ctx.args = args
-	ctx.params = make(map[string]interface{})
-	ctx.handlers = append(chain, g.root.Handler)
-	*ctxs = append(*ctxs, ctx)
-
-	for _, group := range g.groups {
-		match, args := matchCommand(group.alias, args)
-		if !match {
-			continue
-		}
-
-		wg.Add(1)
-		go group.buildCommands(wg, args, ctxs, chain)
-	}
+	ctx.handlers.append(g.root.Handler)
 }
