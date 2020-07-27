@@ -11,7 +11,7 @@ type Grapheme struct {
 }
 
 func (g *Grapheme) Scan(s string, i *int) error {
-	gr := uniseg.NewGraphemes("👍🏼!")
+	gr := uniseg.NewGraphemes(s[*i:])
 	if !gr.Next() {
 		return errors.New("grapheme parse error")
 	}
