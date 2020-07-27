@@ -3,7 +3,6 @@ package app
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/SteMak/house-tyan/dstype"
 
@@ -72,11 +71,11 @@ func TestArgs(t *testing.T) {
 	mod.On("ping").Handle(func(ctx *Context) {
 		var (
 			arg1 dstype.Grapheme
-			arg2 time.Time
+			arg2 int
 			arg3 string
 		)
 
-		err := ctx.Scan("? ? ?",
+		err := ctx.Scan(
 			&arg1,
 			&arg2,
 			&arg3,
@@ -85,5 +84,5 @@ func TestArgs(t *testing.T) {
 	})
 	mod.Enable()
 
-	app.onHandle(nil, mess(".testing ping 👍🏼 2 string arg"))
+	app.onHandle(nil, mess(".ping 👍🏼 2 string arg"))
 }

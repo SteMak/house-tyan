@@ -23,7 +23,59 @@ type args struct {
 	Args string
 }
 
-func (a *args) Scan(tpl string, dest ...interface{}) (err error) {
+func (a *args) Scan(dest ...interface{}) (err error) {
+	var (
+		lenArgs = len(a.Args)
+
+		iDest = 0
+		iArgs = skipSpaces(a.Args, 0)
+	)
+
+	if iArgs == -1 {
+		return nil
+	}
+
+	for {
+		if iArgs >= lenArgs || iDest >= len(dest) {
+			break
+		}
+
+		iArgs = skipSpaces(a.Args, iArgs)
+		if iArgs == -1 {
+			return nil
+		}
+
+		switch t := dest[iDest].(type) {
+		case *string:
+			value := dest[iDest].(*string)
+			*value, err = doString(a.Args, &iArgs)
+			if err != nil {
+				return
+			}
+			return nil
+		case *int:
+			value := dest[iDest].(*int)
+			*value, err = doInt(a.Args, &iArgs)
+			if err != nil {
+				return
+			}
+		default:
+			value, ok := t.(dstype.Scanneable)
+			if !ok {
+				return fmt.Errorf("type %T not scannable", t)
+			}
+			err = value.Scan(a.Args, &iArgs)
+			if err != nil {
+				return
+			}
+		}
+		iDest++
+		iArgs++
+	}
+	return nil
+}
+
+func (a *args) Scanf(tpl string, dest ...interface{}) (err error) {
 	if count := strings.Count(tpl, "?"); count != len(dest) {
 		return fmt.Errorf("count '?' [%d] and length 'dest' [%d] not equal", count, len(dest))
 	}
