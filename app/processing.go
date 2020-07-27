@@ -10,6 +10,9 @@ func matchCommand(alias, args string) (bool, string) {
 		if strings.HasPrefix(cut, alias) {
 			return true, strings.TrimSpace(strings.TrimPrefix(cut, alias))
 		}
+		if cut[0] != ' ' {
+			return false, args
+		}
 		cut = cut[1:]
 	}
 	return false, args
