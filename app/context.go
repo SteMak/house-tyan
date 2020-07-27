@@ -9,9 +9,7 @@ import (
 const abortIndex int8 = math.MaxInt8 / 2
 
 type Context struct {
-	scannable
-
-	args     string
+	args
 	module   *Module
 	params   map[string]interface{}
 	handlers HandlerChain

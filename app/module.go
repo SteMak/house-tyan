@@ -23,12 +23,13 @@ func (m *Module) buildCommands(wg *sync.WaitGroup, s *discordgo.Session, mess *d
 
 	ctx := &Context{
 		module:   m,
-		args:     strings.TrimPrefix(mess.Content, m.alias),
 		handlers: m.middlewares,
 		params:   make(map[string]interface{}),
 		Message:  mess,
 		Session:  s,
 	}
+	ctx.args.Args = strings.TrimPrefix(mess.Content, m.alias)
+
 	m.CommandGroup.buildCommands(ctx)
 
 	return ctx

@@ -72,12 +72,12 @@ func (g *CommandGroup) buildCommands(ctx *Context) {
 	ctx.handlers.append(g.middlewares...)
 
 	for _, group := range g.groups {
-		match, args := matchCommand(group.alias, ctx.args)
+		match, args := matchCommand(group.alias, ctx.args.Args)
 		if !match {
 			continue
 		}
 
-		ctx.args = args
+		ctx.args.Args = args
 		group.buildCommands(ctx)
 
 		return
@@ -88,12 +88,12 @@ func (g *CommandGroup) buildCommands(ctx *Context) {
 			continue
 		}
 
-		match, args := matchAliases(ctx.args, cmd)
+		match, args := matchAliases(ctx.args.Args, cmd)
 		if !match {
 			continue
 		}
 
-		ctx.args = args
+		ctx.args.Args = args
 		ctx.handlers.append(cmd.Handler)
 
 		return

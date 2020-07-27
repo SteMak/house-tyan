@@ -3,6 +3,9 @@ package app
 import (
 	"fmt"
 	"testing"
+	"time"
+
+	"github.com/SteMak/house-tyan/dstype"
 
 	"github.com/stretchr/testify/assert"
 
@@ -62,4 +65,25 @@ func TestGroup(t *testing.T) {
 
 	app.onHandle(nil, mess(".club create"))
 	assert.Equal(t, "club create", result)
+}
+
+func TestArgs(t *testing.T) {
+	mod := NewModule("testing", ".")
+	mod.On("ping").Handle(func(ctx *Context) {
+		var (
+			arg1 dstype.Grapheme
+			arg2 time.Time
+			arg3 string
+		)
+
+		err := ctx.Scan("? ? ?",
+			&arg1,
+			&arg2,
+			&arg3,
+		)
+		assert.NoError(t, err)
+	})
+	mod.Enable()
+
+	app.onHandle(nil, mess(".testing ping 👍🏼 2 string arg"))
 }
