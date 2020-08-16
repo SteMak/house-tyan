@@ -11,7 +11,7 @@ import (
 )
 
 func (bot *module) triggerHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if m.Author.Bot || m.Content == "" || strings.Contains(m.Content, " ") {
+	if m.Author.Bot || m.Content == "" {
 		return
 	}
 
@@ -31,7 +31,7 @@ func (bot *module) triggerHandler(s *discordgo.Session, m *discordgo.MessageCrea
 		return
 	}
 
-	_, err = s.ChannelMessageSend(m.ChannelID, trigger.Answers[rand.Intn(len(trigger.Answers))])
+	_, err = s.ChannelMessageSendComplex(m.ChannelID, &trigger.Answers[rand.Intn(len(trigger.Answers))])
 	if err != nil {
 		out.Err(true, err)
 	}

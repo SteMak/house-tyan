@@ -1,7 +1,7 @@
 <template>
     <embed color="#43b581">
-        <title>Список триггеров</title>
-        {{ range . }}
+        <title>Список триггеров #{{ .Page }}</title>
+        {{ range .Triggers }}
             {{ if .Name -}} `{{ .Name }}` {{- end }}
         {{ end }}
     </embed>

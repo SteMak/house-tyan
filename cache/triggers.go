@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/gob"
 
+	"github.com/bwmarrin/discordgo"
 	"github.com/dgraph-io/badger"
 )
 
 type Trigger struct {
 	Name    string
-	Answers []string
+	Answers []discordgo.MessageSend
 }
 
 type triggers struct{}

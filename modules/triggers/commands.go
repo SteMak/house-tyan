@@ -161,6 +161,10 @@ func (bot *module) onTriggerDelete(ctx *dgutils.MessageContext) {
 }
 
 func (bot *module) onTriggerList(ctx *dgutils.MessageContext) {
+	if len(ctx.Args) == 0 {
+		ctx.Args = []string{"0"}
+	}
+
 	if len(ctx.Args) != 1 {
 		modules.Send(ctx.Message.ChannelID, "triggers/usage.xml", nil, nil)
 		return
@@ -185,7 +189,13 @@ func (bot *module) onTriggerList(ctx *dgutils.MessageContext) {
 		return
 	}
 
-	modules.Send(ctx.Message.ChannelID, "triggers/trigger.list.xml", triggers, nil)
+	modules.Send(ctx.Message.ChannelID, "triggers/trigger.list.xml", struct {
+		Triggers *[]cache.Trigger
+		Page     int
+	}{
+		triggers,
+		i,
+	}, nil)
 }
 
 func (bot *module) onTriggerInfo(ctx *dgutils.MessageContext) {

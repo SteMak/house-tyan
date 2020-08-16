@@ -47,6 +47,11 @@ func loadModules() {
 			continue
 		}
 
+		if module.IsRunning() {
+			out.Infof("Module %s already loaded", id)
+			continue
+		}
+
 		out.Infoln("Config file:", m.Config)
 		out.Infoln("Prefix:", m.Prefix)
 

@@ -4,8 +4,8 @@
         Информация о триггере на слово `{{ .Name }}`.
         <fields>
             <field name="Значения" inline="false">
-            {{ range .Answers }}
-            `{{ . }}`{{ end }}
+            {{ range $index, $element := .Answers }}
+            ```{{ $index }}. {{ $element }}```{{ end }}
             </field>
         </fields>
     </embed>
