@@ -65,7 +65,7 @@ func (discord *Discord) messageCreate(s *discordgo.Session, m *discordgo.Message
 	}
 
 	str := strings.TrimPrefix(m.Content, discord.Prefix)
-	str = strings.Join(strings.Fields(str), " ")
+	str = strings.TrimSpace(str)
 
 	command, args := findCommand(str, discord.Commands)
 	if command == nil {
