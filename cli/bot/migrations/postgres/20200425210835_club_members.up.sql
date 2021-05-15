@@ -4,7 +4,7 @@ CREATE TABLE club_members (
     inserted_at timestamp without time zone NULL,
     updated_at timestamp without time zone NULL,
     xp bigint NOT NULL DEFAULT 0,
-    PRIMARY KEY(club_id, user_id)
+    PRIMARY KEY(user_id)
 );
 
 CREATE TRIGGER on_insert
