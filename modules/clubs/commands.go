@@ -30,6 +30,22 @@ var (
 					},
 					Function: _module.onClubDelete,
 				},
+				"info": &dgutils.Command{
+					Raw: true,
+					Handlers: []func(*dgutils.MessageContext){
+						_module.middlewareChannel,
+						_module.middlewareClubInfo,
+					},
+					Function: _module.onClubInfo,
+				},
+				"desc": &dgutils.Command{
+					Raw: true,
+					Handlers: []func(*dgutils.MessageContext){
+						_module.middlewareChannel,
+						_module.middlewareClubEditInfo,
+					},
+					Function: _module.onClubEditDescription,
+				},
 				"kick": &dgutils.Command{
 					Raw: true,
 					Handlers: []func(*dgutils.MessageContext){
@@ -153,4 +169,41 @@ func (bot *module) onClubKick(ctx *dgutils.MessageContext) {
 	}
 
 	modules.SendGood(ctx.Message.ChannelID, "Участник исключён", "Стирание прошло успешно")
+}
+
+func (bot *module) onClubInfo(ctx *dgutils.MessageContext) {
+	club := ctx.Param("club").(*storage.Club)
+	m := modules.Send(ctx.Message.ChannelID, "clubs/info.xml", club, nil)
+	if m == nil {
+		go modules.SendFail(ctx.Message.ChannelID, "Не удалось вывести информацию о клубе", "Попробуйте снова позже.")
+		return
+	}
+}
+
+func (bot *module) onClubEditDescription(ctx *dgutils.MessageContext) {
+	tx, err := storage.Tx()
+	if err != nil {
+		go out.Err(true, err)
+		go modules.SendFail(ctx.Message.ChannelID, "База крашнулась на открытии", "Попробуйте снова позже.")
+		go log.Error(err)
+		return
+	}
+
+	club := ctx.Param("club").(*storage.Club)
+	club.Description = &ctx.Args[0]
+	club.EditDescription(tx, ctx.Args[0])
+
+	err = tx.Commit()
+	if err != nil {
+		go out.Err(true, err)
+		go modules.SendFail(ctx.Message.ChannelID, "База крашнулась на закрытии", "Попробуйте снова позже.")
+		go log.Error(err)
+		return
+	}
+
+	m := modules.Send(ctx.Message.ChannelID, "clubs/description_edit.xml", club, nil)
+	if m == nil {
+		go modules.SendFail(ctx.Message.ChannelID, "Не удалось вывести информацию о клубе", "Попробуйте снова позже.")
+		return
+	}
 }

@@ -69,6 +69,13 @@ func (c *Club) Delete(tx *sqlx.Tx) error {
 	)
 }
 
+func (c *Club) EditDescription(tx *sqlx.Tx, desc string) error {
+	return exec(tx, psql.Update("clubs").
+		Where(squirrel.Eq{"id": c.ID}).
+		Set("description", desc),
+	)
+}
+
 type ClubMember struct {
 	ClubID     uint       `db:"club_id"`
 	UserID     string     `db:"user_id"`

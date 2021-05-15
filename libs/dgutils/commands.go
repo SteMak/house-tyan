@@ -65,6 +65,7 @@ func findCommand(args string, commands map[string]interface{}) (*Command, []stri
 		switch v := item.(type) {
 		case *Command:
 			if len(an) == 2 {
+				an[1] = strings.TrimSpace(an[1])
 				if v.Raw {
 					return v, []string{an[1]}
 				}
@@ -73,6 +74,7 @@ func findCommand(args string, commands map[string]interface{}) (*Command, []stri
 			return v, nil
 		case *Group:
 			if len(an) == 2 {
+				an[1] = strings.TrimSpace(an[1])
 				return findCommand(an[1], v.Commands)
 			}
 			return nil, nil

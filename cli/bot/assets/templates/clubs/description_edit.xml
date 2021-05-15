@@ -1,0 +1,9 @@
+<template>
+    <embed color="#ffa550">
+        <title>Описание отредактировано</title>
+        <@{{ .OwnerID }}>, описание клуба {{ bold .Title }} успешно изменено.
+        [EOL]
+        Ныне описание представляет собой:
+        {{ .Description}}
+    </embed>
+</template>

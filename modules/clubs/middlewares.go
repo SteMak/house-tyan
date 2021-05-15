@@ -95,13 +95,17 @@ func (bot *module) middlewareClubKick(ctx *dgutils.MessageContext) {
 	userID = strings.TrimPrefix(userID, "!")
 	userID = strings.TrimSuffix(userID, ">")
 
+	if userID == ctx.Message.Author.ID {
+		modules.SendFail(ctx.Message.ChannelID, "Нельзя кикнуть себя", "Найдите кого нибудь другого.")
+		return
+	}
+
 	_, err = bot.session.User(userID)
 	if err != nil {
 		modules.SendFail(ctx.Message.ChannelID, "Вааааа! Кто это?!", "Что это за существо???")
 		return
 	}
 
-	bot.session.User(userID)
 	userClub, err := storage.Clubs.GetClubByUser(userID)
 	if err != nil || userClub == nil || userClub.ID != club.ID {
 		modules.SendFail(ctx.Message.ChannelID, "Этот пользователь неуязвим", "Данный человек не состоит в вашем клубе.")
@@ -109,6 +113,43 @@ func (bot *module) middlewareClubKick(ctx *dgutils.MessageContext) {
 	}
 
 	ctx.SetParam("userID", userID)
+	ctx.SetParam("club", club)
+
+	ctx.Next()
+}
+
+func (bot *module) middlewareClubInfo(ctx *dgutils.MessageContext) {
+	club, err := storage.Clubs.GetClubByUser(ctx.Message.Author.ID)
+	if err != nil {
+		return
+	}
+
+	if club == nil {
+		go modules.SendFail(ctx.Message.ChannelID, "Вы не в клубе", "Попробуйте когда будете в клубе")
+		return
+	}
+
+	ctx.SetParam("club", club)
+
+	ctx.Next()
+}
+
+func (bot *module) middlewareClubEditInfo(ctx *dgutils.MessageContext) {
+	club, err := storage.Clubs.GetClubByUser(ctx.Message.Author.ID)
+	if err != nil {
+		return
+	}
+
+	if club == nil {
+		modules.SendFail(ctx.Message.ChannelID, "Вы не состоите в клубе", "Станьте главой клуба, тогда вы сможете удалить его.")
+		return
+	}
+
+	if club.OwnerID != ctx.Message.Author.ID {
+		modules.SendFail(ctx.Message.ChannelID, "Вы не владелец клуба", "Станьте главой клуба, тогда вы сможете удалить его.")
+		return
+	}
+
 	ctx.SetParam("club", club)
 
 	ctx.Next()
