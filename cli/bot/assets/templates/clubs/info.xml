@@ -1,6 +1,10 @@
 <template>
     <embed color="#ffa550">
-        <title>{{.Symbol}}: {{.Title}}</title>
-        {{ if .Description }} {{ .Description }} {{ end }}
+        <title>{{ .Club.Symbol }}: {{ .Club.Title }}</title>
+        {{ if .Club.Description }} {{ .Club.Description }} {{ end }}
+        [EOL]
+        {{ range .Members }}
+        <@{{ .UserID }}>: {{ .XP }}xp
+        {{ end }}
     </embed>
 </template>

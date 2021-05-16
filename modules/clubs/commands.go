@@ -26,7 +26,7 @@ var (
 					Raw: true,
 					Handlers: []func(*dgutils.MessageContext){
 						_module.middlewareChannel,
-						_module.middlewareClubDelete,
+						_module.middlewareClubOwner,
 					},
 					Function: _module.onClubDelete,
 				},
@@ -42,7 +42,7 @@ var (
 					Raw: true,
 					Handlers: []func(*dgutils.MessageContext){
 						_module.middlewareChannel,
-						_module.middlewareClubEditInfo,
+						_module.middlewareClubOwner,
 					},
 					Function: _module.onClubEditDescription,
 				},
@@ -50,9 +50,18 @@ var (
 					Raw: true,
 					Handlers: []func(*dgutils.MessageContext){
 						_module.middlewareChannel,
+						_module.middlewareClubOwner,
 						_module.middlewareClubKick,
 					},
 					Function: _module.onClubKick,
+				},
+				"apply": &dgutils.Command{
+					Raw: true,
+					Handlers: []func(*dgutils.MessageContext){
+						_module.middlewareChannel,
+						_module.middlewareClubApply,
+					},
+					Function: _module.onClubApply,
 				},
 			},
 		},
@@ -173,7 +182,15 @@ func (bot *module) onClubKick(ctx *dgutils.MessageContext) {
 
 func (bot *module) onClubInfo(ctx *dgutils.MessageContext) {
 	club := ctx.Param("club").(*storage.Club)
-	m := modules.Send(ctx.Message.ChannelID, "clubs/info.xml", club, nil)
+	members, err := club.GetMembers()
+	if err != nil {
+		return
+	}
+
+	m := modules.Send(ctx.Message.ChannelID, "clubs/info.xml", map[string]interface{}{
+		"Club":    club,
+		"Members": members,
+	}, nil)
 	if m == nil {
 		go modules.SendFail(ctx.Message.ChannelID, "Не удалось вывести информацию о клубе", "Попробуйте снова позже.")
 		return
@@ -202,7 +219,34 @@ func (bot *module) onClubEditDescription(ctx *dgutils.MessageContext) {
 
 	m := modules.Send(ctx.Message.ChannelID, "clubs/description_edit.xml", club, nil)
 	if m == nil {
-		go modules.SendFail(ctx.Message.ChannelID, "Не удалось вывести информацию о клубе", "Попробуйте снова позже.")
+		go modules.SendFail(ctx.Message.ChannelID, "Не удалось вывести информацию об изменении описания", "Попробуйте снова позже.")
+		return
+	}
+}
+
+func (bot *module) onClubApply(ctx *dgutils.MessageContext) {
+	tx, err := storage.Tx()
+	if err != nil {
+		go out.Err(true, err)
+		go modules.SendFail(ctx.Message.ChannelID, "База крашнулась на открытии", "Попробуйте снова позже.")
+		go log.Error(err)
+		return
+	}
+
+	club := ctx.Param("club").(*storage.Club)
+	club.ClubApply(tx)
+
+	err = tx.Commit()
+	if err != nil {
+		go out.Err(true, err)
+		go modules.SendFail(ctx.Message.ChannelID, "База крашнулась на закрытии", "Попробуйте снова позже.")
+		go log.Error(err)
+		return
+	}
+
+	m := modules.Send(ctx.Message.ChannelID, "clubs/club_apply.xml", club, nil)
+	if m == nil {
+		go modules.SendFail(ctx.Message.ChannelID, "Не удалось вывести информацию о вступлении в клуб", "Попробуйте снова позже.")
 		return
 	}
 }

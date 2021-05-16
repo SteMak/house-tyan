@@ -3,6 +3,7 @@ package storage
 import (
 	"database/sql"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -57,8 +58,30 @@ func (c *Club) HasMember(memberID string) (result bool, err error) {
 	return
 }
 
+func (c *Club) GetMembers() (*[]ClubMember, error) {
+	query, args, err := psql.Select("cm.*").
+		From("club_members cm").
+		Where(squirrel.Eq{"cm.club_id": c.ID}).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	members := new([]ClubMember)
+	err = db.Select(members, query, args...)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+
+	return members, err
+}
+
 func (c *Club) Delete(tx *sqlx.Tx) error {
 	if err := exec(tx, psql.Delete("club_members").Where(squirrel.Eq{"club_id": c.ID})); err != nil {
+		return err
+	}
+	if err := exec(tx, psql.Delete("club_invites").Where(squirrel.Eq{"club_id": c.ID})); err != nil {
 		return err
 	}
 
@@ -72,6 +95,14 @@ func (c *Club) EditDescription(tx *sqlx.Tx, desc string) error {
 	return exec(tx, psql.Update("clubs").
 		Where(squirrel.Eq{"id": c.ID}).
 		Set("description", desc),
+	)
+}
+
+func (c *Club) ClubApply(tx *sqlx.Tx) error {
+	return exec(tx, psql.Insert("club_invites").
+		Columns("club_id", "user_id", "is_request").
+		Values(c.ID, c.Title, true).
+		Suffix("ON CONFLICT DO NOTHING"),
 	)
 }
 
@@ -124,6 +155,7 @@ func (c *clubs) GetClubByUser(userID string) (*Club, error) {
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
+
 	return club, err
 }
 
@@ -143,6 +175,53 @@ func (c *clubs) GetClubByTitle(title string) (*Club, error) {
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
+	}
+	return club, err
+}
+
+func (c *clubs) GetClubByPrefix(title string) (*Club, error) {
+	query, args, err := psql.Select("c.*").
+		From("clubs c").
+		Where(squirrel.Eq{"c.symbol": title}).
+		Limit(1).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	club := new(Club)
+	err = db.Get(club, query, args...)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	return club, err
+}
+
+func (c *clubs) GetClub(arg string) (*Club, error) {
+	var (
+		club *Club
+		err  error
+	)
+
+	userID := arg
+	userID = strings.TrimPrefix(userID, "<@")
+	userID = strings.TrimPrefix(userID, "!")
+	userID = strings.TrimSuffix(userID, ">")
+
+	if club, err = Clubs.GetClubByTitle(arg); err != nil || club != nil {
+		if err != nil {
+			return nil, err
+		}
+	} else if club, err = Clubs.GetClubByPrefix(arg); err != nil || club != nil {
+		if err != nil {
+			return nil, err
+		}
+	} else if club, err = Clubs.GetClubByUser(userID); err != nil || club != nil {
+		if err != nil {
+			return nil, err
+		}
 	}
 	return club, err
 }

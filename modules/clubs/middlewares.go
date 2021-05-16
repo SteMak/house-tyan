@@ -17,13 +17,34 @@ func (bot *module) middlewareChannel(ctx *dgutils.MessageContext) {
 	ctx.Next()
 }
 
+func (bot *module) middlewareClubOwner(ctx *dgutils.MessageContext) {
+	club, err := storage.Clubs.GetClubByUser(ctx.Message.Author.ID)
+	if err != nil {
+		return
+	}
+
+	if club == nil {
+		modules.SendFail(ctx.Message.ChannelID, "Вы не состоите в клубе", "Станьте главой клуба, тогда вы сможете удалить его.")
+		return
+	}
+
+	if club.OwnerID != ctx.Message.Author.ID {
+		modules.SendFail(ctx.Message.ChannelID, "Вы не владелец клуба", "Станьте главой клуба, тогда вы сможете удалить его.")
+		return
+	}
+
+	ctx.SetParam("club", club)
+
+	ctx.Next()
+}
+
 func (bot *module) middlewareClubCreate(ctx *dgutils.MessageContext) {
 	for _, banedCombinamions := range []string{"<@", "<#", "@here", "@everyone"} {
 		if !strings.Contains(ctx.Message.Content, banedCombinamions) {
 			continue
 		}
 
-		modules.SendFail(ctx.Message.ChannelID, "Не правильные данные", "Нельзя использовать `"+banedCombinamions+"`.")
+		modules.SendFail(ctx.Message.ChannelID, "Неправильные данные", "Нельзя использовать `"+banedCombinamions+"`.")
 		return
 	}
 
@@ -32,7 +53,7 @@ func (bot *module) middlewareClubCreate(ctx *dgutils.MessageContext) {
 			continue
 		}
 
-		modules.SendFail(ctx.Message.ChannelID, "Не правильные данные", "Нельзя использовать слово ||"+banWord+"||.")
+		modules.SendFail(ctx.Message.ChannelID, "Неправильные данные", "Нельзя использовать слово ||"+banWord+"||.")
 		return
 	}
 
@@ -73,43 +94,7 @@ func (bot *module) middlewareClubCreate(ctx *dgutils.MessageContext) {
 	ctx.Next()
 }
 
-func (bot *module) middlewareClubDelete(ctx *dgutils.MessageContext) {
-	club, err := storage.Clubs.GetClubByUser(ctx.Message.Author.ID)
-	if err != nil {
-		return
-	}
-
-	if club == nil {
-		modules.SendFail(ctx.Message.ChannelID, "Вы не состоите в клубе", "Станьте главой клуба, тогда вы сможете удалить его.")
-		return
-	}
-
-	if club.OwnerID != ctx.Message.Author.ID {
-		modules.SendFail(ctx.Message.ChannelID, "Вы не владелец клуба", "Станьте главой клуба, тогда вы сможете удалить его.")
-		return
-	}
-
-	ctx.SetParam("club", club)
-
-	ctx.Next()
-}
-
 func (bot *module) middlewareClubKick(ctx *dgutils.MessageContext) {
-	club, err := storage.Clubs.GetClubByUser(ctx.Message.Author.ID)
-	if err != nil {
-		return
-	}
-
-	if club == nil {
-		modules.SendFail(ctx.Message.ChannelID, "Вы не состоите в клубе", "Создайте клуб, тогда вы сможете удалить участников.")
-		return
-	}
-
-	if club.OwnerID != ctx.Message.Author.ID {
-		modules.SendFail(ctx.Message.ChannelID, "Вы не владелец клуба", "Станьте главой клуба, тогда вы сможете удалить участников.")
-		return
-	}
-
 	userID := ctx.Args[0]
 	userID = strings.TrimPrefix(userID, "<@")
 	userID = strings.TrimPrefix(userID, "!")
@@ -120,12 +105,13 @@ func (bot *module) middlewareClubKick(ctx *dgutils.MessageContext) {
 		return
 	}
 
-	_, err = bot.session.User(userID)
+	_, err := bot.session.User(userID)
 	if err != nil {
 		modules.SendFail(ctx.Message.ChannelID, "Вааааа! Кто это?!", "Что это за существо???")
 		return
 	}
 
+	club := ctx.Param("club").(*storage.Club)
 	userClub, err := storage.Clubs.GetClubByUser(userID)
 	if err != nil || userClub == nil || userClub.ID != club.ID {
 		modules.SendFail(ctx.Message.ChannelID, "Этот пользователь неуязвим", "Данный человек не состоит в вашем клубе.")
@@ -133,7 +119,6 @@ func (bot *module) middlewareClubKick(ctx *dgutils.MessageContext) {
 	}
 
 	ctx.SetParam("userID", userID)
-	ctx.SetParam("club", club)
 
 	ctx.Next()
 }
@@ -154,19 +139,9 @@ func (bot *module) middlewareClubInfo(ctx *dgutils.MessageContext) {
 			return
 		}
 	} else {
-		userID := ctx.Args[0]
-		userID = strings.TrimPrefix(userID, "<@")
-		userID = strings.TrimPrefix(userID, "!")
-		userID = strings.TrimSuffix(userID, ">")
-
-		if club, err = storage.Clubs.GetClubByTitle(ctx.Args[0]); err != nil || club != nil {
-			if err != nil {
-				return
-			}
-		} else if club, err = storage.Clubs.GetClubByUser(userID); err != nil || club != nil {
-			if err != nil {
-				return
-			}
+		club, err = storage.Clubs.GetClub(ctx.Args[0])
+		if err != nil {
+			return
 		}
 	}
 
@@ -180,19 +155,28 @@ func (bot *module) middlewareClubInfo(ctx *dgutils.MessageContext) {
 	ctx.Next()
 }
 
-func (bot *module) middlewareClubEditInfo(ctx *dgutils.MessageContext) {
+func (bot *module) middlewareClubApply(ctx *dgutils.MessageContext) {
+	if len(ctx.Args) == 0 {
+		go modules.SendFail(ctx.Message.ChannelID, "Вы не УКАЗАЛИ клуб", "Накажите меня.")
+		return
+	}
+
 	club, err := storage.Clubs.GetClubByUser(ctx.Message.Author.ID)
 	if err != nil {
 		return
 	}
 
-	if club == nil {
-		modules.SendFail(ctx.Message.ChannelID, "Вы не состоите в клубе", "Станьте главой клуба, тогда вы сможете удалить его.")
+	if club != nil {
+		go modules.SendFail(ctx.Message.ChannelID, "Вы уже состоите в клубе", "Попросите себя кикнуть.")
 		return
 	}
 
-	if club.OwnerID != ctx.Message.Author.ID {
-		modules.SendFail(ctx.Message.ChannelID, "Вы не владелец клуба", "Станьте главой клуба, тогда вы сможете удалить его.")
+	if club, err = storage.Clubs.GetClub(ctx.Args[0]); err != nil {
+		return
+	}
+
+	if club == nil {
+		go modules.SendFail(ctx.Message.ChannelID, "404 Клуб нот фаунд", "Укажите пользователя, значёк или имя клуба.")
 		return
 	}
 

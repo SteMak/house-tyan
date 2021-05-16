@@ -1,0 +1,6 @@
+<template>
+    <embed color="#ffa550">
+        <title>Зайка отправлена</title>
+        Заявка в клуб {{ bold .Title }} успешно отправлена.
+    </embed>
+</template>
