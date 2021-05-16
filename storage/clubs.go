@@ -52,24 +52,23 @@ func (c *Club) DeleteMember(tx *sqlx.Tx, memberID string) error {
 	)
 }
 
-func (c *Club) DeleteMembers(tx *sqlx.Tx) error {
-	return exec(tx, psql.Delete("club_members").
-		Where(squirrel.Eq{"club_id": c.ID}),
-	)
-}
-
 func (c *Club) HasMember(memberID string) (result bool, err error) {
 	err = db.Get(&result, `SELECT EXISTS(SELECT 1 FROM club_members WHERE user_id = $1)`, memberID)
 	return
 }
 
 func (c *Club) Delete(tx *sqlx.Tx) error {
+	if err := exec(tx, psql.Delete("club_members").Where(squirrel.Eq{"club_id": c.ID})); err != nil {
+		return err
+	}
+
 	return exec(tx, psql.Delete("clubs").
 		Where(squirrel.Eq{"id": c.ID}),
 	)
 }
 
 func (c *Club) EditDescription(tx *sqlx.Tx, desc string) error {
+	c.Description = &desc
 	return exec(tx, psql.Update("clubs").
 		Where(squirrel.Eq{"id": c.ID}).
 		Set("description", desc),
@@ -112,6 +111,26 @@ func (c *clubs) GetClubByUser(userID string) (*Club, error) {
 		From("club_members cm").
 		Join("clubs c ON c.id=cm.club_id").
 		Where(squirrel.Eq{"cm.user_id": userID}).
+		Limit(1).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	club := new(Club)
+	err = db.Get(club, query, args...)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	return club, err
+}
+
+func (c *clubs) GetClubByTitle(title string) (*Club, error) {
+	query, args, err := psql.Select("c.*").
+		From("clubs c").
+		Where(squirrel.Eq{"c.title": title}).
 		Limit(1).
 		ToSql()
 

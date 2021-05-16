@@ -119,8 +119,8 @@ func (bot *module) onClubDelete(ctx *dgutils.MessageContext) {
 		return
 	}
 
-	err = storage.Clubs.DeleteByOwner(tx, ctx.Message.Author.ID)
-	if err != nil {
+	club := ctx.Param("club").(*storage.Club)
+	if err = club.Delete(tx); err != nil {
 		go out.Err(true, err)
 		go modules.SendFail(ctx.Message.ChannelID, "Удаление клуба полетело", "Попробуйте снова позже.")
 		go log.Error(err)
@@ -190,7 +190,6 @@ func (bot *module) onClubEditDescription(ctx *dgutils.MessageContext) {
 	}
 
 	club := ctx.Param("club").(*storage.Club)
-	club.Description = &ctx.Args[0]
 	club.EditDescription(tx, ctx.Args[0])
 
 	err = tx.Commit()

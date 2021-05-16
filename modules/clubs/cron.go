@@ -21,13 +21,6 @@ func (bot *module) removeNotVerified() {
 	}
 
 	for _, club := range clubs {
-		if err := club.DeleteMembers(tx); err != nil {
-			go out.Err(true, err)
-			go log.Error(err)
-			tx.Rollback()
-			return
-		}
-
 		if err := club.Delete(tx); err != nil {
 			go out.Err(true, err)
 			go log.Error(err)

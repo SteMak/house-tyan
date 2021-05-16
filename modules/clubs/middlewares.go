@@ -18,6 +18,24 @@ func (bot *module) middlewareChannel(ctx *dgutils.MessageContext) {
 }
 
 func (bot *module) middlewareClubCreate(ctx *dgutils.MessageContext) {
+	for _, banedCombinamions := range []string{"<@", "<#", "@here", "@everyone"} {
+		if !strings.Contains(ctx.Message.Content, banedCombinamions) {
+			continue
+		}
+
+		modules.SendFail(ctx.Message.ChannelID, "Не правильные данные", "Нельзя использовать `"+banedCombinamions+"`.")
+		return
+	}
+
+	for _, banWord := range bot.config.BadWords {
+		if !strings.Contains(ctx.Message.Content, banWord) {
+			continue
+		}
+
+		modules.SendFail(ctx.Message.ChannelID, "Не правильные данные", "Нельзя использовать слово ||"+banWord+"||.")
+		return
+	}
+
 	club, err := storage.Clubs.GetClubByUser(ctx.Message.Author.ID)
 	if err != nil {
 		return
@@ -71,6 +89,8 @@ func (bot *module) middlewareClubDelete(ctx *dgutils.MessageContext) {
 		return
 	}
 
+	ctx.SetParam("club", club)
+
 	ctx.Next()
 }
 
@@ -119,13 +139,39 @@ func (bot *module) middlewareClubKick(ctx *dgutils.MessageContext) {
 }
 
 func (bot *module) middlewareClubInfo(ctx *dgutils.MessageContext) {
-	club, err := storage.Clubs.GetClubByUser(ctx.Message.Author.ID)
-	if err != nil {
-		return
+	var (
+		club *storage.Club
+		err  error
+	)
+
+	if len(ctx.Args) == 0 {
+		club, err = storage.Clubs.GetClubByUser(ctx.Message.Author.ID)
+		if err != nil {
+			return
+		}
+		if club == nil {
+			go modules.SendFail(ctx.Message.ChannelID, "Вы не в клубе", "Попробуйте когда будете в клубе")
+			return
+		}
+	} else {
+		userID := ctx.Args[0]
+		userID = strings.TrimPrefix(userID, "<@")
+		userID = strings.TrimPrefix(userID, "!")
+		userID = strings.TrimSuffix(userID, ">")
+
+		if club, err = storage.Clubs.GetClubByTitle(ctx.Args[0]); err != nil || club != nil {
+			if err != nil {
+				return
+			}
+		} else if club, err = storage.Clubs.GetClubByUser(userID); err != nil || club != nil {
+			if err != nil {
+				return
+			}
+		}
 	}
 
 	if club == nil {
-		go modules.SendFail(ctx.Message.ChannelID, "Вы не в клубе", "Попробуйте когда будете в клубе")
+		go modules.SendFail(ctx.Message.ChannelID, "Клуб не найден", "Укажите члена клуба или его название")
 		return
 	}
 
