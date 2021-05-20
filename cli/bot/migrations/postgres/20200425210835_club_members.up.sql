@@ -1,6 +1,7 @@
 CREATE TABLE club_members (
     club_id int NOT NULL,
     user_id varchar(18) NOT NULL,
+    manager boolean NOT NULL DEFAULT false,
     inserted_at timestamp without time zone NULL,
     updated_at timestamp without time zone NULL,
     xp bigint NOT NULL DEFAULT 0,

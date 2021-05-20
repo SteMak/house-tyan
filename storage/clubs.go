@@ -12,19 +12,22 @@ import (
 )
 
 type Club struct {
-	ID          uint       `db:"id"`
-	InsertedAt  *time.Time `db:"inserted_at"`
-	UpdatedAt   *time.Time `db:"updated_at"`
-	OwnerID     string     `db:"owner_id"`
-	RoleID      *string    `db:"role_id"`
-	ChannelID   *string    `db:"channel_id"`
-	Title       string     `db:"title"`
-	Description *string    `db:"description"`
-	Symbol      string     `db:"symbol"`
-	IconURL     *string    `db:"icon_url"`
-	XP          uint64     `db:"xp"`
-	ExpiredAt   *time.Time `db:"expired_at"`
-	Verified    bool       `db:"verified"`
+	ID              uint       `db:"id"`
+	InsertedAt      *time.Time `db:"inserted_at"`
+	UpdatedAt       *time.Time `db:"updated_at"`
+	OwnerID         string     `db:"owner_id"`
+	RoleID          *string    `db:"role_id"`
+	RoleColor       string     `db:"role_color"`
+	RoleMentionable bool       `db:"role_mentionable"`
+	ChannelID       *string    `db:"channel_id"`
+	CardMessageID   *string    `db:"card_message_id"`
+	Title           string     `db:"title"`
+	Description     *string    `db:"description"`
+	Symbol          string     `db:"symbol"`
+	IconURL         *string    `db:"icon_url"`
+	XP              uint64     `db:"xp"`
+	ExpiredAt       *time.Time `db:"expired_at"`
+	Verified        bool       `db:"verified"`
 }
 
 func (c *Club) randomize() {
@@ -44,6 +47,20 @@ func (c *Club) AddMember(tx *sqlx.Tx, memberID string) error {
 	return exec(tx, psql.Insert("club_members").
 		Values(c.ID, memberID).
 		Suffix("ON CONFLICT DO NOTHING"),
+	)
+}
+
+func (c *Club) MakeMemberManager(tx *sqlx.Tx, memberID string) error {
+	return exec(tx, psql.Update("club_members").
+		Where(squirrel.Eq{"club_members.user_id": memberID}).
+		Set("manager", true),
+	)
+}
+
+func (c *Club) MakeMemberUser(tx *sqlx.Tx, memberID string) error {
+	return exec(tx, psql.Update("club_members").
+		Where(squirrel.Eq{"club_members.user_id": memberID}).
+		Set("manager", false),
 	)
 }
 
@@ -90,6 +107,14 @@ func (c *Club) Delete(tx *sqlx.Tx) error {
 	)
 }
 
+func (c *Club) onClubVerified(tx *sqlx.Tx) error {
+	c.CreateRole(tx)
+	c.CreateChannel(tx)
+	// c.PostCard()
+
+	return nil
+}
+
 func (c *Club) EditDescription(tx *sqlx.Tx, desc string) error {
 	c.Description = &desc
 	return exec(tx, psql.Update("clubs").
@@ -112,6 +137,7 @@ type ClubMember struct {
 	InsertedAt *time.Time `db:"inserted_at"`
 	UpdatedAt  *time.Time `db:"updated_at"`
 	XP         uint64     `db:"xp"`
+	Manager    bool       `db:"manager"`
 }
 
 type clubs struct{}
@@ -123,12 +149,16 @@ func (c *clubs) Create(tx *sqlx.Tx, club *Club) error {
 		Suffix("RETURNING id").
 		RunWith(tx).
 		QueryRow().Scan(&club.ID)
-
 	if err != nil {
 		return err
 	}
 
-	return club.AddMember(tx, club.OwnerID)
+	err = club.AddMember(tx, club.OwnerID)
+	if err != nil {
+		return err
+	}
+
+	return club.MakeMemberManager(tx, club.OwnerID)
 }
 
 func (c *clubs) DeleteByOwner(tx *sqlx.Tx, ownerID string) error {
