@@ -1,21 +1,22 @@
 package gofakeit
 
 import (
+	"math"
 	"strconv"
 	"strings"
 )
 
 // PersonInfo is a struct of person information
 type PersonInfo struct {
-	FirstName  string          `json:"first_name"`
-	LastName   string          `json:"last_name"`
-	Gender     string          `json:"gender"`
-	SSN        string          `json:"ssn"`
-	Image      string          `json:"image"`
-	Job        *JobInfo        `json:"job"`
-	Address    *AddressInfo    `json:"address"`
-	Contact    *ContactInfo    `json:"contact"`
-	CreditCard *CreditCardInfo `json:"credit_card"`
+	FirstName  string          `json:"first_name" xml:"first_name"`
+	LastName   string          `json:"last_name" xml:"last_name"`
+	Gender     string          `json:"gender" xml:"gender"`
+	SSN        string          `json:"ssn" xml:"ssn"`
+	Image      string          `json:"image" xml:"image"`
+	Job        *JobInfo        `json:"job" xml:"job"`
+	Address    *AddressInfo    `json:"address" xml:"address"`
+	Contact    *ContactInfo    `json:"contact" xml:"contact"`
+	CreditCard *CreditCardInfo `json:"credit_card" xml:"credit_card"`
 }
 
 // Person will generate a struct with person information
@@ -74,8 +75,8 @@ func Gender() string {
 
 // ContactInfo struct full of contact info
 type ContactInfo struct {
-	Phone string `json:"phone"`
-	Email string `json:"email"`
+	Phone string `json:"phone" xml:"phone"`
+	Email string `json:"email" xml:"email"`
 }
 
 // Contact will generate a struct with information randomly populated contact information
@@ -105,8 +106,33 @@ func Email() string {
 	return strings.ToLower(email)
 }
 
+// Teams takes in an array of people and team names and randomly places the people into teams as evenly as possible
+func Teams(people []string, teams []string) map[string][]string {
+
+	// Shuffle the people if more than 1
+	if len(people) > 1 {
+		ShuffleStrings(people)
+	}
+
+	peopleIndex := 0
+	teamsOutput := make(map[string][]string)
+	numPer := math.Ceil(float64(len(people)) / float64(len(teams)))
+	for _, team := range teams {
+		teamsOutput[team] = []string{}
+		for i := 0.00; i < numPer; i++ {
+			if peopleIndex < len(people) {
+				teamsOutput[team] = append(teamsOutput[team], people[peopleIndex])
+				peopleIndex++
+			}
+		}
+	}
+
+	return teamsOutput
+}
+
 func addPersonLookup() {
-	AddLookupData("person", Info{
+	AddFuncLookup("person", Info{
+		Display:     "Person",
 		Category:    "person",
 		Description: "Random set of person info",
 		Example: `{
@@ -148,7 +174,8 @@ func addPersonLookup() {
 		},
 	})
 
-	AddLookupData("name", Info{
+	AddFuncLookup("name", Info{
+		Display:     "Name",
 		Category:    "person",
 		Description: "Random name",
 		Example:     "Markus Moen",
@@ -158,7 +185,8 @@ func addPersonLookup() {
 		},
 	})
 
-	AddLookupData("nameprefix", Info{
+	AddFuncLookup("nameprefix", Info{
+		Display:     "Name Prefix",
 		Category:    "person",
 		Description: "Random name prefix",
 		Example:     "Mr.",
@@ -168,7 +196,8 @@ func addPersonLookup() {
 		},
 	})
 
-	AddLookupData("namesuffix", Info{
+	AddFuncLookup("namesuffix", Info{
+		Display:     "Name Suffix",
 		Category:    "person",
 		Description: "Random name suffix",
 		Example:     "Jr.",
@@ -178,7 +207,8 @@ func addPersonLookup() {
 		},
 	})
 
-	AddLookupData("firstname", Info{
+	AddFuncLookup("firstname", Info{
+		Display:     "First Name",
 		Category:    "person",
 		Description: "Random first name",
 		Example:     "Markus",
@@ -188,7 +218,8 @@ func addPersonLookup() {
 		},
 	})
 
-	AddLookupData("lastname", Info{
+	AddFuncLookup("lastname", Info{
+		Display:     "Last Name",
 		Category:    "person",
 		Description: "Random last name",
 		Example:     "Daniel",
@@ -198,7 +229,8 @@ func addPersonLookup() {
 		},
 	})
 
-	AddLookupData("gender", Info{
+	AddFuncLookup("gender", Info{
+		Display:     "Gender",
 		Category:    "person",
 		Description: "Random gender",
 		Example:     "male",
@@ -208,7 +240,8 @@ func addPersonLookup() {
 		},
 	})
 
-	AddLookupData("ssn", Info{
+	AddFuncLookup("ssn", Info{
+		Display:     "SSN",
 		Category:    "person",
 		Description: "Random social security number",
 		Example:     "296446360",
@@ -218,7 +251,8 @@ func addPersonLookup() {
 		},
 	})
 
-	AddLookupData("email", Info{
+	AddFuncLookup("email", Info{
+		Display:     "Email",
 		Category:    "person",
 		Description: "Random email",
 		Example:     "markusmoen@pagac.net",
@@ -228,7 +262,8 @@ func addPersonLookup() {
 		},
 	})
 
-	AddLookupData("phone", Info{
+	AddFuncLookup("phone", Info{
+		Display:     "Phone",
 		Category:    "person",
 		Description: "Random phone number",
 		Example:     "6136459948",
@@ -238,13 +273,39 @@ func addPersonLookup() {
 		},
 	})
 
-	AddLookupData("phoneformatted", Info{
+	AddFuncLookup("phoneformatted", Info{
+		Display:     "Phone Formatted",
 		Category:    "person",
 		Description: "Random formatted phone number",
 		Example:     "136-459-9489",
 		Output:      "string",
 		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
 			return PhoneFormatted(), nil
+		},
+	})
+
+	AddFuncLookup("teams", Info{
+		Display:     "Teams",
+		Category:    "person",
+		Description: "Randomly split people into teams",
+		Example:     `{"Team 1": ["Sharon","Jeff"], "Team 2": ["Billy","Connor"]}`,
+		Output:      "map[string][]string",
+		Params: []Param{
+			{Field: "people", Display: "Strings", Type: "[]string", Description: "Array of people"},
+			{Field: "teams", Display: "Strings", Type: "[]string", Description: "Array of teams"},
+		},
+		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
+			people, err := info.GetStringArray(m, "people")
+			if err != nil {
+				return nil, err
+			}
+
+			teams, err := info.GetStringArray(m, "teams")
+			if err != nil {
+				return nil, err
+			}
+
+			return Teams(people, teams), nil
 		},
 	})
 }

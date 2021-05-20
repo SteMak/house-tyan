@@ -139,6 +139,7 @@ func (v *VoiceConnection) ChangeChannel(channelID string, mute, deaf bool) (err 
 func (v *VoiceConnection) Disconnect() (err error) {
 
 	// Send a OP4 with a nil channel to disconnect
+	v.Lock()
 	if v.sessionID != "" {
 		data := voiceChannelJoinOp{4, voiceChannelJoinData{&v.GuildID, nil, true, true}}
 		v.session.wsMutex.Lock()
@@ -146,6 +147,7 @@ func (v *VoiceConnection) Disconnect() (err error) {
 		v.session.wsMutex.Unlock()
 		v.sessionID = ""
 	}
+	v.Unlock()
 
 	// Close websocket and udp connections
 	v.Close()
@@ -346,6 +348,25 @@ func (v *VoiceConnection) wsListen(wsConn *websocket.Conn, close <-chan struct{}
 	for {
 		_, message, err := v.wsConn.ReadMessage()
 		if err != nil {
+			// 4014 indicates a manual disconnection by someone in the guild;
+			// we shouldn't reconnect.
+			if websocket.IsCloseError(err, 4014) {
+				v.log(LogInformational, "received 4014 manual disconnection")
+
+				// Abandon the voice WS connection
+				v.Lock()
+				v.wsConn = nil
+				v.Unlock()
+
+				v.session.Lock()
+				delete(v.session.VoiceConnections, v.GuildID)
+				v.session.Unlock()
+
+				v.Close()
+
+				return
+			}
+
 			// Detect if we have been closed manually. If a Close() has already
 			// happened, the websocket we are listening on will be different to the
 			// current session.

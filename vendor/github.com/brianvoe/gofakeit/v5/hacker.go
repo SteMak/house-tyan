@@ -29,13 +29,25 @@ func HackerVerb() string {
 	return getRandValue([]string{"hacker", "verb"})
 }
 
-// HackerIngverb will return a random hacker ingverb
-func HackerIngverb() string {
+// HackeringVerb will return a random hacker ingverb
+func HackeringVerb() string {
 	return getRandValue([]string{"hacker", "ingverb"})
 }
 
 func addHackerLookup() {
-	AddLookupData("hackerabbreviation", Info{
+	AddFuncLookup("hackerphrase", Info{
+		Display:     "Hacker Phrase",
+		Category:    "hacker",
+		Description: "Random hacker phrase",
+		Example:     "If we calculate the program, we can get to the AI pixel through the redundant XSS matrix!",
+		Output:      "string",
+		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
+			return HackerPhrase(), nil
+		},
+	})
+
+	AddFuncLookup("hackerabbreviation", Info{
+		Display:     "Hacker Abbreviation",
 		Category:    "hacker",
 		Description: "Random hacker abbreviation",
 		Example:     "ADP",
@@ -45,7 +57,8 @@ func addHackerLookup() {
 		},
 	})
 
-	AddLookupData("hackeradjective", Info{
+	AddFuncLookup("hackeradjective", Info{
+		Display:     "Hacker Adjective",
 		Category:    "hacker",
 		Description: "Random hacker adjective",
 		Example:     "wireless",
@@ -55,17 +68,8 @@ func addHackerLookup() {
 		},
 	})
 
-	AddLookupData("hackerverb", Info{
-		Category:    "hacker",
-		Description: "Random hacker verb",
-		Example:     "synthesize",
-		Output:      "string",
-		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
-			return HackerVerb(), nil
-		},
-	})
-
-	AddLookupData("hackernoun", Info{
+	AddFuncLookup("hackernoun", Info{
+		Display:     "Hacker Noun",
 		Category:    "hacker",
 		Description: "Random hacker noun",
 		Example:     "driver",
@@ -75,13 +79,25 @@ func addHackerLookup() {
 		},
 	})
 
-	AddLookupData("hackerphrase", Info{
+	AddFuncLookup("hackerverb", Info{
+		Display:     "Hacker Verb",
 		Category:    "hacker",
-		Description: "Random hacker phrase",
-		Example:     "If we calculate the program, we can get to the AI pixel through the redundant XSS matrix!",
+		Description: "Random hacker verb",
+		Example:     "synthesize",
 		Output:      "string",
 		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
-			return HackerPhrase(), nil
+			return HackerVerb(), nil
+		},
+	})
+
+	AddFuncLookup("hackeringverb", Info{
+		Display:     "Hackering Verb",
+		Category:    "hacker",
+		Description: "Random hackering verb",
+		Example:     "connecting",
+		Output:      "string",
+		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
+			return HackeringVerb(), nil
 		},
 	})
 }

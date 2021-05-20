@@ -3,6 +3,8 @@ package gofakeit
 import (
 	"math"
 	"math/rand"
+	"reflect"
+	"strings"
 
 	"github.com/brianvoe/gofakeit/v5/data"
 )
@@ -10,10 +12,12 @@ import (
 const lowerStr = "abcdefghijklmnopqrstuvwxyz"
 const upperStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const numericStr = "0123456789"
-const specialStr = "!@#$%&*+-=?"
-const spaceStr = "   "
+const specialStr = "!@#$%&*+-_=?:;,.|(){}<>"
+const spaceStr = " "
+const allStr = lowerStr + upperStr + numericStr + specialStr + spaceStr
 const hashtag = '#'
 const questionmark = '?'
+const base58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 
 // Check if in lib
 func dataCheck(dataVal []string) bool {
@@ -109,7 +113,12 @@ func replaceWithHexLetters(str string) string {
 
 // Generate random lowercase ASCII letter
 func randLetter() rune {
-	return rune(byte(rand.Intn(26)) + 'a')
+	allLetters := upperStr + lowerStr
+	return rune(allLetters[rand.Intn(len(allLetters))])
+}
+
+func randCharacter(s string) string {
+	return string(s[rand.Int63()%int64(len(s))])
 }
 
 // Generate random lowercase ASCII letter between a and f
@@ -147,4 +156,81 @@ func randFloat64Range(min, max float64) float64 {
 func toFixed(num float64, precision int) float64 {
 	output := math.Pow(10, float64(precision))
 	return float64(math.Floor(num*output)) / output
+}
+
+func equalSliceString(a, b []string) bool {
+	sizeA, sizeB := len(a), len(b)
+	if sizeA != sizeB {
+		return false
+	}
+
+	for i, va := range a {
+		vb := b[i]
+
+		if va != vb {
+			return false
+		}
+	}
+	return true
+}
+
+func equalSliceInt(a, b []int) bool {
+	sizeA, sizeB := len(a), len(b)
+	if sizeA != sizeB {
+		return false
+	}
+
+	for i, va := range a {
+		vb := b[i]
+
+		if va != vb {
+			return false
+		}
+	}
+	return true
+}
+
+func equalSliceInterface(a, b []interface{}) bool {
+	sizeA, sizeB := len(a), len(b)
+	if sizeA != sizeB {
+		return false
+	}
+
+	for i, va := range a {
+		if !reflect.DeepEqual(va, b[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+func funcLookupSplit(str string) []string {
+	out := []string{}
+	for str != "" {
+		if strings.HasPrefix(str, "[") {
+			startIndex := strings.Index(str, "[")
+			endIndex := strings.Index(str, "]")
+			val := str[(startIndex) : endIndex+1]
+			out = append(out, strings.TrimSpace(val))
+			str = strings.Replace(str, val, "", 1)
+
+			// Trim off comma if it has it
+			if strings.HasPrefix(str, ",") {
+				str = strings.Replace(str, ",", "", 1)
+			}
+		} else {
+			strSplit := strings.SplitN(str, ",", 2)
+			strSplitLen := len(strSplit)
+			if strSplitLen >= 1 {
+				out = append(out, strings.TrimSpace(strSplit[0]))
+			}
+			if strSplitLen >= 2 {
+				str = strSplit[1]
+			} else {
+				str = ""
+			}
+		}
+	}
+
+	return out
 }

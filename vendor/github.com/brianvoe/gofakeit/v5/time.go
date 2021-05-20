@@ -1,13 +1,14 @@
 package gofakeit
 
 import (
+	"errors"
 	"strconv"
 	"time"
 )
 
 // Date will generate a random time.Time struct
 func Date() time.Time {
-	return time.Date(Year(), time.Month(Number(0, 12)), Day(), Hour(), Minute(), Second(), NanoSecond(), time.UTC)
+	return time.Date(Year(), time.Month(Number(1, 12)), Day(), Hour(), Minute(), Second(), NanoSecond(), time.UTC)
 }
 
 // DateRange will generate a random time.Time struct between a start and end date
@@ -65,6 +66,11 @@ func TimeZoneFull() string {
 	return getRandValue([]string{"timezone", "full"})
 }
 
+// TimeZoneRegion will select a random region style timezone string, e.g. "America/Chicago"
+func TimeZoneRegion() string {
+	return getRandValue([]string{"timezone", "region"})
+}
+
 // TimeZoneAbv will select a random timezone abbreviation string
 func TimeZoneAbv() string {
 	return getRandValue([]string{"timezone", "abr"})
@@ -77,9 +83,57 @@ func TimeZoneOffset() float32 {
 }
 
 func addDateTimeLookup() {
-	// TODO: add random datetime output with various format options
+	AddFuncLookup("date", Info{
+		Display:     "Date",
+		Category:    "time",
+		Description: "Random date",
+		Example:     "2006-01-02T15:04:05Z07:00",
+		Output:      "string",
+		Params: []Param{
+			{
+				Field:       "format",
+				Display:     "Format",
+				Type:        "string",
+				Default:     "RFC3339",
+				Options:     []string{"ANSIC", "UnixDate", "RubyDate", "RFC822", "RFC822Z", "RFC850", "RFC1123", "RFC1123Z", "RFC3339", "RFC3339Nano"},
+				Description: "Date time string format output",
+			},
+		},
+		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
+			format, err := info.GetString(m, "format")
+			if err != nil {
+				return nil, err
+			}
 
-	AddLookupData("nanosecond", Info{
+			switch format {
+			case "ANSIC":
+				return Date().Format(time.ANSIC), nil
+			case "UnixDate":
+				return Date().Format(time.UnixDate), nil
+			case "RubyDate":
+				return Date().Format(time.RubyDate), nil
+			case "RFC822":
+				return Date().Format(time.RFC822), nil
+			case "RFC822Z":
+				return Date().Format(time.RFC822Z), nil
+			case "RFC850":
+				return Date().Format(time.RFC850), nil
+			case "RFC1123":
+				return Date().Format(time.RFC1123), nil
+			case "RFC1123Z":
+				return Date().Format(time.RFC1123Z), nil
+			case "RFC3339":
+				return Date().Format(time.RFC3339), nil
+			case "RFC3339Nano":
+				return Date().Format(time.RFC3339Nano), nil
+			}
+
+			return "", errors.New("Invalid format")
+		},
+	})
+
+	AddFuncLookup("nanosecond", Info{
+		Display:     "Nanosecond",
 		Category:    "time",
 		Description: "Random nanosecond",
 		Example:     "196446360",
@@ -89,7 +143,8 @@ func addDateTimeLookup() {
 		},
 	})
 
-	AddLookupData("second", Info{
+	AddFuncLookup("second", Info{
+		Display:     "Second",
 		Category:    "time",
 		Description: "Random second",
 		Example:     "43",
@@ -99,7 +154,8 @@ func addDateTimeLookup() {
 		},
 	})
 
-	AddLookupData("minute", Info{
+	AddFuncLookup("minute", Info{
+		Display:     "Minute",
 		Category:    "time",
 		Description: "Random minute",
 		Example:     "34",
@@ -109,7 +165,8 @@ func addDateTimeLookup() {
 		},
 	})
 
-	AddLookupData("hour", Info{
+	AddFuncLookup("hour", Info{
+		Display:     "Hour",
 		Category:    "time",
 		Description: "Random hour",
 		Example:     "8",
@@ -119,7 +176,8 @@ func addDateTimeLookup() {
 		},
 	})
 
-	AddLookupData("day", Info{
+	AddFuncLookup("day", Info{
+		Display:     "Day",
 		Category:    "time",
 		Description: "Random day",
 		Example:     "12",
@@ -129,7 +187,8 @@ func addDateTimeLookup() {
 		},
 	})
 
-	AddLookupData("weekday", Info{
+	AddFuncLookup("weekday", Info{
+		Display:     "Weekday",
 		Category:    "time",
 		Description: "Random week day",
 		Example:     "Friday",
@@ -139,7 +198,8 @@ func addDateTimeLookup() {
 		},
 	})
 
-	AddLookupData("year", Info{
+	AddFuncLookup("year", Info{
+		Display:     "Year",
 		Category:    "time",
 		Description: "Random year",
 		Example:     "1900",
@@ -149,7 +209,8 @@ func addDateTimeLookup() {
 		},
 	})
 
-	AddLookupData("timezone", Info{
+	AddFuncLookup("timezone", Info{
+		Display:     "Timezone",
 		Category:    "time",
 		Description: "Random timezone",
 		Example:     "Kaliningrad Standard Time",
@@ -159,9 +220,10 @@ func addDateTimeLookup() {
 		},
 	})
 
-	AddLookupData("timezoneabv", Info{
+	AddFuncLookup("timezoneabv", Info{
+		Display:     "Timezone Abbreviation",
 		Category:    "time",
-		Description: "Random abreviated timezone",
+		Description: "Random abbreviated timezone",
 		Example:     "KST",
 		Output:      "string",
 		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
@@ -169,7 +231,8 @@ func addDateTimeLookup() {
 		},
 	})
 
-	AddLookupData("timezonefull", Info{
+	AddFuncLookup("timezonefull", Info{
+		Display:     "Timezone Full",
 		Category:    "time",
 		Description: "Random full timezone",
 		Example:     "(UTC+03:00) Kaliningrad, Minsk",
@@ -179,13 +242,25 @@ func addDateTimeLookup() {
 		},
 	})
 
-	AddLookupData("timezoneoffset", Info{
+	AddFuncLookup("timezoneoffset", Info{
+		Display:     "Timezone Offset",
 		Category:    "time",
 		Description: "Random timezone offset",
 		Example:     "3",
 		Output:      "float32",
 		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
 			return TimeZoneOffset(), nil
+		},
+	})
+
+	AddFuncLookup("timezoneregion", Info{
+		Display:     "Timezone Region",
+		Category:    "time",
+		Description: "Random region timezone",
+		Example:     "America/Alaska",
+		Output:      "string",
+		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
+			return TimeZoneRegion(), nil
 		},
 	})
 

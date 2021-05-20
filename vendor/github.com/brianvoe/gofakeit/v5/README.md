@@ -1,36 +1,21 @@
 ![alt text](https://raw.githubusercontent.com/brianvoe/gofakeit/master/logo.png)
 
-# Gofakeit [![Go Report Card](https://goreportcard.com/badge/github.com/brianvoe/gofakeit)](https://goreportcard.com/report/github.com/brianvoe/gofakeit) [![Build Status](https://travis-ci.org/brianvoe/gofakeit.svg?branch=master)](https://travis-ci.org/brianvoe/gofakeit) [![codecov.io](https://codecov.io/github/brianvoe/gofakeit/branch/master/graph/badge.svg)](https://codecov.io/github/brianvoe/gofakeit) [![GoDoc](https://godoc.org/github.com/brianvoe/gofakeit?status.svg)](https://godoc.org/github.com/brianvoe/gofakeit) [![license](http://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://raw.githubusercontent.com/brianvoe/gofakeit/master/LICENSE.txt)
+# Gofakeit [![Go Report Card](https://goreportcard.com/badge/github.com/brianvoe/gofakeit)](https://goreportcard.com/report/github.com/brianvoe/gofakeit) ![Go](https://github.com/brianvoe/gofakeit/workflows/Go/badge.svg) [![codecov.io](https://codecov.io/github/brianvoe/gofakeit/branch/master/graph/badge.svg)](https://codecov.io/github/brianvoe/gofakeit) [![GoDoc](https://godoc.org/github.com/brianvoe/gofakeit?status.svg)](https://godoc.org/github.com/brianvoe/gofakeit) [![license](http://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://raw.githubusercontent.com/brianvoe/gofakeit/master/LICENSE.txt)
 Random data generator written in go
 
 <a href="https://www.buymeacoffee.com/brianvoe" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
 
-### Features
-- Every function has an example and a benchmark,
-[see benchmarks](https://github.com/brianvoe/gofakeit/blob/master/BENCHMARKS.md)
+## Features
+- [160+ Functions!!!](#functions)
+- [Struct Generator](#example-struct)
+- [Custom Functions](#example-custom-functions)
+- [Http Server](https://github.com/brianvoe/gofakeit/tree/master/cmd/gofakeitserver)
+- [Command Line Tool](https://github.com/brianvoe/gofakeit/tree/master/cmd/gofakeit)
 - Zero dependencies
-- Randomizes user defined structs
-- Numerous functions for regular use
-- Run [server](https://github.com/brianvoe/gofakeit/tree/master/cmd/gofakeitserver)
-- Run via [command line](https://github.com/brianvoe/gofakeit/tree/master/cmd/gofakeit)
+- [Benchmarks](https://github.com/brianvoe/gofakeit/blob/master/BENCHMARKS.md)
+- [Issue](https://github.com/brianvoe/gofakeit/issues)
 
-### 120+ Functions!!!
-If there is something that is generic enough missing from this package [add an issue](https://github.com/brianvoe/gofakeit/issues) and let me know what you need.
-Most of the time i'll add it!
-
-### Server
-[See Server Docs](https://github.com/brianvoe/gofakeit/tree/master/cmd/gofakeitserver)
-
-### Command Line Tool
-[See Command Line Docs](https://github.com/brianvoe/gofakeit/tree/master/cmd/gofakeit)
-
-### Seed
-If you would like to ensure randomization on initial use be sure to seed it first
-```go
-gofakeit.Seed(time.Now().UnixNano()) // or gofakeit.Seed(0)
-```
-
-### Installation
+## Installation
 ```go
 go get github.com/brianvoe/gofakeit/v5
 ```
@@ -41,18 +26,17 @@ import "github.com/brianvoe/gofakeit/v5"
 
 gofakeit.Seed(0)
 
-gofakeit.Name() // Markus Moen
-gofakeit.Email() // alaynawuckert@kozey.biz
-gofakeit.Phone() // (570)245-7485
-gofakeit.BS() // front-end
-gofakeit.BeerName() // Duvel
-gofakeit.Color() // MediumOrchid
-gofakeit.Company() // Moen, Pagac and Wuckert
+gofakeit.Name()             // Markus Moen
+gofakeit.Email()            // alaynawuckert@kozey.biz
+gofakeit.Phone()            // (570)245-7485
+gofakeit.BS()               // front-end
+gofakeit.BeerName()         // Duvel
+gofakeit.Color()            // MediumOrchid
+gofakeit.Company()          // Moen, Pagac and Wuckert
 gofakeit.CreditCardNumber() // 4287271570245748
-gofakeit.HackerPhrase() // Connecting the array won't do anything, we need to generate the haptic COM driver!
-gofakeit.JobTitle() // Director
-gofakeit.Password(true, true, true, true, true, 32) // WV10MzLxq2DX79w1omH97_0ga59j8!kj
-gofakeit.CurrencyShort() // USD
+gofakeit.HackerPhrase()     // Connecting the array won't do anything, we need to generate the haptic COM driver!
+gofakeit.JobTitle()         // Director
+gofakeit.CurrencyShort()    // USD
 // See full list below
 ```
 
@@ -62,25 +46,96 @@ import "github.com/brianvoe/gofakeit/v5"
 
 // Create structs with random injected data
 type Foo struct {
-	Bar     string
-	Int     int
-	Pointer *int
-	Name    string  `fake:"{person.first}"`
-	Skip    *string `fake:"skip"` // Set to "skip" to not generate data for
+	Bar      string
+	Int      int
+	Pointer  *int
+	Name     string  `fake:"{firstname}"`   // Any available function all lowercase
+	Sentence string  `fake:"{sentence:3}"`  // Can call with parameters
+	RandStr  string  `fake:"{randomstring:[hello,world]}"`
+	Number   string  `fake:"{number:1,10}"` // Comma separated for multiple values
+	Skip     *string `fake:"skip"`          // Set to "skip" to not generate data for
+}
+
+type FooBar struct {
+	Bars    []string `fake:"{name}"`              // Array of random size (1-10) with fake function applied
+	Foos    []Foo    `fakesize:"3"`               // Array of size specified with faked struct
+	FooBars []Foo    `fake:"{name}" fakesize:"3"` // Array of size 3 with fake function applied
 }
 
 // Pass your struct as a pointer
 var f Foo
 gofakeit.Struct(&f)
+fmt.Println(f.Bar)      // hrukpttuezptneuvunh
+fmt.Println(f.Int)      // -7825289004089916589
+fmt.Println(*f.Pointer) // -343806609094473732
+fmt.Println(f.Name)     // fred
+fmt.Println(f.Sentence) // Record river mind.
+fmt.Println(f.RandStr)  // world
+fmt.Println(f.Number)   // 4
+fmt.Println(f.Skip)     // <nil>
 
-fmt.Printf("f.Bar:%s\n", f.Bar) // f.Bar:hrukpttuezptneuvunh
-fmt.Printf("f.Int:%d\n", f.Int) // f.Int:-7825289004089916589
-fmt.Printf("f.Pointer:%d\n", *f.Pointer) // f.Pointer:-343806609094473732
-fmt.Printf("f.Name:%v\n", f.Name) // f.Name:fred
-fmt.Printf("f.Skip:%v\n", f.Skip) // f.Skip:<nil>
+var fb FooBar
+gofakeit.Struct(&fb)
+fmt.Println(fb.Bars)      // [Charlie Senger]
+fmt.Println(fb.Foos)      // [{blmfxy -2585154718894894116 0xc000317bc0 Emmy Attitude demand addition. hello 3 <nil>} {cplbf -1722374676852125164 0xc000317cb0 Viva Addition option link. hello 7 <nil>}]
+
 ```
 
-## Person
+## Example Custom Functions
+```go
+// Simple
+AddFuncLookup("friendname", Info{
+	Category:    "custom",
+	Description: "Random friend name",
+	Example:     "bill",
+	Output:      "string",
+	Call: func(m *map[string][]string, info *Info) (interface{}, error) {
+		return RandomString([]string{"bill", "bob", "sally"}), nil
+	},
+})
+
+// With Params
+AddFuncLookup("jumbleword", Info{
+	Category:    "jumbleword",
+	Description: "Take a word and jumple it up",
+	Example:     "loredlowlh",
+	Output:      "string",
+	Params: []Param{
+		{Field: "word", Type: "int", Description: "Word you want to jumble"},
+	},
+	Call: func(m *map[string][]string, info *Info) (interface{}, error) {
+		word, err := info.GetString(m, "word")
+		if err != nil {
+			return nil, err
+		}
+
+		split := strings.Split(word, "")
+		ShuffleStrings(split)
+		return strings.Join(split, ""), nil
+	},
+})
+
+type Foo struct {
+	FriendName string `fake:"{friendname}"`
+	JumbleWord string `fake:"{jumbleword:helloworld}"`
+}
+
+var f Foo
+Struct(&f)
+fmt.Printf("%s", f.FriendName) // bill
+fmt.Printf("%s", f.JumbleWord) // loredlowlh
+```
+
+## Functions
+### File
+```go
+JSON(jo *JSONOptions) []byte
+XML(xo *XMLOptions) []byte
+Extension() string
+MimeType() string
+```
+
+### Person
 ```go
 Person() *PersonInfo
 Name() string
@@ -94,22 +149,23 @@ Contact() *ContactInfo
 Email() string
 Phone() string
 PhoneFormatted() string
+Teams(people []string, teams []string) map[string][]string
 ```
 
-## Generate
+### Generate
 ```go
 Struct(v interface{})
 Map() map[string]interface{}
 Generate(value string) string
 ```
 
-## Auth
+### Auth
 ```go
 Username() string
 Password(lower bool, upper bool, numeric bool, special bool, space bool, num int) string
 ```
 
-## Address
+### Address
 ```go
 Address() *AddressInfo
 City() string
@@ -129,7 +185,12 @@ Longitude() float64
 LongitudeInRange(min, max float64) (float64, error)
 ```
 
-## Beer
+### Game
+```go
+Gamertag() string
+```
+
+### Beer
 ```go
 BeerAlcohol() string
 BeerBlg() string
@@ -141,7 +202,7 @@ BeerStyle() string
 BeerYeast() string
 ```
 
-## Cars
+### Cars
 ```go
 Vehicle() *VehicleInfo
 CarMaker() string
@@ -151,22 +212,42 @@ FuelType() string
 TransmissionGearType() string
 ```
 
-## Words
+### Words
 ```go
+Noun() string
+Verb() string
+Adverb() string
+Preposition() string
+Adjective() string
 Word() string
 Sentence(wordCount int) string
 Paragraph(paragraphCount int, sentenceCount int, wordCount int, separator string) string
+LoremIpsumWord() string
+LoremIpsumSentence(wordCount int) string
+LoremIpsumParagraph(paragraphCount int, sentenceCount int, wordCount int, separator string) string
 Question() string
 Quote() string
+Phrase() string
 ```
 
-## Misc
+### Foods
+```go
+Fruit() string
+Vegetable() string
+Breakfast() string
+Lunch() string
+Dinner() string
+Snack() string
+Dessert() string
+```
+
+### Misc
 ```go
 Bool() bool
 UUID() string
 ```
 
-## Colors
+### Colors
 ```go
 Color() string
 HexColor() string
@@ -174,7 +255,7 @@ RGBColor() []int
 SafeColor() string
 ```
 
-## Internet
+### Internet
 ```go
 URL() string
 ImageURL(width int, height int) string
@@ -193,7 +274,7 @@ OperaUserAgent() string
 SafariUserAgent() string
 ```
 
-## Date/Time
+### Date/Time
 ```go
 Date() time.Time
 DateRange(start, end time.Time) time.Time
@@ -209,23 +290,27 @@ TimeZone() string
 TimeZoneAbv() string
 TimeZoneFull() string
 TimeZoneOffset() float32
+TimeZoneRegion() string
 ```
 
-## Payment
+### Payment
 ```go
 Price(min, max float64) float64
 CreditCard() *CreditCardInfo
 CreditCardCvv() string
 CreditCardExp() string
-CreditCardNumber() int
-CreditCardNumberLuhn() int
+CreditCardNumber(*CreditCardOptions) string
 CreditCardType() string
 Currency() *CurrencyInfo
 CurrencyLong() string
 CurrencyShort() string
+AchRouting() string
+AchAccount() string
+BitcoinAddress() string
+BitcoinPrivateKey() string
 ```
 
-## Company
+### Company
 ```go
 BS() string
 BuzzWord() string
@@ -237,7 +322,7 @@ JobLevel() string
 JobTitle() string
 ```
 
-## Hacker
+### Hacker
 ```go
 HackerAbbreviation() string
 HackerAdjective() string
@@ -247,14 +332,21 @@ HackerPhrase() string
 HackerVerb() string
 ```
 
-## Hipster
+### Hipster
 ```go
 HipsterWord() string
 HipsterSentence(wordCount int) string
 HipsterParagraph(paragraphCount int, sentenceCount int, wordCount int, separator string) string
 ```
 
-## Animal
+### App
+```go
+AppName() string
+AppVersion() string
+AppAuthor() string
+```
+
+### Animal
 ```go
 PetName() string
 Animal() string
@@ -264,7 +356,7 @@ Cat() string
 Dog() string
 ```
 
-## Emoji
+### Emoji
 ```go
 Emoji() string // 🤣
 EmojiDescription() string // winking face
@@ -273,7 +365,7 @@ EmojiAlias() string // smiley
 EmojiTag() string // happy
 ```
 
-## Languages
+### Languages
 ```go
 Language() string
 LanguageAbbreviation() string
@@ -281,13 +373,7 @@ ProgrammingLanguage() string
 ProgrammingLanguageBest() string
 ```
 
-## File
-```go
-Extension() string
-MimeType() string
-```
-
-## Numbers
+### Numbers
 ```go
 Number(min int, max int) int
 Int8() int8
@@ -303,14 +389,17 @@ Float32Range(min, max float32) float32
 Float64() float64
 Float64Range(min, max float64) float64
 ShuffleInts(a []int)
+RandomInt(i []int) int
 ```
 
-## String
+### String
 ```go
 Digit() string
+DigitN(n int) string
 Letter() string
+LetterN(n int) string
 Lexify(str string) string
 Numerify(str string) string
-RandString(a []string) string
 ShuffleStrings(a []string)
+RandomString(a []string) string
 ```
