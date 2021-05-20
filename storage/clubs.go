@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Masterminds/squirrel"
+
 	"github.com/brianvoe/gofakeit/v5"
 	"github.com/jmoiron/sqlx"
 )
@@ -107,12 +108,20 @@ func (c *Club) Delete(tx *sqlx.Tx) error {
 	)
 }
 
-func (c *Club) onClubVerified(tx *sqlx.Tx) error {
-	c.CreateRole(tx)
-	c.CreateChannel(tx)
-	// c.PostCard()
+func (c *Club) EditRoleID(tx *sqlx.Tx, roleID string) error {
+	c.RoleID = &roleID
+	return exec(tx, psql.Update("clubs").
+		Where(squirrel.Eq{"id": c.ID}).
+		Set("role_id", roleID),
+	)
+}
 
-	return nil
+func (c *Club) EditChannelID(tx *sqlx.Tx, channelID string) error {
+	c.ChannelID = &channelID
+	return exec(tx, psql.Update("clubs").
+		Where(squirrel.Eq{"id": c.ID}).
+		Set("channel_id", channelID),
+	)
 }
 
 func (c *Club) EditDescription(tx *sqlx.Tx, desc string) error {

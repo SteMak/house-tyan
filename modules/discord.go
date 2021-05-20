@@ -149,3 +149,35 @@ func SendGood(channelID string, title, msg string) {
 
 	Send(channelID, "good.xml", data, nil)
 }
+
+func CreateRole(title string, color int, hoist bool, perm int64, mention bool) *discordgo.Role {
+	role, err := session.GuildRoleCreate(config.Bot.GuildID)
+	if err != nil {
+		out.Err(true, errors.WithStack(err))
+		return nil
+	}
+
+	role, err = session.GuildRoleEdit(config.Bot.GuildID, role.ID, title, color, hoist, perm, mention)
+	if err != nil {
+		out.Err(true, errors.WithStack(err))
+		return nil
+	}
+
+	return role
+}
+
+func CreateChannel(title string, channelType discordgo.ChannelType, topic, parent string, permissions []*discordgo.PermissionOverwrite) *discordgo.Channel {
+	channel, err := session.GuildChannelCreateComplex(config.Bot.GuildID, discordgo.GuildChannelCreateData{
+		Name:                 title,
+		Type:                 channelType,
+		Topic:                topic,
+		ParentID:             parent,
+		PermissionOverwrites: permissions,
+	})
+	if err != nil {
+		out.Err(true, errors.WithStack(err))
+		return nil
+	}
+
+	return channel
+}
