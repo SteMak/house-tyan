@@ -17,6 +17,14 @@ func (bot *module) middlewareChannel(ctx *dgutils.MessageContext) {
 	ctx.Next()
 }
 
+func (bot *module) middlewareArgsPresented(ctx *dgutils.MessageContext) {
+	if len(ctx.Args) == 0 {
+		modules.SendFail(ctx.Message.ChannelID, "Вы не ввели описание", "Введите описание, чтобы эта команда обрела свою былую мощь.")
+		return
+	}
+	ctx.Next()
+}
+
 func (bot *module) middlewareClubOwner(ctx *dgutils.MessageContext) {
 	club, err := storage.Clubs.GetClubByUser(ctx.Message.Author.ID)
 	if err != nil {
@@ -30,6 +38,27 @@ func (bot *module) middlewareClubOwner(ctx *dgutils.MessageContext) {
 
 	if club.OwnerID != ctx.Message.Author.ID {
 		modules.SendFail(ctx.Message.ChannelID, "Вы не владелец клуба", "Станьте главой клуба, тогда вы сможете удалить его.")
+		return
+	}
+
+	ctx.SetParam("club", club)
+
+	ctx.Next()
+}
+
+func (bot *module) middlewareNotClubOwner(ctx *dgutils.MessageContext) {
+	club, err := storage.Clubs.GetClubByUser(ctx.Message.Author.ID)
+	if err != nil {
+		return
+	}
+
+	if club == nil {
+		modules.SendFail(ctx.Message.ChannelID, "Вы не состоите в клубе", "Вступите в клуб, чтобы его покинуть.")
+		return
+	}
+
+	if club.OwnerID == ctx.Message.Author.ID {
+		modules.SendFail(ctx.Message.ChannelID, "Вы владелец клуба", "Передайте главу или удалите клуб, тогда у нас с Вами не будет ничего общего.")
 		return
 	}
 

@@ -42,6 +42,7 @@ var (
 					Raw: true,
 					Handlers: []func(*dgutils.MessageContext){
 						_module.middlewareChannel,
+						_module.middlewareArgsPresented,
 						_module.middlewareClubOwner,
 					},
 					Function: _module.onClubEditDescription,
@@ -54,6 +55,14 @@ var (
 						_module.middlewareClubKick,
 					},
 					Function: _module.onClubKick,
+				},
+				"leave": &dgutils.Command{
+					Raw: true,
+					Handlers: []func(*dgutils.MessageContext){
+						_module.middlewareChannel,
+						_module.middlewareNotClubOwner,
+					},
+					Function: _module.onClubLeave,
 				},
 				"apply": &dgutils.Command{
 					Raw: true,
@@ -159,6 +168,38 @@ func (bot *module) onClubKick(ctx *dgutils.MessageContext) {
 
 	club := ctx.Param("club").(*storage.Club)
 	userID := ctx.Param("userID").(string)
+
+	err = club.DeleteMember(tx, userID)
+	if err != nil {
+		go out.Err(true, err)
+		go modules.SendFail(ctx.Message.ChannelID, "Ошибка удаления учасника", "Попробуйте снова позже.")
+		go log.Error(err)
+		tx.Rollback()
+		return
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		go out.Err(true, err)
+		go modules.SendFail(ctx.Message.ChannelID, "База крашнулась на закрытии", "Попробуйте снова позже.")
+		go log.Error(err)
+		return
+	}
+
+	modules.SendGood(ctx.Message.ChannelID, "Участник исключён", "Стирание прошло успешно")
+}
+
+func (bot *module) onClubLeave(ctx *dgutils.MessageContext) {
+	tx, err := storage.Tx()
+	if err != nil {
+		go out.Err(true, err)
+		go modules.SendFail(ctx.Message.ChannelID, "База крашнулась на открытии", "Попробуйте снова позже.")
+		go log.Error(err)
+		return
+	}
+
+	club := ctx.Param("club").(*storage.Club)
+	userID := ctx.Message.Author.ID
 
 	err = club.DeleteMember(tx, userID)
 	if err != nil {
