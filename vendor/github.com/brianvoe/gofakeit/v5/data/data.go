@@ -12,7 +12,6 @@ var Data = map[string]map[string][]string{
 	"file":      Files,
 	"color":     Colors,
 	"computer":  Computer,
-	"payment":   Payment,
 	"hipster":   Hipster,
 	"beer":      Beer,
 	"hacker":    Hacker,
@@ -22,6 +21,8 @@ var Data = map[string]map[string][]string{
 	"timezone":  TimeZone,
 	"car":       Car,
 	"emoji":     Emoji,
+	"word":      Word,
+	"food":      Food,
 }
 
 // IntData consists of the main set of fake information (integer only)

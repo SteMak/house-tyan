@@ -9,6 +9,8 @@ bot:
     console: "691362207300321381"
     errors: "691362207300321381"
     logs: "691362207300321381"
+    cards: "843526647043063818"
+    category: "843556564702461963"
   templates: ./assets/templates/
 cache:
   path: ./cache/

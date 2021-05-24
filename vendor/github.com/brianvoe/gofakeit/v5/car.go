@@ -2,12 +2,12 @@ package gofakeit
 
 // CarInfo is a struct dataset of all car information
 type CarInfo struct {
-	Type         string `json:"type"`
-	Fuel         string `json:"fuel"`
-	Transmission string `json:"transmission"`
-	Brand        string `json:"brand"`
-	Model        string `json:"model"`
-	Year         int    `json:"year"`
+	Type         string `json:"type" xml:"type"`
+	Fuel         string `json:"fuel" xml:"fuel"`
+	Transmission string `json:"transmission" xml:"transmission"`
+	Brand        string `json:"brand" xml:"brand"`
+	Model        string `json:"model" xml:"model"`
+	Year         int    `json:"year" xml:"year"`
 }
 
 // Car will generate a struct with car information
@@ -49,7 +49,8 @@ func CarModel() string {
 }
 
 func addCarLookup() {
-	AddLookupData("car", Info{
+	AddFuncLookup("car", Info{
+		Display:     "Car",
 		Category:    "car",
 		Description: "Random car set of data",
 		Output:      "map[string]interface",
@@ -59,7 +60,8 @@ func addCarLookup() {
 		},
 	})
 
-	AddLookupData("cartype", Info{
+	AddFuncLookup("cartype", Info{
+		Display:     "Car Type",
 		Category:    "car",
 		Description: "Random car type",
 		Example:     "Passenger car mini",
@@ -69,7 +71,8 @@ func addCarLookup() {
 		},
 	})
 
-	AddLookupData("carfueltype", Info{
+	AddFuncLookup("carfueltype", Info{
+		Display:     "Car Fuel Type",
 		Category:    "car",
 		Description: "Random car fuel type",
 		Example:     "CNG",
@@ -79,7 +82,8 @@ func addCarLookup() {
 		},
 	})
 
-	AddLookupData("cartransmissiontype", Info{
+	AddFuncLookup("cartransmissiontype", Info{
+		Display:     "Car Transmission Type",
 		Category:    "car",
 		Description: "Random car transmission type",
 		Example:     "Manual",
@@ -89,7 +93,8 @@ func addCarLookup() {
 		},
 	})
 
-	AddLookupData("carmaker", Info{
+	AddFuncLookup("carmaker", Info{
+		Display:     "Car Maker",
 		Category:    "car",
 		Description: "Random car maker",
 		Example:     "Nissan",
@@ -99,7 +104,8 @@ func addCarLookup() {
 		},
 	})
 
-	AddLookupData("carmodel", Info{
+	AddFuncLookup("carmodel", Info{
+		Display:     "Car Model",
 		Category:    "car",
 		Description: "Random car model",
 		Example:     "Aveo",

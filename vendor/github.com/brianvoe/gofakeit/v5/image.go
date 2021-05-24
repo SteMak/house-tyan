@@ -47,14 +47,15 @@ func ImagePng(width int, height int) []byte {
 }
 
 func addImageLookup() {
-	AddLookupData("imageurl", Info{
+	AddFuncLookup("imageurl", Info{
+		Display:     "Image URL",
 		Category:    "image",
 		Description: "Random image url",
 		Example:     "https://picsum.photos/500/500",
 		Output:      "string",
 		Params: []Param{
-			{Field: "width", Type: "int", Default: "500", Description: "Image width"},
-			{Field: "height", Type: "int", Default: "500", Description: "Image height"},
+			{Field: "width", Display: "Width", Type: "int", Default: "500", Description: "Image width in px"},
+			{Field: "height", Display: "Height", Type: "int", Default: "500", Description: "Image height in px"},
 		},
 		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
 			width, err := info.GetInt(m, "width")
@@ -77,14 +78,15 @@ func addImageLookup() {
 		},
 	})
 
-	AddLookupData("imagejpeg", Info{
+	AddFuncLookup("imagejpeg", Info{
+		Display:     "Image JPEG",
 		Category:    "image",
 		Description: "Random jpeg image",
 		Example:     "file.jpeg - bytes",
 		Output:      "[]byte",
 		Params: []Param{
-			{Field: "width", Type: "int", Default: "500", Description: "Image width"},
-			{Field: "height", Type: "int", Default: "500", Description: "Image height"},
+			{Field: "width", Display: "Width", Type: "int", Default: "500", Description: "Image width in px"},
+			{Field: "height", Display: "Height", Type: "int", Default: "500", Description: "Image height in px"},
 		},
 		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
 			width, err := info.GetInt(m, "width")
@@ -107,14 +109,15 @@ func addImageLookup() {
 		},
 	})
 
-	AddLookupData("imagepng", Info{
+	AddFuncLookup("imagepng", Info{
+		Display:     "Image PNG",
 		Category:    "image",
 		Description: "Random png image",
 		Example:     "file.png - bytes",
 		Output:      "[]byte",
 		Params: []Param{
-			{Field: "width", Type: "int", Default: "500", Description: "Image width"},
-			{Field: "height", Type: "int", Default: "500", Description: "Image height"},
+			{Field: "width", Display: "Width", Type: "int", Default: "500", Description: "Image width in px"},
+			{Field: "height", Display: "Height", Type: "int", Default: "500", Description: "Image height in px"},
 		},
 		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
 			width, err := info.GetInt(m, "width")

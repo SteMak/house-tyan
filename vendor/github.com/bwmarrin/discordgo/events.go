@@ -139,8 +139,11 @@ type GuildEmojisUpdate struct {
 
 // A GuildMembersChunk is the data for a GuildMembersChunk event.
 type GuildMembersChunk struct {
-	GuildID string    `json:"guild_id"`
-	Members []*Member `json:"members"`
+	GuildID    string      `json:"guild_id"`
+	Members    []*Member   `json:"members"`
+	ChunkIndex int         `json:"chunk_index"`
+	ChunkCount int         `json:"chunk_count"`
+	Presences  []*Presence `json:"presences,omitempty"`
 }
 
 // GuildIntegrationsUpdate is the data for a GuildIntegrationsUpdate event.
@@ -169,6 +172,7 @@ type MessageUpdate struct {
 // MessageDelete is the data for a MessageDelete event.
 type MessageDelete struct {
 	*Message
+	BeforeDelete *Message `json:"-"`
 }
 
 // MessageReactionAdd is the data for a MessageReactionAdd event.
@@ -192,8 +196,7 @@ type PresencesReplace []*Presence
 // PresenceUpdate is the data for a PresenceUpdate event.
 type PresenceUpdate struct {
 	Presence
-	GuildID string   `json:"guild_id"`
-	Roles   []string `json:"roles"`
+	GuildID string `json:"guild_id"`
 }
 
 // Resumed is the data for a Resumed event.
@@ -248,6 +251,8 @@ type VoiceServerUpdate struct {
 // VoiceStateUpdate is the data for a VoiceStateUpdate event.
 type VoiceStateUpdate struct {
 	*VoiceState
+	// BeforeUpdate will be nil if the VoiceState was not previously cached in the state cache.
+	BeforeUpdate *VoiceState `json:"-"`
 }
 
 // MessageDeleteBulk is the data for a MessageDeleteBulk event

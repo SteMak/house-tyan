@@ -31,7 +31,8 @@ func Dog() string {
 }
 
 func addAnimalLookup() {
-	AddLookupData("petname", Info{
+	AddFuncLookup("petname", Info{
+		Display:     "Pet Name",
 		Category:    "animal",
 		Description: "Random pet name",
 		Example:     "Ozzy Pawsborne",
@@ -41,7 +42,8 @@ func addAnimalLookup() {
 		},
 	})
 
-	AddLookupData("animal", Info{
+	AddFuncLookup("animal", Info{
+		Display:     "Animal",
 		Category:    "animal",
 		Description: "Random animal",
 		Example:     "elk",
@@ -51,7 +53,8 @@ func addAnimalLookup() {
 		},
 	})
 
-	AddLookupData("animaltype", Info{
+	AddFuncLookup("animaltype", Info{
+		Display:     "Animal Type",
 		Category:    "animal",
 		Description: "Random animal type",
 		Example:     "amphibians",
@@ -61,7 +64,8 @@ func addAnimalLookup() {
 		},
 	})
 
-	AddLookupData("farmanimal", Info{
+	AddFuncLookup("farmanimal", Info{
+		Display:     "Farm Animal",
 		Category:    "animal",
 		Description: "Random farm animal",
 		Example:     "Chicken",
@@ -71,7 +75,8 @@ func addAnimalLookup() {
 		},
 	})
 
-	AddLookupData("cat", Info{
+	AddFuncLookup("cat", Info{
+		Display:     "Cat",
 		Category:    "animal",
 		Description: "Random cat type",
 		Example:     "Chausie",
@@ -81,7 +86,8 @@ func addAnimalLookup() {
 		},
 	})
 
-	AddLookupData("dog", Info{
+	AddFuncLookup("dog", Info{
+		Display:     "Dog",
 		Category:    "animal",
 		Description: "Random dog type",
 		Example:     "Norwich Terrier",

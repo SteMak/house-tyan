@@ -26,7 +26,8 @@ func EmojiTag() string {
 }
 
 func addEmojiLookup() {
-	AddLookupData("emoji", Info{
+	AddFuncLookup("emoji", Info{
+		Display:     "Emoji",
 		Category:    "emoji",
 		Description: "Random emoji",
 		Example:     "🤣",
@@ -36,7 +37,8 @@ func addEmojiLookup() {
 		},
 	})
 
-	AddLookupData("emojidescription", Info{
+	AddFuncLookup("emojidescription", Info{
+		Display:     "Emoji Description",
 		Category:    "emoji",
 		Description: "Random emoji description",
 		Example:     "face vomiting",
@@ -46,7 +48,8 @@ func addEmojiLookup() {
 		},
 	})
 
-	AddLookupData("emojicategory", Info{
+	AddFuncLookup("emojicategory", Info{
+		Display:     "Emoji Category",
 		Category:    "emoji",
 		Description: "Random emoji category",
 		Example:     "Smileys & Emotion",
@@ -56,7 +59,8 @@ func addEmojiLookup() {
 		},
 	})
 
-	AddLookupData("emojialias", Info{
+	AddFuncLookup("emojialias", Info{
+		Display:     "Emoji Alias",
 		Category:    "emoji",
 		Description: "Random emoji alias",
 		Example:     "smile",
@@ -66,7 +70,8 @@ func addEmojiLookup() {
 		},
 	})
 
-	AddLookupData("emojitag", Info{
+	AddFuncLookup("emojitag", Info{
+		Display:     "Emoji Tag",
 		Category:    "emoji",
 		Description: "Random emoji tag",
 		Example:     "happy",

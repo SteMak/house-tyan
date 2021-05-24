@@ -12,20 +12,31 @@ var lockFuncLookups sync.Mutex
 
 // Info structures fields to better break down what each one generates
 type Info struct {
+	Display     string                                                        `json:"display"`
 	Category    string                                                        `json:"category"`
 	Description string                                                        `json:"description"`
 	Example     string                                                        `json:"example"`
 	Output      string                                                        `json:"output"`
+	Data        map[string]string                                             `json:"-"`
 	Params      []Param                                                       `json:"params"`
 	Call        func(m *map[string][]string, info *Info) (interface{}, error) `json:"-"`
 }
 
 // Param is a breakdown of param requirements and type definition
 type Param struct {
-	Field       string `json:"field"`
-	Type        string `json:"type"`
-	Default     string `json:"default"`
-	Description string `json:"description"`
+	Field       string   `json:"field"`
+	Display     string   `json:"display"`
+	Type        string   `json:"type"`
+	Default     string   `json:"default"`
+	Options     []string `json:"options"`
+	Description string   `json:"description"`
+}
+
+// Field is used for defining what name and function you to generate for file outuputs
+type Field struct {
+	Name     string              `json:"name"`
+	Function string              `json:"function"`
+	Params   map[string][]string `json:"params"`
 }
 
 // init will add all the functions to MapLookups
@@ -47,32 +58,50 @@ func init() {
 	addHipsterLookup()
 	addLanguagesLookup()
 	addFileLookup()
+	addFileJSONLookup()
+	addFileXMLLookup()
+	addFileCSVLookup()
 	addEmojiLookup()
 	addImageLookup()
 	addNumberLookup()
 	addStringLookup()
 	addAnimalLookup()
+	addGameLookup()
+	addFoodLookup()
+	addAppLookup()
 }
 
-// AddLookupData takes a field and adds it to map
-func AddLookupData(field string, info Info) {
+// AddFuncLookup takes a field and adds it to map
+func AddFuncLookup(functionName string, info Info) {
 	if FuncLookups == nil {
 		FuncLookups = make(map[string]Info)
 	}
 
 	lockFuncLookups.Lock()
-	FuncLookups[field] = info
+	FuncLookups[functionName] = info
 	lockFuncLookups.Unlock()
 }
 
-// GetLookupData will lookup
-func GetLookupData(field string) *Info {
-	info, ok := FuncLookups[field]
+// GetFuncLookup will lookup
+func GetFuncLookup(functionName string) *Info {
+	info, ok := FuncLookups[functionName]
 	if !ok {
 		return nil
 	}
 
 	return &info
+}
+
+// RemoveFuncLookup will remove a function from lookup
+func RemoveFuncLookup(functionName string) {
+	_, ok := FuncLookups[functionName]
+	if !ok {
+		return
+	}
+
+	lockFuncLookups.Lock()
+	delete(FuncLookups, functionName)
+	lockFuncLookups.Unlock()
 }
 
 // GetField will retrieve field from data

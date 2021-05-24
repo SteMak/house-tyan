@@ -8,14 +8,14 @@ import (
 
 // AddressInfo is a struct full of address information
 type AddressInfo struct {
-	Address   string  `json:"address"`
-	Street    string  `json:"street"`
-	City      string  `json:"city"`
-	State     string  `json:"state"`
-	Zip       string  `json:"zip"`
-	Country   string  `json:"country"`
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
+	Address   string  `json:"address" xml:"address"`
+	Street    string  `json:"street" xml:"street"`
+	City      string  `json:"city" xml:"city"`
+	State     string  `json:"state" xml:"state"`
+	Zip       string  `json:"zip" xml:"zip"`
+	Country   string  `json:"country" xml:"country"`
+	Latitude  float64 `json:"latitude" xml:"latitude"`
+	Longitude float64 `json:"longitude" xml:"longitude"`
 }
 
 // Address will generate a struct of address information
@@ -41,9 +41,9 @@ func Address() *AddressInfo {
 func Street() (street string) {
 	switch randInt := randIntRange(1, 2); randInt {
 	case 1:
-		street = StreetNumber() + " " + StreetPrefix() + " " + StreetName() + StreetSuffix()
+		street = StreetNumber() + " " + StreetPrefix() + " " + StreetName() + " " + StreetSuffix()
 	case 2:
-		street = StreetNumber() + " " + StreetName() + StreetSuffix()
+		street = StreetNumber() + " " + StreetName() + " " + StreetSuffix()
 	}
 
 	return
@@ -131,7 +131,28 @@ func LongitudeInRange(min, max float64) (float64, error) {
 }
 
 func addAddressLookup() {
-	AddLookupData("city", Info{
+	AddFuncLookup("address", Info{
+		Display:     "Address",
+		Category:    "address",
+		Description: "Random set of address info",
+		Example: `{
+			address: "364 East Rapidsborough, Rutherfordstad, New Jersey 36906",
+			street: "364 East Rapidsborough",
+			city: "Rutherfordstad",
+			state: "New Jersey",
+			zip: "36906",
+			country: "South Africa",
+			latitude: "23.058758",
+			longitude: "89.022594"
+		}`,
+		Output: "map[string]interface",
+		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
+			return Address(), nil
+		},
+	})
+
+	AddFuncLookup("city", Info{
+		Display:     "City",
 		Category:    "address",
 		Description: "Random city",
 		Example:     "Marcelside",
@@ -141,7 +162,8 @@ func addAddressLookup() {
 		},
 	})
 
-	AddLookupData("country", Info{
+	AddFuncLookup("country", Info{
+		Display:     "Country",
 		Category:    "address",
 		Description: "Random country",
 		Example:     "United States of America",
@@ -151,7 +173,8 @@ func addAddressLookup() {
 		},
 	})
 
-	AddLookupData("countryabr", Info{
+	AddFuncLookup("countryabr", Info{
+		Display:     "Country Abbreviation",
 		Category:    "address",
 		Description: "Random 2 digit country abbreviation",
 		Example:     "US",
@@ -161,7 +184,8 @@ func addAddressLookup() {
 		},
 	})
 
-	AddLookupData("state", Info{
+	AddFuncLookup("state", Info{
+		Display:     "State",
 		Category:    "address",
 		Description: "Random state",
 		Example:     "Illinois",
@@ -171,7 +195,8 @@ func addAddressLookup() {
 		},
 	})
 
-	AddLookupData("stateabr", Info{
+	AddFuncLookup("stateabr", Info{
+		Display:     "State Abbreviation",
 		Category:    "address",
 		Description: "Random 2 digit state abbreviation",
 		Example:     "IL",
@@ -181,7 +206,8 @@ func addAddressLookup() {
 		},
 	})
 
-	AddLookupData("street", Info{
+	AddFuncLookup("street", Info{
+		Display:     "Street",
 		Category:    "address",
 		Description: "Random full street",
 		Example:     "364 East Rapidsborough",
@@ -191,7 +217,8 @@ func addAddressLookup() {
 		},
 	})
 
-	AddLookupData("streetname", Info{
+	AddFuncLookup("streetname", Info{
+		Display:     "Street Name",
 		Category:    "address",
 		Description: "Random street name",
 		Example:     "View",
@@ -201,7 +228,8 @@ func addAddressLookup() {
 		},
 	})
 
-	AddLookupData("streetnumber", Info{
+	AddFuncLookup("streetnumber", Info{
+		Display:     "Street Number",
 		Category:    "address",
 		Description: "Random street number",
 		Example:     "13645",
@@ -211,7 +239,8 @@ func addAddressLookup() {
 		},
 	})
 
-	AddLookupData("streetprefix", Info{
+	AddFuncLookup("streetprefix", Info{
+		Display:     "Street Prefix",
 		Category:    "address",
 		Description: "Random street prefix",
 		Example:     "Lake",
@@ -221,7 +250,8 @@ func addAddressLookup() {
 		},
 	})
 
-	AddLookupData("streetsuffix", Info{
+	AddFuncLookup("streetsuffix", Info{
+		Display:     "Street Suffix",
 		Category:    "address",
 		Description: "Random street suffix",
 		Example:     "land",
@@ -231,7 +261,8 @@ func addAddressLookup() {
 		},
 	})
 
-	AddLookupData("zip", Info{
+	AddFuncLookup("zip", Info{
+		Display:     "Zip",
 		Category:    "address",
 		Description: "Random street zip",
 		Example:     "13645",
@@ -241,7 +272,8 @@ func addAddressLookup() {
 		},
 	})
 
-	AddLookupData("latitude", Info{
+	AddFuncLookup("latitude", Info{
+		Display:     "Latitude",
 		Category:    "address",
 		Description: "Random latitude",
 		Example:     "-73.534056",
@@ -251,14 +283,15 @@ func addAddressLookup() {
 		},
 	})
 
-	AddLookupData("latituderange", Info{
+	AddFuncLookup("latituderange", Info{
+		Display:     "Latitude Range",
 		Category:    "address",
 		Description: "Random latitude between given range",
 		Example:     "22.921026",
 		Output:      "float",
 		Params: []Param{
-			{Field: "min", Type: "float", Default: "0", Description: "Minimum range"},
-			{Field: "max", Type: "float", Default: "90", Description: "Maximum range"},
+			{Field: "min", Display: "Min", Type: "float", Default: "0", Description: "Minimum range"},
+			{Field: "max", Display: "Max", Type: "float", Default: "90", Description: "Maximum range"},
 		},
 		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
 			min, err := info.GetFloat64(m, "min")
@@ -280,7 +313,8 @@ func addAddressLookup() {
 		},
 	})
 
-	AddLookupData("longitude", Info{
+	AddFuncLookup("longitude", Info{
+		Display:     "Longitude",
 		Category:    "address",
 		Description: "Random longitude",
 		Example:     "-147.068112",
@@ -290,14 +324,15 @@ func addAddressLookup() {
 		},
 	})
 
-	AddLookupData("longituderange", Info{
+	AddFuncLookup("longituderange", Info{
+		Display:     "Longitude Range",
 		Category:    "address",
 		Description: "Random longitude between given range",
 		Example:     "-8.170450",
 		Output:      "float",
 		Params: []Param{
-			{Field: "min", Type: "float", Default: "0", Description: "Minimum range"},
-			{Field: "max", Type: "float", Default: "180", Description: "Maximum range"},
+			{Field: "min", Display: "Min", Type: "float", Default: "0", Description: "Minimum range"},
+			{Field: "max", Display: "Max", Type: "float", Default: "180", Description: "Maximum range"},
 		},
 		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
 			min, err := info.GetFloat64(m, "min")

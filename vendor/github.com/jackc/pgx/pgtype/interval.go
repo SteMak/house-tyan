@@ -34,8 +34,6 @@ func (dst *Interval) Set(src interface{}) error {
 	switch value := src.(type) {
 	case time.Duration:
 		*dst = Interval{Microseconds: int64(value) / 1000, Status: Present}
-	case int64:
-		*dst = Interval{Microseconds: value / 1000, Status: Present}
 	default:
 		if originalSrc, ok := underlyingPtrType(src); ok {
 			return dst.Set(originalSrc)

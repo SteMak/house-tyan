@@ -67,7 +67,8 @@ func Password(lower bool, upper bool, numeric bool, special bool, space bool, nu
 }
 
 func addAuthLookup() {
-	AddLookupData("username", Info{
+	AddFuncLookup("username", Info{
+		Display:     "Username",
 		Category:    "auth",
 		Description: "Generates a random username",
 		Example:     "Daniel1364",
@@ -77,18 +78,19 @@ func addAuthLookup() {
 		},
 	})
 
-	AddLookupData("password", Info{
+	AddFuncLookup("password", Info{
+		Display:     "Password",
 		Category:    "auth",
 		Description: "Generates a random password",
 		Example:     "EEP+wwpk 4lU-eHNXlJZ4n K9%v&TZ9e",
 		Output:      "string",
 		Params: []Param{
-			{Field: "lower", Type: "bool", Default: "true", Description: "Whether or not to add lower case characters"},
-			{Field: "upper", Type: "bool", Default: "true", Description: "Whether or not to add upper case characters"},
-			{Field: "numeric", Type: "bool", Default: "true", Description: "Whether or not to add numeric characters"},
-			{Field: "special", Type: "bool", Default: "true", Description: "Whether or not to add special characters"},
-			{Field: "space", Type: "bool", Default: "false", Description: "Whether or not to add spaces"},
-			{Field: "length", Type: "int", Default: "12", Description: "Number of characters in password"},
+			{Field: "lower", Display: "Lower", Type: "bool", Default: "true", Description: "Whether or not to add lower case characters"},
+			{Field: "upper", Display: "Upper", Type: "bool", Default: "true", Description: "Whether or not to add upper case characters"},
+			{Field: "numeric", Display: "Numeric", Type: "bool", Default: "true", Description: "Whether or not to add numeric characters"},
+			{Field: "special", Display: "Special", Type: "bool", Default: "true", Description: "Whether or not to add special characters"},
+			{Field: "space", Display: "Space", Type: "bool", Default: "false", Description: "Whether or not to add spaces"},
+			{Field: "length", Display: "Length", Type: "int", Default: "12", Description: "Number of characters in password"},
 		},
 		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
 			lower, err := info.GetBool(m, "lower")

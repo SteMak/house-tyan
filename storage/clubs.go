@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Masterminds/squirrel"
+
 	"github.com/brianvoe/gofakeit/v5"
 	"github.com/jmoiron/sqlx"
 )
@@ -47,6 +48,20 @@ func (c *Club) AddMember(tx *sqlx.Tx, memberID string) error {
 	return exec(tx, psql.Insert("club_members").
 		Values(c.ID, memberID).
 		Suffix("ON CONFLICT DO NOTHING"),
+	)
+}
+
+func (c *Club) MakeMemberManager(tx *sqlx.Tx, memberID string) error {
+	return exec(tx, psql.Update("club_members").
+		Where(squirrel.Eq{"club_members.user_id": memberID}).
+		Set("manager", true),
+	)
+}
+
+func (c *Club) MakeMemberUser(tx *sqlx.Tx, memberID string) error {
+	return exec(tx, psql.Update("club_members").
+		Where(squirrel.Eq{"club_members.user_id": memberID}).
+		Set("manager", false),
 	)
 }
 
@@ -117,6 +132,22 @@ func (c *Club) Delete(tx *sqlx.Tx) error {
 	)
 }
 
+func (c *Club) EditRoleID(tx *sqlx.Tx, roleID string) error {
+	c.RoleID = &roleID
+	return exec(tx, psql.Update("clubs").
+		Where(squirrel.Eq{"id": c.ID}).
+		Set("role_id", roleID),
+	)
+}
+
+func (c *Club) EditChannelID(tx *sqlx.Tx, channelID string) error {
+	c.ChannelID = &channelID
+	return exec(tx, psql.Update("clubs").
+		Where(squirrel.Eq{"id": c.ID}).
+		Set("channel_id", channelID),
+	)
+}
+
 func (c *Club) EditDescription(tx *sqlx.Tx, desc string) error {
 	c.Description = &desc
 	return exec(tx, psql.Update("clubs").
@@ -160,12 +191,16 @@ func (c *clubs) Create(tx *sqlx.Tx, club *Club) error {
 		Suffix("RETURNING id").
 		RunWith(tx).
 		QueryRow().Scan(&club.ID)
-
 	if err != nil {
 		return err
 	}
 
-	return club.AddMember(tx, club.OwnerID)
+	err = club.AddMember(tx, club.OwnerID)
+	if err != nil {
+		return err
+	}
+
+	return club.MakeMemberManager(tx, club.OwnerID)
 }
 
 func (c *clubs) DeleteByOwner(tx *sqlx.Tx, ownerID string) error {

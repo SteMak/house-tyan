@@ -79,15 +79,40 @@ func ShuffleInts(a []int) {
 	}
 }
 
+// RandomInt will take in a slice of int and return a randomly selected value
+func RandomInt(i []int) int {
+	size := len(i)
+	if size == 0 {
+		return 0
+	}
+	if size == 1 {
+		return i[0]
+	}
+	return i[rand.Intn(size)]
+}
+
+// RandomUint will take in a slice of uint and return a randomly selected value
+func RandomUint(i []uint) uint {
+	size := len(i)
+	if size == 0 {
+		return 0
+	}
+	if size == 1 {
+		return i[0]
+	}
+	return i[rand.Intn(size)]
+}
+
 func addNumberLookup() {
-	AddLookupData("number", Info{
+	AddFuncLookup("number", Info{
+		Display:     "Number",
 		Category:    "number",
 		Description: "Random number between given range",
 		Example:     "14866",
 		Output:      "int",
 		Params: []Param{
-			{Field: "min", Type: "int", Default: "-2147483648", Description: "Minimum integer value"},
-			{Field: "max", Type: "int", Default: "2147483647", Description: "Maximum integer value"},
+			{Field: "min", Display: "Min", Type: "int", Default: "-2147483648", Description: "Minimum integer value"},
+			{Field: "max", Display: "Max", Type: "int", Default: "2147483647", Description: "Maximum integer value"},
 		},
 		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
 			min, err := info.GetInt(m, "min")
@@ -108,7 +133,8 @@ func addNumberLookup() {
 		},
 	})
 
-	AddLookupData("uint8", Info{
+	AddFuncLookup("uint8", Info{
+		Display:     "Uint8",
 		Category:    "number",
 		Description: "Random uint8 value",
 		Example:     "152",
@@ -118,7 +144,8 @@ func addNumberLookup() {
 		},
 	})
 
-	AddLookupData("uint16", Info{
+	AddFuncLookup("uint16", Info{
+		Display:     "Uint16",
 		Category:    "number",
 		Description: "Random uint16 value",
 		Example:     "34968",
@@ -128,7 +155,8 @@ func addNumberLookup() {
 		},
 	})
 
-	AddLookupData("uint32", Info{
+	AddFuncLookup("uint32", Info{
+		Display:     "Uint32",
 		Category:    "number",
 		Description: "Random uint32 value",
 		Example:     "1075055705",
@@ -138,7 +166,8 @@ func addNumberLookup() {
 		},
 	})
 
-	AddLookupData("uint64", Info{
+	AddFuncLookup("uint64", Info{
+		Display:     "Uint64",
 		Category:    "number",
 		Description: "Random uint64 value",
 		Example:     "843730692693298265",
@@ -148,7 +177,8 @@ func addNumberLookup() {
 		},
 	})
 
-	AddLookupData("int8", Info{
+	AddFuncLookup("int8", Info{
+		Display:     "Int8",
 		Category:    "number",
 		Description: "Random int8 value",
 		Example:     "24",
@@ -158,7 +188,8 @@ func addNumberLookup() {
 		},
 	})
 
-	AddLookupData("int16", Info{
+	AddFuncLookup("int16", Info{
+		Display:     "Int16",
 		Category:    "number",
 		Description: "Random int16 value",
 		Example:     "2200",
@@ -168,7 +199,8 @@ func addNumberLookup() {
 		},
 	})
 
-	AddLookupData("int32", Info{
+	AddFuncLookup("int32", Info{
+		Display:     "Int32",
 		Category:    "number",
 		Description: "Random int32 value",
 		Example:     "-1072427943",
@@ -178,7 +210,8 @@ func addNumberLookup() {
 		},
 	})
 
-	AddLookupData("int64", Info{
+	AddFuncLookup("int64", Info{
+		Display:     "Int64",
 		Category:    "number",
 		Description: "Random int64 value",
 		Example:     "-8379641344161477543",
@@ -188,7 +221,8 @@ func addNumberLookup() {
 		},
 	})
 
-	AddLookupData("float32", Info{
+	AddFuncLookup("float32", Info{
+		Display:     "Float32",
 		Category:    "number",
 		Description: "Random float32 value",
 		Example:     "3.1128167e+37",
@@ -198,14 +232,15 @@ func addNumberLookup() {
 		},
 	})
 
-	AddLookupData("float32range", Info{
+	AddFuncLookup("float32range", Info{
+		Display:     "Float32 Range",
 		Category:    "number",
 		Description: "Random float32 between given range",
 		Example:     "914774.6",
 		Output:      "float32",
 		Params: []Param{
-			{Field: "min", Type: "int", Description: "Minimum float32 value"},
-			{Field: "max", Type: "int", Description: "Maximum float32 value"},
+			{Field: "min", Display: "Min", Type: "int", Description: "Minimum float32 value"},
+			{Field: "max", Display: "Max", Type: "int", Description: "Maximum float32 value"},
 		},
 		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
 			min, err := info.GetFloat32(m, "min")
@@ -222,7 +257,8 @@ func addNumberLookup() {
 		},
 	})
 
-	AddLookupData("float64", Info{
+	AddFuncLookup("float64", Info{
+		Display:     "Float64",
 		Category:    "number",
 		Description: "Random float64 value",
 		Example:     "1.644484108270445e+307",
@@ -232,14 +268,15 @@ func addNumberLookup() {
 		},
 	})
 
-	AddLookupData("float64range", Info{
+	AddFuncLookup("float64range", Info{
+		Display:     "Float64 Range",
 		Category:    "number",
 		Description: "Random float64 between given range",
 		Example:     "914774.5585333086",
 		Output:      "float64",
 		Params: []Param{
-			{Field: "min", Type: "int", Description: "Minimum float64 value"},
-			{Field: "max", Type: "int", Description: "Maximum float64 value"},
+			{Field: "min", Display: "Min", Type: "int", Description: "Minimum float64 value"},
+			{Field: "max", Display: "Max", Type: "int", Description: "Maximum float64 value"},
 		},
 		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
 			min, err := info.GetFloat64(m, "min")
@@ -256,13 +293,14 @@ func addNumberLookup() {
 		},
 	})
 
-	AddLookupData("shuffleints", Info{
+	AddFuncLookup("shuffleints", Info{
+		Display:     "Shuffle Ints",
 		Category:    "number",
 		Description: "Shuffle an array of ints",
 		Example:     "1,2,3,4 => 3,1,4,2",
 		Output:      "[]int",
 		Params: []Param{
-			{Field: "ints", Type: "[]int", Description: "Delimited seperated ints"},
+			{Field: "ints", Display: "Integers", Type: "[]int", Description: "Delimited separated integers"},
 		},
 		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
 			ints, err := info.GetIntArray(m, "ints")

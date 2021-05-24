@@ -9,9 +9,35 @@ func Letter() string {
 	return string(randLetter())
 }
 
+// LetterN will generate a random ASCII string with length N
+func LetterN(n uint) string {
+	// Make sure we dont use 0
+	if n == 0 {
+		n = 1
+	}
+	out := make([]rune, n)
+	for i := 0; i < int(n); i++ {
+		out[i] = randLetter()
+	}
+	return string(out)
+}
+
 // Digit will generate a single ASCII digit
 func Digit() string {
 	return string(randDigit())
+}
+
+// DigitN will generate a random string of length N consists of ASCII digits (note it can start with 0).
+func DigitN(n uint) string {
+	// Make sure we dont use 0
+	if n == 0 {
+		n = 1
+	}
+	out := make([]rune, n)
+	for i := 0; i < int(n); i++ {
+		out[i] = randDigit()
+	}
+	return string(out)
 }
 
 // Numerify will replace # with random numerical values
@@ -43,17 +69,21 @@ func ShuffleStrings(a []string) {
 	}
 }
 
-// RandString will take in a slice of string and return a randomly selected value
-func RandString(a []string) string {
+// RandomString will take in a slice of string and return a randomly selected value
+func RandomString(a []string) string {
 	size := len(a)
 	if size == 0 {
 		return ""
+	}
+	if size == 1 {
+		return a[0]
 	}
 	return a[rand.Intn(size)]
 }
 
 func addStringLookup() {
-	AddLookupData("letter", Info{
+	AddFuncLookup("letter", Info{
+		Display:     "Letter",
 		Category:    "string",
 		Description: "Generate a single random lower case ASCII letter",
 		Example:     "g",
@@ -63,23 +93,63 @@ func addStringLookup() {
 		},
 	})
 
-	AddLookupData("digit", Info{
+	AddFuncLookup("lettern", Info{
+		Display:     "LetterN",
 		Category:    "string",
-		Description: "Generate a single random lower case ASCII letter",
-		Example:     "g",
+		Description: "Generate a random ASCII string with length N",
+		Example:     "gbRMaRxHki",
 		Output:      "string",
+		Params: []Param{
+			{Field: "count", Display: "Count", Type: "uint", Description: "Number of digits to generate"},
+		},
 		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
-			return Letter(), nil
+			ui, err := info.GetUint(m, "count")
+			if err != nil {
+				return nil, err
+			}
+
+			return LetterN(ui), nil
 		},
 	})
 
-	AddLookupData("numerify", Info{
+	AddFuncLookup("digit", Info{
+		Display:     "Digit",
+		Category:    "string",
+		Description: "Generate a single ASCII digit",
+		Example:     "0",
+		Output:      "string",
+		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
+			return Digit(), nil
+		},
+	})
+
+	AddFuncLookup("digitn", Info{
+		Display:     "DigitN",
+		Category:    "string",
+		Description: "Generate a random string of length N consists of ASCII digits",
+		Example:     "0136459948",
+		Output:      "string",
+		Params: []Param{
+			{Field: "count", Display: "Count", Type: "uint", Description: "Number of digits to generate"},
+		},
+		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
+			ui, err := info.GetUint(m, "count")
+			if err != nil {
+				return nil, err
+			}
+
+			return DigitN(ui), nil
+		},
+	})
+
+	AddFuncLookup("numerify", Info{
+		Display:     "Numerify",
 		Category:    "string",
 		Description: "Replace # with random numerical values",
 		Example:     "(###)###-#### => (555)867-5309",
 		Output:      "string",
 		Params: []Param{
-			{Field: "str", Type: "string", Description: "String value to replace #'s"},
+			{Field: "str", Display: "String", Type: "string", Description: "String value to replace #'s"},
 		},
 		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
 			str, err := info.GetString(m, "str")
@@ -91,13 +161,14 @@ func addStringLookup() {
 		},
 	})
 
-	AddLookupData("lexify", Info{
+	AddFuncLookup("lexify", Info{
+		Display:     "Lexify",
 		Category:    "string",
 		Description: "Replace ? will random generated letters",
 		Example:     "?????@??????.com => billy@mister.com",
 		Output:      "string",
 		Params: []Param{
-			{Field: "str", Type: "string", Description: "String value to replace #'s"},
+			{Field: "str", Display: "String", Type: "string", Description: "String value to replace #'s"},
 		},
 		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
 			str, err := info.GetString(m, "str")
@@ -109,13 +180,14 @@ func addStringLookup() {
 		},
 	})
 
-	AddLookupData("shufflestrings", Info{
+	AddFuncLookup("shufflestrings", Info{
+		Display:     "Shuffle Strings",
 		Category:    "string",
 		Description: "Shuffle an array of strings",
 		Example:     "hello,world,whats,up => whats,world,hello,up",
 		Output:      "[]string",
 		Params: []Param{
-			{Field: "strs", Type: "[]string", Description: "Delimited seperated strings"},
+			{Field: "strs", Display: "Strings", Type: "[]string", Description: "Delimited separated strings"},
 		},
 		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
 			strs, err := info.GetStringArray(m, "strs")
@@ -126,6 +198,25 @@ func addStringLookup() {
 			ShuffleStrings(strs)
 
 			return strs, nil
+		},
+	})
+
+	AddFuncLookup("randomstring", Info{
+		Display:     "Random String",
+		Category:    "string",
+		Description: "Randomly grab one string from array",
+		Example:     "hello,world,whats,up => world",
+		Output:      "[]string",
+		Params: []Param{
+			{Field: "strs", Display: "Strings", Type: "[]string", Description: "Delimited separated strings"},
+		},
+		Call: func(m *map[string][]string, info *Info) (interface{}, error) {
+			strs, err := info.GetStringArray(m, "strs")
+			if err != nil {
+				return nil, err
+			}
+
+			return RandomString(strs), nil
 		},
 	})
 }

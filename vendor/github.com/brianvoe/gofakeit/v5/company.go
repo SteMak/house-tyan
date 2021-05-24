@@ -2,16 +2,7 @@ package gofakeit
 
 // Company will generate a random company name string
 func Company() (company string) {
-	switch randInt := randIntRange(1, 3); randInt {
-	case 1:
-		company = LastName() + ", " + LastName() + " and " + LastName()
-	case 2:
-		company = LastName() + "-" + LastName()
-	case 3:
-		company = LastName() + " " + CompanySuffix()
-	}
-
-	return
+	return getRandValue([]string{"company", "name"})
 }
 
 // CompanySuffix will generate a random company suffix string
@@ -31,10 +22,10 @@ func BS() string {
 
 // JobInfo is a struct of job information
 type JobInfo struct {
-	Company    string `json:"company"`
-	Title      string `json:"title"`
-	Descriptor string `json:"descriptor"`
-	Level      string `json:"level"`
+	Company    string `json:"company" xml:"company"`
+	Title      string `json:"title" xml:"title"`
+	Descriptor string `json:"descriptor" xml:"descriptor"`
+	Level      string `json:"level" xml:"level"`
 }
 
 // Job will generate a struct with random job information
@@ -63,7 +54,8 @@ func JobLevel() string {
 }
 
 func addCompanyLookup() {
-	AddLookupData("company", Info{
+	AddFuncLookup("company", Info{
+		Display:     "Company",
 		Category:    "company",
 		Description: "Random company name",
 		Example:     "Moen, Pagac and Wuckert",
@@ -73,7 +65,8 @@ func addCompanyLookup() {
 		},
 	})
 
-	AddLookupData("companysuffix", Info{
+	AddFuncLookup("companysuffix", Info{
+		Display:     "Company Suffix",
 		Category:    "company",
 		Description: "Random company name suffix",
 		Example:     "Inc",
@@ -83,7 +76,8 @@ func addCompanyLookup() {
 		},
 	})
 
-	AddLookupData("bs", Info{
+	AddFuncLookup("bs", Info{
+		Display:     "BS",
 		Category:    "company",
 		Description: "Random bs company word",
 		Example:     "front-end",
@@ -93,7 +87,8 @@ func addCompanyLookup() {
 		},
 	})
 
-	AddLookupData("buzzword", Info{
+	AddFuncLookup("buzzword", Info{
+		Display:     "Buzzword",
 		Category:    "company",
 		Description: "Random company buzzwords",
 		Example:     "disintermediate",
@@ -103,7 +98,8 @@ func addCompanyLookup() {
 		},
 	})
 
-	AddLookupData("job", Info{
+	AddFuncLookup("job", Info{
+		Display:     "Job",
 		Category:    "company",
 		Description: "Random job data set",
 		Example:     `{company: "Moen, Pagac and Wuckert", title: "Director", descriptor: "Central", level: "Assurance"}`,
@@ -113,7 +109,8 @@ func addCompanyLookup() {
 		},
 	})
 
-	AddLookupData("jobtitle", Info{
+	AddFuncLookup("jobtitle", Info{
+		Display:     "Job Title",
 		Category:    "company",
 		Description: "Random job title",
 		Example:     "Director",
@@ -123,7 +120,8 @@ func addCompanyLookup() {
 		},
 	})
 
-	AddLookupData("jobdescriptor", Info{
+	AddFuncLookup("jobdescriptor", Info{
+		Display:     "Job Descriptor",
 		Category:    "company",
 		Description: "Random job descriptor",
 		Example:     "Central",
@@ -133,7 +131,8 @@ func addCompanyLookup() {
 		},
 	})
 
-	AddLookupData("joblevel", Info{
+	AddFuncLookup("joblevel", Info{
+		Display:     "Job Level",
 		Category:    "company",
 		Description: "Random job level",
 		Example:     "Assurance",
