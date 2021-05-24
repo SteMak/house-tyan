@@ -15,12 +15,12 @@ func CreateClubChannel(title string, roleID string, managers []string) *discordg
 		{
 			Type:  discordgo.PermissionOverwriteTypeRole,
 			ID:    roleID,
-			Allow: discordgo.PermissionReadMessages,
+			Allow: discordgo.PermissionViewChannel,
 		},
 		{
 			Type: discordgo.PermissionOverwriteTypeRole,
 			ID:   conf.Bot.GuildID,
-			Deny: discordgo.PermissionReadMessages,
+			Deny: discordgo.PermissionViewChannel,
 		},
 	}
 	for i := 0; i < len(managers); i++ {
