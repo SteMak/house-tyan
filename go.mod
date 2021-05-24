@@ -3,7 +3,7 @@ module github.com/SteMak/house-tyan
 go 1.14
 
 require (
-	github.com/bwmarrin/discordgo v0.20.2
+	github.com/bwmarrin/discordgo v0.23.2
 	github.com/daviddengcn/go-colortext v1.0.0
 	github.com/dgraph-io/badger v1.6.1
 	github.com/lib/pq v1.3.0
