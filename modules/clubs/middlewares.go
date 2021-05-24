@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	conf "github.com/SteMak/house-tyan/config"
+	"github.com/SteMak/house-tyan/out"
 
 	"github.com/SteMak/house-tyan/libs/dgutils"
 	"github.com/SteMak/house-tyan/modules"
@@ -132,8 +133,12 @@ func (bot *module) middlewareClubInfo(ctx *dgutils.MessageContext) {
 	if len(ctx.Args) == 0 {
 		club, err = storage.Clubs.GetClubByUser(ctx.Message.Author.ID)
 		if err != nil {
+			go out.Err(true, err)
+			go modules.SendFail(ctx.Message.ChannelID, "Не удалось получить клуб", "Попробуйте снова позже.")
+			go log.Error(err)
 			return
 		}
+
 		if club == nil {
 			go modules.SendFail(ctx.Message.ChannelID, "Вы не в клубе", "Попробуйте когда будете в клубе")
 			return
@@ -163,6 +168,9 @@ func (bot *module) middlewareClubApply(ctx *dgutils.MessageContext) {
 
 	club, err := storage.Clubs.GetClubByUser(ctx.Message.Author.ID)
 	if err != nil {
+		go out.Err(true, err)
+		go modules.SendFail(ctx.Message.ChannelID, "Не удалось получить ваш клуб", "Попробуйте снова позже.")
+		go log.Error(err)
 		return
 	}
 
@@ -172,11 +180,27 @@ func (bot *module) middlewareClubApply(ctx *dgutils.MessageContext) {
 	}
 
 	if club, err = storage.Clubs.GetClub(ctx.Args[0]); err != nil {
+		go out.Err(true, err)
+		go modules.SendFail(ctx.Message.ChannelID, "Не удалось получить клуб", "Попробуйте снова позже.")
+		go log.Error(err)
 		return
 	}
 
 	if club == nil {
-		go modules.SendFail(ctx.Message.ChannelID, "404 Клуб нот фаунд", "Укажите пользователя, значёк или имя клуба.")
+		go modules.SendFail(ctx.Message.ChannelID, "Нет такого клуба", "Создайте его.")
+		return
+	}
+
+	has, err := club.HasInvite(ctx.Message.Author.ID)
+	if err != nil {
+		go out.Err(true, err)
+		go modules.SendFail(ctx.Message.ChannelID, "Не удалось проверить инвайты", "Попробуйте снова позже.")
+		go log.Error(err)
+		return
+	}
+
+	if has {
+		go modules.SendFail(ctx.Message.ChannelID, "Вы уже подали заявку в этот клуб", "Пока")
 		return
 	}
 

@@ -4,7 +4,7 @@
         {{ if .Club.Description }} {{ .Club.Description }} {{ end }}
         [EOL]
         {{ range .Members }}
-        <@{{ .UserID }}>: {{ .XP }}xp
+        <@{{ .UserID }}>: {{ .XP }} xp
         {{ end }}
     </embed>
 </template>

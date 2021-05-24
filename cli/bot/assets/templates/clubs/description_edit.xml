@@ -4,6 +4,6 @@
         <@{{ .OwnerID }}>, описание клуба {{ bold .Title }} успешно изменено.
         [EOL]
         Ныне описание представляет собой:
-        {{ .Description}}
+        ```{{ .Description}}```
     </embed>
 </template>

@@ -184,6 +184,9 @@ func (bot *module) onClubInfo(ctx *dgutils.MessageContext) {
 	club := ctx.Param("club").(*storage.Club)
 	members, err := club.GetMembers()
 	if err != nil {
+		go out.Err(true, err)
+		go modules.SendFail(ctx.Message.ChannelID, "Не удалось получить список участников", "Попробуйте снова позже.")
+		go log.Error(err)
 		return
 	}
 
@@ -234,7 +237,44 @@ func (bot *module) onClubApply(ctx *dgutils.MessageContext) {
 	}
 
 	club := ctx.Param("club").(*storage.Club)
-	club.ClubApply(tx)
+
+	dm, err := ctx.Session.UserChannelCreate(club.OwnerID)
+	if err != nil {
+		go out.Err(true, err)
+		go modules.SendFail(ctx.Message.ChannelID, "Не удалось создать DM с главой клуба", "Попробуйте снова позже.")
+		go log.Error(err)
+		return
+	}
+
+	m := modules.Send(dm.ID, "clubs/club_accept.xml", ctx.Message.Author, nil)
+	if err != nil {
+		go out.Err(true, err)
+		go modules.SendFail(ctx.Message.ChannelID, "Не удалось отправить запрос", "Попробуйте снова позже.")
+		go log.Error(err)
+		return
+	}
+
+	err = ctx.Session.MessageReactionAdd(m.ChannelID, m.ID, "✅")
+	if err != nil {
+		go out.Err(false, err)
+		go log.Error(err)
+		return
+	}
+
+	err = ctx.Session.MessageReactionAdd(m.ChannelID, m.ID, "❎")
+	if err != nil {
+		go out.Err(false, err)
+		go log.Error(err)
+		return
+	}
+
+	err = club.ClubApply(tx, ctx.Message.Author.ID, m.ID)
+	if err != nil {
+		go out.Err(true, err)
+		go modules.SendFail(ctx.Message.ChannelID, "База крашнулась на комите", "Попробуйте снова позже.")
+		go log.Error(err)
+		return
+	}
 
 	err = tx.Commit()
 	if err != nil {
@@ -244,9 +284,5 @@ func (bot *module) onClubApply(ctx *dgutils.MessageContext) {
 		return
 	}
 
-	m := modules.Send(ctx.Message.ChannelID, "clubs/club_apply.xml", club, nil)
-	if m == nil {
-		go modules.SendFail(ctx.Message.ChannelID, "Не удалось вывести информацию о вступлении в клуб", "Попробуйте снова позже.")
-		return
-	}
+	modules.Send(ctx.Message.ChannelID, "clubs/club_apply.xml", club, nil)
 }

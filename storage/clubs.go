@@ -12,19 +12,22 @@ import (
 )
 
 type Club struct {
-	ID          uint       `db:"id"`
-	InsertedAt  *time.Time `db:"inserted_at"`
-	UpdatedAt   *time.Time `db:"updated_at"`
-	OwnerID     string     `db:"owner_id"`
-	RoleID      *string    `db:"role_id"`
-	ChannelID   *string    `db:"channel_id"`
-	Title       string     `db:"title"`
-	Description *string    `db:"description"`
-	Symbol      string     `db:"symbol"`
-	IconURL     *string    `db:"icon_url"`
-	XP          uint64     `db:"xp"`
-	ExpiredAt   *time.Time `db:"expired_at"`
-	Verified    bool       `db:"verified"`
+	ID              uint       `db:"id"`
+	InsertedAt      *time.Time `db:"inserted_at"`
+	UpdatedAt       *time.Time `db:"updated_at"`
+	OwnerID         string     `db:"owner_id"`
+	RoleID          *string    `db:"role_id"`
+	RoleColor       string     `db:"role_color"`
+	RoleMentionable bool       `db:"role_mentionable"`
+	ChannelID       *string    `db:"channel_id"`
+	CardMessageID   *string    `db:"card_message_id"`
+	Title           string     `db:"title"`
+	Description     *string    `db:"description"`
+	Symbol          string     `db:"symbol"`
+	IconURL         *string    `db:"icon_url"`
+	XP              uint64     `db:"xp"`
+	ExpiredAt       *time.Time `db:"expired_at"`
+	Verified        bool       `db:"verified"`
 }
 
 func (c *Club) randomize() {
@@ -54,8 +57,32 @@ func (c *Club) DeleteMember(tx *sqlx.Tx, memberID string) error {
 }
 
 func (c *Club) HasMember(memberID string) (result bool, err error) {
-	err = db.Get(&result, `SELECT EXISTS(SELECT 1 FROM club_members WHERE user_id = $1)`, memberID)
+	err = db.Get(&result, `
+		SELECT EXISTS(SELECT 1 FROM club_members WHERE club_id = $1 AND user_id = $2)
+	`, c.ID, memberID)
 	return
+}
+
+func (c *Club) HasInvite(memberID string) (result bool, err error) {
+	err = db.Get(&result, `
+		SELECT EXISTS(SELECT 1 FROM club_invites WHERE club_id = $1 AND user_id = $2)
+	`, c.ID, memberID)
+	return
+}
+
+func (c *clubs) GetInvite(messageID string) (*ClubInvite, error) {
+	invite := new(ClubInvite)
+	err := db.Get(invite, `SELECT * FROM club_invites WHERE message_id = $1`, messageID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+
+	return invite, err
+}
+
+func (c *clubs) DeleteUserInvites(userID string) error {
+	_, err := db.Exec(`DELETE FROM club_invites WHERE user_id = $1`, userID)
+	return err
 }
 
 func (c *Club) GetMembers() (*[]ClubMember, error) {
@@ -98,10 +125,10 @@ func (c *Club) EditDescription(tx *sqlx.Tx, desc string) error {
 	)
 }
 
-func (c *Club) ClubApply(tx *sqlx.Tx) error {
+func (c *Club) ClubApply(tx *sqlx.Tx, userID, messageID string) error {
 	return exec(tx, psql.Insert("club_invites").
-		Columns("club_id", "user_id", "is_request").
-		Values(c.ID, c.Title, true).
+		Columns("club_id", "user_id", "is_request", "message_id").
+		Values(c.ID, userID, true, messageID).
 		Suffix("ON CONFLICT DO NOTHING"),
 	)
 }
@@ -109,9 +136,19 @@ func (c *Club) ClubApply(tx *sqlx.Tx) error {
 type ClubMember struct {
 	ClubID     uint       `db:"club_id"`
 	UserID     string     `db:"user_id"`
+	Manager    bool       `db:"manager"`
 	InsertedAt *time.Time `db:"inserted_at"`
 	UpdatedAt  *time.Time `db:"updated_at"`
 	XP         uint64     `db:"xp"`
+}
+
+type ClubInvite struct {
+	ClubID     uint       `db:"club_id"`
+	UserID     string     `db:"user_id"`
+	IsRequest  bool       `db:"is_request"`
+	MessageID  string     `db:"message_id"`
+	InsertedAt *time.Time `db:"inserted_at"`
+	UpdatedAt  *time.Time `db:"updated_at"`
 }
 
 type clubs struct{}
@@ -135,6 +172,27 @@ func (c *clubs) DeleteByOwner(tx *sqlx.Tx, ownerID string) error {
 	return exec(tx, psql.Delete("clubs").
 		Where(squirrel.Eq{"owner_id": ownerID}),
 	)
+}
+
+func (c *clubs) GetClubByID(id uint) (*Club, error) {
+	query, args, err := psql.Select("c.*").
+		From("clubs c").
+		Where(squirrel.Eq{"c.id": id}).
+		Limit(1).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	club := new(Club)
+	err = db.Get(club, query, args...)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+
+	return club, err
 }
 
 func (c *clubs) GetClubByUser(userID string) (*Club, error) {
@@ -223,7 +281,8 @@ func (c *clubs) GetClub(arg string) (*Club, error) {
 			return nil, err
 		}
 	}
-	return club, err
+
+	return club, nil
 }
 
 func (c *clubs) GetExpired() (clubs []Club, err error) {

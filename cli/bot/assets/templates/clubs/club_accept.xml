@@ -1,0 +1,6 @@
+<template>
+    <embed color="#ffa550">
+        <title>Зайка в клуб</title>
+        Заявка на вступление в клуб от {{ .Mention }} ({{ .String }}).
+    </embed>
+</template>
