@@ -8,7 +8,12 @@ import (
 
 var (
 	voiceStatesCache []*discordgo.VoiceState
-	privateVoices map[string]map[string]string
+	privateVoices map[string]map[string]string = map[string]map[string]string{
+		"692382001545871501": {
+			"coreChannelID": "844141092180852736",
+			"coreParentID": "843056759287447572",
+			},
+	}
 	err error
 )
 
