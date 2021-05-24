@@ -15,7 +15,7 @@ type module struct {
 }
 
 func (module) ID() string {
-	return "triggers"
+	return "voices"
 }
 
 func (bot module) IsRunning() bool {
