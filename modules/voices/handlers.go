@@ -7,24 +7,60 @@ import (
 )
 
 var (
+	voiceStatesCache []*discordgo.VoiceState
+	privateVoices map[string]map[string]string
 	err error
 )
 
-func (bot *module) voiceHandler(s *discordgo.Session, vs *discordgo.VoicrStateUpdate) {
-	privateVoices := map[string]map[string]string{
-		"692382001545871501": {
-			"coreChannelID": "844141092180852736",
-			"coreParentID": "843056759287447572",
-			},
-		}
+const (
+	permConnect int64 = 1048576
+	permView int64 = 1024
+	permManage int64 = 16
+)
 
+func (bot *module) voiceHandler(s *discordgo.Session, vs *discordgo.VoiceStateUpdate) {
+	privateVoices = map[string]map[string]string{
+	       "692382001545871501": {
+	           "coreChannelID": "844141092180852736",
+	           "coreParentID": "843056759287447572",
+	           },
+	  }
+
+	if len(voiceStatesCache) == 0 && vs.VoiceState.ChannelID != "" {
+		voiceStatesCache = append(voiceStatesCache,vs.VoiceState)
+
+	} else if vs.BeforeUpdate == nil {
+		voiceStatesCache = append(voiceStatesCache, vs.VoiceState)
+	
+	} else if vs.VoiceState.ChannelID != "" && vs.BeforeUpdate != nil {
+		for i, state := range voiceStatesCache {
+			if state.UserID == vs.UserID	{
+				voiceStatesCache[i] = vs.VoiceState
+			}
+		}
+		
+	} else if vs.BeforeUpdate != nil {
+		for i, state := range voiceStatesCache {
+			if state.UserID == vs.BeforeUpdate.UserID {
+				voiceStatesCache = append(voiceStatesCache[:i], voiceStatesCache[i+1:]...)
+			}
+		}
+	}
+	
 	privateVoice := privateVoices[vs.GuildID]
+	coreCh, err := s.Channel(privateVoice["coreChannelID"])
+	if err != nil {
+		out.Err(true, err)
+		return
+	}
 
-	if vs.ChannelID == privateVoice["coreChannelID"] {
-		voiceDefaultData := discordgo.ChannelEdit {
-			Position: 99,
-			ParentID: privateVoice["coreParentID"],
-		}
+	cg, err := s.Channel(coreCh.ParentID)
+	if err != nil {
+		out.Err(true, err)
+		return
+	}
+	
+	if vs.ChannelID == privateVoice["coreChannelID"]{
 
 		member, err := s.GuildMember(vs.GuildID, vs.UserID)
 		if err != nil {
@@ -32,62 +68,62 @@ func (bot *module) voiceHandler(s *discordgo.Session, vs *discordgo.VoicrStateUp
 			return
 		}
 
-		permInitData := discordgo.PermissonOverwrite{
+		permissionOverwrite := discordgo.PermissionOverwrite{
 			ID: vs.UserID,
 			Type: 1,
 			Deny: 0,
-			Allow: 16,
+			Allow: permManage,
 		}
 
-		permissionOverwrites := []*discordgo.PermissonOverwrite{
-			&permInitData,
+		cgPerms := cg.PermissionOverwrites
+		
+		permissionOverwrites := []*discordgo.PermissionOverwrite{
+			&permissionOverwrite,
 		}
 
+		for _, perm := range cgPerms {
+			permissionOverwrites = append(permissionOverwrites, perm)
+		}
+		
 		data := discordgo.GuildChannelCreateData{
 			Name: member.User.Username,
 			Type: 2,
 			Position: 99,
-			PermissionOverwrites: permissionOverwrites,
 			ParentID: privateVoice["coreParentID"],
+			PermissionOverwrites: permissionOverwrites,
 		}
 
-		channel, err := s.GuildChannelCreateComplex(vs.GuildID, data)
+		ch, err := s.GuildChannelCreateComplex(vs.GuildID, data)
 		if err != nil {
 			out.Err(true, err)
 			return
 		}
 
-		err = s.GuildMemberMove(vs.GuildID, vs.UserID, &channel.ID)
+		err = s.GuildMemberMove(vs.GuildID, vs.UserID, &ch.ID)
 		if err != nil {
 			out.Err(true, err)
 			return
 		}
 	}
-	if vs.BeforeUpdate != nil && vs.BeforeUpdate.ChannelID != privateVoice["coreChannelID"] {
+	
+	if vs.BeforeUpdate != nil && vs.BeforeUpdate.ChannelID != privateVoice["coreChannelID"]{
 		channelID := vs.BeforeUpdate.ChannelID
-		channel, err := s.Channel(channelID)
-		if err != nil {
-			out.Err(true, err)
-			return
-		}
-
-		if channel.ParentID != privateVoice["coreParentID"] {
-			return
-		}
-
-		guild, err := s.Guild(vs.GuildID)
-		if err != nil {
-			out.Err(true, err)
-			return
-		}
-
-		for _, voiceState := range guild.VoiceStates {
-			if channelID == voiceState.ChannelID {
+			
+		for _, voiceState := range voiceStatesCache {
+			if channelID == voiceState.ChannelID{
 				return
 			}
 		}
 
-		s.ChannelDelete(channelID)
+		ch, err := s.Channel(channelID)
+		if err != nil {
+			out.Err(true, err)
+			return
+		}
 
+		if ch.ParentID == privateVoice["coreParentID"] {
+			s.ChannelDelete(channelID)
+		}
 	}
 }
+
