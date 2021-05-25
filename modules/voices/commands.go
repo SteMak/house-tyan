@@ -18,7 +18,7 @@ var (
 					Raw: false,
 					Description: "Открыть доступ к каналу пользователю или роли",
 					Handlers: []func(*dgutils.MessageContext){
-						_module.middlewareChannel,
+						_module.middlewareChannelManage,
 					},
 					Function: _module.onVoiceUnlock,
 				},
@@ -27,7 +27,7 @@ var (
 					Raw:false,
 					Description: "Закрыть доступ к каналу пользователю или роли",
 					Handlers: []func(*dgutils.MessageContext){
-						_module.middlewareChannel,
+						_module.middlewareChannelManage,
 					},
 					Function: _module.onVoiceLock,
 				},
@@ -36,7 +36,7 @@ var (
 					Raw: false,
 					Description: "Показать канал для пользователя или роли",
 					Handlers: []func(*dgutils.MessageContext){
-						_module.middlewareChannel,
+						_module.middlewareChannelManage,
 					},
 					Function: _module.onVoiceShow,
 				},
@@ -45,9 +45,18 @@ var (
 					Raw: false,
 					Description: "Скрыть канал от пользователя или роли",
 					Handlers: []func(*dgutils.MessageContext){
-						_module.middlewareChannel,
+						_module.middlewareChannelManage,
 					},
-					Function: _module.middlewareChannel,
+					Function: _module.onVoiceHide,
+				},
+
+				"info": &dgutils.Command{
+					Raw: false,
+					Description:"Информация о приватном канале",
+					Handlers: []func(*dgutils.MessageContext){
+						_module.middlewareChannelInfo,
+					},
+					Function: _module.onVoiceInfo,
 				},
 			},
 		},
@@ -71,5 +80,20 @@ func (bot *module) onVoiceHide(ctx *dgutils.MessageContext) {
 }
 
 func (bot *module) onVoiceInfo(ctx *dgutils.MessageContext) {
-	
+	channelID := ""
+
+	if len(ctx.Args) != 0 {
+		channelID = ctx.Args[0]
+	} else {
+		for _, state := range voiceStatesCache {
+			if ctx.Message.Author.ID == state.UserID {
+				channelID = state.ChannelID
+				break
+			}
+		}
+	}
+
+	messageEmbed := getInfo(ctx.Session, channelID)
+	ctx.Session.ChannelMessageSendEmbed(ctx.Message.ChannelID, &messageEmbed)
+
 }
