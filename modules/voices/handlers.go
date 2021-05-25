@@ -24,12 +24,6 @@ const (
 )
 
 func (bot *module) voiceHandler(s *discordgo.Session, vs *discordgo.VoiceStateUpdate) {
-	privateVoices = map[string]map[string]string{
-	       "692382001545871501": {
-	           "coreChannelID": "844141092180852736",
-	           "coreParentID": "843056759287447572",
-	           },
-	  }
 
 	if len(voiceStatesCache) == 0 && vs.VoiceState.ChannelID != "" {
 		voiceStatesCache = append(voiceStatesCache,vs.VoiceState)
