@@ -16,6 +16,7 @@ var (
 	Blanks    blanks
 	Usernames usernames
 	Triggers  triggers
+	Voices    voices
 )
 
 func Init() {
