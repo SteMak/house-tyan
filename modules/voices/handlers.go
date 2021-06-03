@@ -1,6 +1,7 @@
 package voices
 
 import (
+	"github.com/SteMak/house-tyan/cache"
 	"github.com/SteMak/house-tyan/out"
 
 	"github.com/bwmarrin/discordgo"
@@ -8,36 +9,36 @@ import (
 
 var (
 	voiceStatesCache []*discordgo.VoiceState
-	privateVoices map[string]map[string]string = map[string]map[string]string{
+	privateVoices    map[string]map[string]string = map[string]map[string]string{
 		"692382001545871501": {
 			"coreChannelID": "844141092180852736",
-			"coreParentID": "843056759287447572",
-			},
+			"coreParentID":  "843056759287447572",
+		},
 	}
 	err error
 )
 
 const (
 	permConnect int64 = 1048576
-	permView int64 = 1024
-	permManage int64 = 16
+	permView    int64 = 1024
+	permManage  int64 = 16
 )
 
 func (bot *module) voiceHandler(s *discordgo.Session, vs *discordgo.VoiceStateUpdate) {
 
 	if len(voiceStatesCache) == 0 && vs.VoiceState.ChannelID != "" {
-		voiceStatesCache = append(voiceStatesCache,vs.VoiceState)
+		voiceStatesCache = append(voiceStatesCache, vs.VoiceState)
 
 	} else if vs.BeforeUpdate == nil {
 		voiceStatesCache = append(voiceStatesCache, vs.VoiceState)
-	
+
 	} else if vs.VoiceState.ChannelID != "" && vs.BeforeUpdate != nil {
 		for i, state := range voiceStatesCache {
-			if state.UserID == vs.UserID	{
+			if state.UserID == vs.UserID {
 				voiceStatesCache[i] = vs.VoiceState
 			}
 		}
-		
+
 	} else if vs.BeforeUpdate != nil {
 		for i, state := range voiceStatesCache {
 			if state.UserID == vs.BeforeUpdate.UserID {
@@ -45,7 +46,7 @@ func (bot *module) voiceHandler(s *discordgo.Session, vs *discordgo.VoiceStateUp
 			}
 		}
 	}
-	
+
 	privateVoice := privateVoices[vs.GuildID]
 	coreCh, err := s.Channel(privateVoice["coreChannelID"])
 	if err != nil {
@@ -58,37 +59,41 @@ func (bot *module) voiceHandler(s *discordgo.Session, vs *discordgo.VoiceStateUp
 		out.Err(true, err)
 		return
 	}
-	
-	if vs.ChannelID == privateVoice["coreChannelID"]{
 
+	if vs.ChannelID == privateVoice["coreChannelID"] {
+		var permissionOverwrites []*discordgo.PermissionOverwrite
 		member, err := s.GuildMember(vs.GuildID, vs.UserID)
 		if err != nil {
 			out.Err(true, err)
 			return
 		}
 
-		permissionOverwrite := discordgo.PermissionOverwrite{
-			ID: vs.UserID,
-			Type: 1,
-			Deny: 0,
-			Allow: permManage,
+		voice, err := cache.Voices.Get(vs.UserID)
+		if err != nil {
+			permissionOverwrites = append(permissionOverwrites, voice.Permissions...)
+
+		} else {
+			permissionOverwrite := discordgo.PermissionOverwrite{
+				ID:    vs.UserID,
+				Type:  1,
+				Deny:  0,
+				Allow: permManage,
+			}
+
+			cgPerms := cg.PermissionOverwrites
+
+			permissionOverwrites = []*discordgo.PermissionOverwrite{
+				&permissionOverwrite,
+			}
+
+			permissionOverwrites = append(permissionOverwrites, cgPerms...)
 		}
 
-		cgPerms := cg.PermissionOverwrites
-		
-		permissionOverwrites := []*discordgo.PermissionOverwrite{
-			&permissionOverwrite,
-		}
-
-		for _, perm := range cgPerms {
-			permissionOverwrites = append(permissionOverwrites, perm)
-		}
-		
 		data := discordgo.GuildChannelCreateData{
-			Name: member.User.Username,
-			Type: 2,
-			Position: 99,
-			ParentID: privateVoice["coreParentID"],
+			Name:                 member.User.Username,
+			Type:                 2,
+			Position:             99,
+			ParentID:             privateVoice["coreParentID"],
 			PermissionOverwrites: permissionOverwrites,
 		}
 
@@ -104,12 +109,12 @@ func (bot *module) voiceHandler(s *discordgo.Session, vs *discordgo.VoiceStateUp
 			return
 		}
 	}
-	
-	if vs.BeforeUpdate != nil && vs.BeforeUpdate.ChannelID != privateVoice["coreChannelID"]{
+
+	if vs.BeforeUpdate != nil && vs.BeforeUpdate.ChannelID != privateVoice["coreChannelID"] {
 		channelID := vs.BeforeUpdate.ChannelID
-			
+
 		for _, voiceState := range voiceStatesCache {
-			if channelID == voiceState.ChannelID{
+			if channelID == voiceState.ChannelID {
 				return
 			}
 		}
@@ -126,3 +131,11 @@ func (bot *module) voiceHandler(s *discordgo.Session, vs *discordgo.VoiceStateUp
 	}
 }
 
+func (bot *module) readyHandler(s *discordgo.Session, r *discordgo.Ready) {
+	guilds := r.Guilds
+	for _, guild := range guilds {
+		if guild.ID == "" {
+			voiceStatesCache = guild.VoiceStates
+		}
+	}
+}

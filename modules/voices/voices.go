@@ -47,6 +47,7 @@ func (bot *module) Start(session *discordgo.Session) {
 
 	bot.stopHandlers = []func(){
 		bot.session.AddHandler(bot.voiceHandler),
+		bot.session.AddHandler(bot.readyHandler),
 	}
 
 	bot.cmds.Start(session)
@@ -61,5 +62,3 @@ func (bot *module) Stop() {
 
 	bot.running = false
 }
-
-
