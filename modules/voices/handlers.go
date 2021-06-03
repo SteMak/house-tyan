@@ -62,17 +62,21 @@ func (bot *module) voiceHandler(s *discordgo.Session, vs *discordgo.VoiceStateUp
 
 	if vs.ChannelID == privateVoice["coreChannelID"] {
 		var permissionOverwrites []*discordgo.PermissionOverwrite
-		member, err := s.GuildMember(vs.GuildID, vs.UserID)
-		if err != nil {
-			out.Err(true, err)
-			return
-		}
+		var channelName string
 
 		voice, err := cache.Voices.Get(vs.UserID)
 		if err != nil {
+			channelName = voice.Name
 			permissionOverwrites = append(permissionOverwrites, voice.Permissions...)
 
 		} else {
+			member, err := s.GuildMember(vs.GuildID, vs.UserID)
+			if err != nil {
+				out.Err(true, err)
+				return
+			}
+
+			channelName = member.User.Username
 			permissionOverwrite := discordgo.PermissionOverwrite{
 				ID:    vs.UserID,
 				Type:  1,
@@ -90,7 +94,7 @@ func (bot *module) voiceHandler(s *discordgo.Session, vs *discordgo.VoiceStateUp
 		}
 
 		data := discordgo.GuildChannelCreateData{
-			Name:                 member.User.Username,
+			Name:                 channelName,
 			Type:                 2,
 			Position:             99,
 			ParentID:             privateVoice["coreParentID"],
